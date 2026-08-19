@@ -1,4 +1,4 @@
-# 🎓 AI-Powered Smart Campus Management System (SCMS)
+# 🎓  Smart Campus Management System (SCMS)
 
 > A Java Full Stack web application for digitizing and streamlining academic, administrative, attendance, examination, timetable, document, and placement activities within an educational institution.
 
