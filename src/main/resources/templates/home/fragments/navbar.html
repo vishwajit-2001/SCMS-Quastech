@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<style th:fragment="authMessageStyles">
+    .auth-message {
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .auth-message-error {
+        background: rgba(183, 28, 28, 0.08);
+        color: #9f1d1d;
+        border: 1px solid rgba(183, 28, 28, 0.18);
+    }
+
+    .auth-message-success {
+        background: rgba(46, 125, 50, 0.08);
+        color: #256c2a;
+        border: 1px solid rgba(46, 125, 50, 0.18);
+    }
+</style>
+
+<!-- =========================
+NAVBAR
+========================= -->
+
+<nav class="navbar" th:fragment="homeNavbar">
+
+    <a href="#home" class="nav-logo nav-logo--college" th:if="${registrationCollegeName != null}">
+        <span class="nav-logo-mark nav-logo-mark--image" th:if="${registrationCollegeLogoPath != null and !#strings.isEmpty(registrationCollegeLogoPath)}">
+            <img th:src="${registrationCollegeLogoPath}" alt="College logo">
+        </span>
+        <span class="logo-mark" th:unless="${registrationCollegeLogoPath != null and !#strings.isEmpty(registrationCollegeLogoPath)}">SC</span>
+        <span class="nav-logo-copy">
+            <span class="nav-logo-title" th:text="${registrationCollegeName}">College Name</span>
+            <span class="nav-logo-sub" th:text="${registrationCollegeAddress}">College Address</span>
+        </span>
+    </a>
+
+    <a href="#home" class="nav-logo" th:unless="${registrationCollegeName != null}">
+        <span class="logo-mark">SC</span>
+        Student Campus
+    </a>
+
+    <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#overview">Overview</a>
+        <a href="#courses">Courses</a>
+        <a href="#contact">Contact</a>
+    </div>
+
+</nav>
+
+
+<!-- =========================
+LOGIN MODAL
+========================= -->
+
+<div class="modal" id="loginModal" th:fragment="loginModal">
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+            <button class="modal-close" type="button" onclick="closeLogin()">&times;</button>
+            <div class="modal-tag">Secure Login</div>
+            <h2>Welcome <em>Back</em></h2>
+            <p>Sign in to your account</p>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="auth-message auth-message-error" th:if="${errorLogin}" th:text="${errorLogin}"></div>
+            <div class="auth-message auth-message-success" th:if="${success}" th:text="${success}"></div>
+
+            <form action="/login" method="post">
+
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+
+                <button class="btn-submit">Login</button>
+
+            </form>
+
+            <div class="divider">OR</div>
+
+            <p class="modal-switch">
+                Don't have an account?
+                <a href="#" onclick="switchToRegister(); return false;">Register here &rarr;</a>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+GLOBAL SCRIPT
+========================= -->
+
+<script th:fragment="loginScript" th:inline="javascript">
+    const registrationApplyUrl = /*[[${defaultRegistrationUrl}]]*/ null;
+
+    function openLogin(){
+        document.getElementById("loginModal").classList.add("active");
+        document.body.style.overflow="hidden";
+    }
+
+    function closeLogin(){
+        document.getElementById("loginModal").classList.remove("active");
+        document.body.style.overflow="";
+    }
+
+    function switchToRegister(){
+        if (registrationApplyUrl) {
+            window.location.href = registrationApplyUrl;
+            return;
+        }
+        window.location.href = "/";
+    }
+
+    function switchToLogin(){
+        window.location.href = "/login";
+    }
+
+    window.onclick = function(event){
+
+        let login = document.getElementById("loginModal");
+        if(event.target === login){
+            closeLogin();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const showLogin = [[${showLogin} ? true : false]];
+
+        if (showLogin) {
+            openLogin();
+        }
+    });
+
+</script>
+
+</body>
+</html>
+
+

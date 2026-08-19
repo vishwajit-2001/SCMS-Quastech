@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interviews - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .workspace{display:grid;gap:18px}
+        .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+        .stat-card{border-radius:24px;background:linear-gradient(180deg,#fff,rgba(249,243,231,.95));border:1px solid rgba(200,146,42,.16);padding:18px;box-shadow:0 14px 36px rgba(24,22,15,.05)}
+        .stat-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a8070;font-weight:700}
+        .stat-value{display:block;margin-top:8px;font-size:30px;font-weight:700}
+        .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .field{display:grid;gap:6px}
+        .field.full{grid-column:1/-1}
+        .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .field input,.field select,.field textarea{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        .field textarea{min-height:96px;resize:vertical}
+        .candidate-block{margin-top:16px;padding-top:16px;border-top:1px solid rgba(24,22,15,.08)}
+        .candidate-grid{display:grid;gap:12px}
+        .candidate-group{border:1px solid rgba(24,22,15,.08);border-radius:18px;background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:14px}
+        .candidate-group summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center}
+        .candidate-group summary::-webkit-details-marker{display:none}
+        .candidate-list{display:grid;gap:10px;margin-top:12px}
+        .candidate-item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.82);border:1px solid rgba(24,22,15,.08)}
+        .candidate-item label{font-weight:600;color:#2c261d}
+        .candidate-item small{display:block;color:#7a7165;margin-top:2px}
+        .candidate-item input{width:18px;height:18px}
+        .actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+        .btn{border:none;border-radius:999px;min-height:46px;padding:0 18px;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f;font-weight:700;cursor:pointer;box-shadow:0 12px 24px rgba(200,146,42,.22)}
+        .hint{color:#7f7566;font-size:12px;line-height:1.5}
+        .list{display:grid;gap:12px}
+        .card{border:1px solid rgba(24,22,15,.08);border-radius:18px;background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:14px}
+        .card-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+        .meta{margin-top:6px;color:#6b6457;font-size:13px;line-height:1.5}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:24px;color:#6b6457;text-align:center;background:rgba(255,255,255,.78)}
+        .msg{border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:14px}
+        .msg.success{background:rgba(26,158,104,.10);color:#1a7a50;border:1px solid rgba(26,158,104,.18)}
+        .msg.error{background:rgba(208,63,63,.10);color:#9f3939;border:1px solid rgba(208,63,63,.18)}
+        @media (max-width:1100px){.layout,.stats,.form-grid{grid-template-columns:1fr 1fr}}
+        @media (max-width:900px){.layout,.stats,.form-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='interviews')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Interviews', subtitle='Schedule interview rounds for a published drive and notify only the students who applied to that company.')}"></div>
+        <main class="portal-page-body">
+            <section class="workspace">
+                <section class="stats">
+                    <article class="stat-card">
+                        <span class="stat-label">Scheduled rounds</span>
+                        <span class="stat-value" th:text="${placementInterviewCount}">0</span>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-label">Published drives</span>
+                        <span class="stat-value" th:text="${placementDriveCount}">0</span>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-label">Applications</span>
+                        <span class="stat-value" th:text="${placementApplicationCount}">0</span>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-label">Open drives</span>
+                        <span class="stat-value" th:text="${placementDriveOpenCount}">0</span>
+                    </article>
+                </section>
+
+                <section class="layout">
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <h2>Schedule Interview</h2>
+                                <p>Select a company drive, pick the date and time, then publish the round.</p>
+                            </div>
+                            <span class="portal-badge portal-badge--neutral">TPO action</span>
+                        </div>
+                        <div class="panel-body">
+                            <div th:if="${placementInterviewSuccess != null}" class="msg success" th:text="${placementInterviewSuccess}">Success</div>
+                            <div th:if="${placementInterviewError != null}" class="msg error" th:text="${placementInterviewError}">Error</div>
+
+                            <form method="post" th:action="@{/placement-interviews}">
+                                <div class="form-grid">
+                                    <div class="field full">
+                                        <label>Company Drive</label>
+                                        <select name="placementDriveId" required>
+                                            <option value="">Select a published drive</option>
+                                            <option th:each="drive : ${placementInterviewDrives}"
+                                                    th:value="${drive.id}"
+                                                    th:text="|${drive.companyName} - ${drive.jobTitle} (${drive.location})|">
+                                                Company drive
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Round</label>
+                                        <input type="text" name="interviewRound" placeholder="Technical / HR / Final" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Status</label>
+                                        <input type="text" name="status" value="Scheduled" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Date</label>
+                                        <input type="date" name="interviewDate" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Time</label>
+                                        <input type="time" name="interviewTime" required>
+                                    </div>
+                                    <div class="field full">
+                                        <label>Venue</label>
+                                        <input type="text" name="venue" placeholder="Campus auditorium / online meeting room">
+                                    </div>
+                                    <div class="field full">
+                                        <label>Meeting Link</label>
+                                        <input type="text" name="meetingLink" placeholder="https://meet.google.com/...">
+                                    </div>
+                                    <div class="field full">
+                                        <label>Notes</label>
+                                        <textarea name="notes" placeholder="Instructions, documents, or interview guidelines"></textarea>
+                                    </div>
+                                </div>
+                                <div class="candidate-block">
+                                    <div class="portal-surface-head" style="margin:0 0 12px;padding:0;border:0;">
+                                        <h2 class="portal-surface-title" style="font-size:18px;">Select Students for This Interview</h2>
+                                        <span class="portal-badge portal-badge--info">Only applicants from the chosen drive</span>
+                                    </div>
+                                    <div class="candidate-grid" th:if="${!#lists.isEmpty(placementDriveApplicantGroups)}">
+                                        <details class="candidate-group" th:each="group : ${placementDriveApplicantGroups}">
+                                            <summary>
+                                                <div>
+                                                    <strong th:text="${group.drive.companyName}">Company</strong>
+                                                    <div class="meta" th:text="${group.drive.jobTitle} + ' | ' + ${group.drive.location}">Role | Location</div>
+                                                </div>
+                                                <span class="portal-badge portal-badge--neutral" th:text="${#lists.size(group.applications)} + ' applicant(s)'">0 applicants</span>
+                                            </summary>
+                                            <div class="candidate-list" th:if="${!#lists.isEmpty(group.applications)}">
+                                                <label class="candidate-item" th:each="applicant : ${group.applications}">
+                                                    <div>
+                                                        <span th:text="${applicant.student != null ? applicant.student.name : applicant.fullName}">Student</span>
+                                                        <small th:text="${applicant.email}">student@email.com</small>
+                                                    </div>
+                                                    <input type="checkbox"
+                                                           name="selectedStudentIds"
+                                                           th:value="${applicant.student != null ? applicant.student.id : ''}">
+                                                </label>
+                                            </div>
+                                            <div class="empty" th:if="${#lists.isEmpty(group.applications)}" style="margin-top:12px;padding:16px;">
+                                                No applications for this drive yet.
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+                                <div class="actions">
+                                    <span class="hint">
+                                        Select the students who should receive this interview schedule.
+                                    </span>
+                                    <button class="btn" type="submit">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                        Submit schedule
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <h2>Scheduled Interviews</h2>
+                                <p>Review rounds already published for your company drives.</p>
+                            </div>
+                            <span class="portal-badge portal-badge--info" th:text="${recentPlacementInterviewsCount} + ' recent'">0 recent</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="list" th:if="${!#lists.isEmpty(placementInterviews)}">
+                                <article class="card" th:each="interview : ${placementInterviews}">
+                                    <div class="card-top">
+                                        <div>
+                                            <h3 th:text="${interview.placementDrive != null ? interview.placementDrive.companyName : 'Company'}">Company</h3>
+                                            <div class="meta">
+                                                <span th:text="${interview.interviewRound}">Round</span>
+                                                <span> | </span>
+                                                <span th:text="${interview.interviewDateTime != null ? #temporals.format(interview.interviewDateTime, 'dd MMM yyyy, hh:mm a') : 'Date pending'}">Date</span>
+                                            </div>
+                                        </div>
+                                        <span class="portal-badge portal-badge--success" th:text="${interview.status != null ? interview.status : 'Scheduled'}">Scheduled</span>
+                                    </div>
+                                    <div class="pill-row">
+                                        <span class="pill" th:text="${interview.venue != null ? interview.venue : 'Venue not set'}">Venue</span>
+                                        <span class="pill" th:text="${interview.meetingLink != null ? interview.meetingLink : 'No online link'}">Link</span>
+                                        <span class="pill" th:text="|${placementInterviewApplicantCounts[interview.id]} applied student(s)|">0 applied student(s)</span>
+                                    </div>
+                                    <div class="meta" th:text="${interview.notes != null ? interview.notes : 'No extra instructions added.'}">Notes</div>
+                                </article>
+                            </div>
+                            <div class="empty" th:if="${#lists.isEmpty(placementInterviews)}">
+                                <i class="fa-solid fa-comments"></i>
+                                <h3 style="margin:10px 0 6px;">No interviews scheduled yet</h3>
+                                <p>Use the form on the left to schedule the first interview round.</p>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

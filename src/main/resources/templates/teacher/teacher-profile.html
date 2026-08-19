@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='profile')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Profile', subtitle='Review your identity, academic status, and teaching details in one place.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner portal-hero-banner--college">
+                <div class="portal-hero-copy portal-hero-college-copy">
+                    
+                    <div class="portal-hero-college-head">
+                        <div class="portal-hero-college-avatar">
+                            <img th:if="${teacherPhoto != null and !#strings.isEmpty(teacherPhoto)}" th:src="${teacherPhoto}" alt="Teacher photo">
+                            <span th:if="${teacherPhoto == null or #strings.isEmpty(teacherPhoto)}" th:text="${teacherInitials}">TE</span>
+                        </div>
+                        <div class="portal-hero-college-text">
+                            <h2 class="portal-hero-student-name" th:text="${teacherName}">Teacher Name</h2>
+                            <p class="portal-hero-teacher-meta" th:text="${teacherDesignationLabel + ' | ' + teacherDepartmentLabel + ' | ' + teacherStatusLabel}">Faculty | Department | Active</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-hero-side portal-hero-college-side">
+                    <h2 class="portal-hero-college-name portal-hero-college-name--side" th:text="${collegeName}">College Name</h2>
+                    <p class="portal-hero-college-year portal-hero-college-year--side" th:text="${teacherAcademicYearLabel}">2025-2026</p>
+                    <div class="portal-chip-row portal-chip-row--hero portal-chip-row--hero-right">
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-id-card"></i><strong th:text="${teacherEmployeeIdLabel}">EMP-001</strong></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-kpi-grid">
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Designation</p>
+                    <h3 class="teacher-kpi-value" th:text="${teacherDesignationLabel}">Faculty</h3>
+                    <p class="teacher-kpi-meta" th:text="${teacherStatusLabel}">Active Faculty</p>
+                </article>
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Employee ID</p>
+                    <h3 class="teacher-kpi-value" th:text="${teacherEmployeeIdLabel}">ID</h3>
+                    <p class="teacher-kpi-meta" th:text="${collegeName}">College</p>
+                </article>
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Experience</p>
+                    <h3 class="teacher-kpi-value" th:text="${teacherExperienceLabel}">Experience</h3>
+                    <p class="teacher-kpi-meta" th:text="${teacherAcademicYearLabel}">Academic year</p>
+                </article>
+            </section>
+
+            <section class="teacher-grid-two">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Personal Details</h2>
+                            <p class="teacher-panel-subtitle">Your identity as stored in the teacher workspace.</p>
+                        </div>
+                    </div>
+
+                    <div class="portal-avatar-card" style="margin-bottom: 18px;">
+                        <div class="portal-avatar" style="width: 92px; height: 92px;">
+                            <img th:if="${teacherPhoto != null and !#strings.isEmpty(teacherPhoto)}" th:src="${teacherPhoto}" alt="Teacher photo">
+                            <span th:if="${teacherPhoto == null or #strings.isEmpty(teacherPhoto)}" th:text="${teacherInitials}">TE</span>
+                        </div>
+                        <div class="portal-avatar-copy">
+                            <h2 th:text="${teacherName}">Teacher Name</h2>
+                            <p>
+                                <span th:text="${teacherDesignationLabel}">Faculty</span>
+                                <span> | </span>
+                                <span th:text="${teacherDepartmentLabel}">Department</span>
+                                <span> | </span>
+                                <span th:text="${teacherStatusLabel}">Status</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="teacher-grid-two">
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">College</span>
+                            <strong th:text="${collegeName}">AI Campus Institute</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Email</span>
+                            <strong th:text="${teacherEmail}">teacher@example.com</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Status</span>
+                            <strong th:text="${teacherStatusLabel}">Active Faculty</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Joining Date</span>
+                            <strong th:text="${teacherJoiningDateLabel}">Date</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Experience</span>
+                            <strong th:text="${teacherExperienceLabel}">Experience</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Professional Details</h2>
+                            <p class="teacher-panel-subtitle">Work-related information connected to your teacher account.</p>
+                        </div>
+                    </div>
+
+                    <div class="teacher-grid-two">
+                        <div class="portal-mini-stat">
+                            <span class="portal-mini-stat-label">Designation</span>
+                            <strong th:text="${teacherDesignationLabel}">Faculty</strong>
+                        </div>
+                        <div class="portal-mini-stat">
+                            <span class="portal-mini-stat-label">Department</span>
+                            <strong th:text="${teacherDepartmentLabel}">Department</strong>
+                        </div>
+                        <div class="portal-mini-stat">
+                            <span class="portal-mini-stat-label">Employee ID</span>
+                            <strong th:text="${teacherEmployeeIdLabel}">ID</strong>
+                        </div>
+                        <div class="portal-mini-stat">
+                            <span class="portal-mini-stat-label">Academic Year</span>
+                            <strong th:text="${teacherAcademicYearLabel}">Year</strong>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

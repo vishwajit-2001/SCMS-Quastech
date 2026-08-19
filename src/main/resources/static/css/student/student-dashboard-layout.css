@@ -1,0 +1,551 @@
+body.student-layout-page {
+    margin: 0;
+    min-height: 100vh;
+    display: block;
+    background:
+        radial-gradient(circle at top right, rgba(230, 181, 79, 0.12), transparent 26%),
+        radial-gradient(circle at left 20%, rgba(30, 40, 58, 0.08), transparent 22%),
+        linear-gradient(180deg, #f6f1e8 0%, #efe6d9 48%, #f8f3eb 100%);
+    color: #151515;
+}
+
+body.student-layout-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(143, 106, 48, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(143, 106, 48, 0.05) 1px, transparent 1px);
+    background-size: 38px 38px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 80%);
+    opacity: 0.35;
+    z-index: 0;
+}
+
+body.student-layout-page .student-shell {
+    --shell-sidebar-width: 272px;
+    --shell-sidebar-collapsed: 88px;
+    --shell-bg-dark: #0d0f16;
+    --shell-bg-dark-2: #181d29;
+    --shell-gold: #d6a53a;
+    --shell-gold-2: #f0c562;
+    --shell-surface-strong: rgba(255, 255, 255, 0.92);
+    --shell-border: rgba(18, 26, 38, 0.08);
+    --shell-text: #17181d;
+    --shell-muted: #6a6c75;
+    --shell-danger: #d9534f;
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+body.student-layout-page .student-shell .portal-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--shell-sidebar-width);
+    height: 100vh;
+    padding: 12px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background:
+        radial-gradient(circle at top left, rgba(240, 197, 98, 0.18), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(54, 71, 102, 0.22), transparent 26%),
+        linear-gradient(180deg, var(--shell-bg-dark) 0%, var(--shell-bg-dark-2) 58%, #10141d 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 20px 0 40px rgba(0, 0, 0, 0.24);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 40;
+    transition: width 0.26s ease;
+}
+
+body.student-layout-page .student-shell .portal-sidebar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 18px;
+    right: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--shell-gold), var(--shell-gold-2), transparent);
+    opacity: 0.95;
+}
+
+body.student-layout-page .student-shell.sidebar-collapsed .portal-sidebar {
+    width: var(--shell-sidebar-collapsed);
+}
+
+body.student-layout-page .portal-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(18, 24, 37, 0.2) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+body.student-layout-page .portal-sidebar-brand::after {
+    content: "";
+    position: absolute;
+    inset: auto -10% -40% 35%;
+    height: 80px;
+    background: radial-gradient(circle, rgba(240, 197, 98, 0.18), transparent 70%);
+    pointer-events: none;
+}
+
+body.student-layout-page .portal-brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #f4d37a 0%, var(--shell-gold) 65%, #b57c1f 100%);
+    color: #111827;
+    font-size: 1.1rem;
+    box-shadow: 0 18px 34px rgba(214, 165, 58, 0.24);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+body.student-layout-page .portal-brand-copy {
+    position: relative;
+    z-index: 1;
+}
+
+body.student-layout-page .portal-brand-copy h2,
+body.student-layout-page .portal-brand-copy p {
+    margin: 0;
+}
+
+body.student-layout-page .portal-brand-copy h2 {
+    font-size: 0.95rem;
+    color: #fff7e6;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+body.student-layout-page .portal-brand-copy p {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.48);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.58rem;
+    font-weight: 600;
+}
+
+body.student-layout-page .portal-sidebar-status-card {
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(18, 26, 38, 0.18) 100%);
+    border: 1px solid rgba(214, 165, 58, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.student-layout-page .portal-sidebar-status-label {
+    display: inline-flex;
+    margin-bottom: 8px;
+    color: rgba(240, 197, 98, 0.88);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+}
+
+body.student-layout-page .portal-sidebar-status-card strong {
+    display: block;
+    color: #ffffff;
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+body.student-layout-page .portal-sidebar-status-card p {
+    margin: 6px 0 0;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+body.student-layout-page .portal-sidebar-frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin-top: 0;
+}
+
+body.student-layout-page .portal-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 0;
+    flex: 0 0 auto;
+    overflow: visible;
+    padding-right: 0;
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+}
+
+body.student-layout-page .portal-section-title {
+    padding: 10px 10px 3px;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.58rem;
+    font-weight: 700;
+}
+
+body.student-layout-page .portal-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.74);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition:
+        background 0.22s ease,
+        color 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+body.student-layout-page .portal-nav-item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 42%);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    pointer-events: none;
+}
+
+body.student-layout-page .portal-nav-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.06);
+    transform: translateX(2px);
+}
+
+body.student-layout-page .portal-nav-item:hover::after,
+body.student-layout-page .portal-nav-item.active::after {
+    opacity: 1;
+}
+
+body.student-layout-page .portal-nav-item.active {
+    background: linear-gradient(135deg, rgba(214, 165, 58, 0.28) 0%, rgba(214, 165, 58, 0.14) 100%);
+    color: #ffffff;
+    border-color: rgba(240, 197, 98, 0.32);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 12px 22px rgba(8, 12, 20, 0.28);
+}
+
+body.student-layout-page .portal-nav-icon {
+    width: 18px;
+    text-align: center;
+    color: var(--shell-gold-2);
+    flex-shrink: 0;
+    font-size: 0.84rem;
+    position: relative;
+    z-index: 1;
+}
+
+body.student-layout-page .portal-nav-label {
+    font-weight: 600;
+    flex: 1;
+    font-size: 0.84rem;
+    position: relative;
+    z-index: 1;
+}
+
+body.student-layout-page .portal-sidebar-footer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.student-layout-page .portal-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(217, 83, 79, 0.52);
+    background: linear-gradient(180deg, rgba(127, 29, 29, 0.08), rgba(88, 18, 18, 0.18));
+    color: #f5aba8;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+body.student-layout-page .portal-logout-btn:hover {
+    background: linear-gradient(180deg, rgba(127, 29, 29, 0.16), rgba(88, 18, 18, 0.28));
+    box-shadow: 0 16px 28px rgba(93, 20, 20, 0.22);
+    transform: translateY(-2px);
+}
+
+body.student-layout-page .student-shell .main,
+body.student-layout-page .student-shell .main-content {
+    width: 100%;
+    min-width: 0;
+    margin-left: var(--shell-sidebar-width);
+    transition: margin-left 0.26s ease;
+    position: relative;
+    z-index: 1;
+}
+
+body.student-layout-page .student-shell .main::before,
+body.student-layout-page .student-shell .main-content::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 28%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+body.student-layout-page .student-shell.sidebar-collapsed .main,
+body.student-layout-page .student-shell.sidebar-collapsed .main-content {
+    margin-left: var(--shell-sidebar-collapsed);
+}
+
+body.student-layout-page .portal-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 30px;
+    background: rgba(248, 242, 232, 0.82);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(18, 26, 38, 0.06);
+    box-shadow: 0 8px 30px rgba(20, 27, 40, 0.04);
+}
+
+body.student-layout-page .portal-header-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+body.student-layout-page .portal-header-kicker {
+    color: #b7852c;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    font-size: 0.64rem;
+    font-weight: 700;
+}
+
+body.student-layout-page .portal-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+body.student-layout-page .portal-header-title {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--shell-text);
+}
+
+body.student-layout-page .portal-header-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.86);
+    color: #f8df9d;
+    border: 1px solid rgba(240, 197, 98, 0.22);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+body.student-layout-page .portal-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.16);
+}
+
+body.student-layout-page .portal-header-subtitle {
+    margin: 0;
+    color: var(--shell-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+body.student-layout-page .portal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+body.student-layout-page .portal-header-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+    display: inline-grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(18, 26, 38, 0.08);
+    color: var(--shell-text);
+    text-decoration: none;
+    position: relative;
+    box-shadow: 0 12px 24px rgba(20, 27, 40, 0.08);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+}
+
+body.student-layout-page .portal-header-btn:hover {
+    transform: translateY(-2px);
+    color: #b7852c;
+    border-color: rgba(214, 165, 58, 0.28);
+    box-shadow: 0 18px 34px rgba(20, 27, 40, 0.11);
+}
+
+body.student-layout-page .portal-header-btn-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--shell-danger);
+    color: #ffffff;
+    border: 2px solid #f7f2e9;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.student-layout-page .portal-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 16px 7px 7px;
+    border-radius: 999px;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(18, 26, 38, 0.07);
+    box-shadow: 0 14px 26px rgba(20, 27, 40, 0.1);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+body.student-layout-page .portal-user-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 34px rgba(20, 27, 40, 0.12);
+}
+
+body.student-layout-page .portal-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #f4d37a 0%, var(--shell-gold) 65%, #b57c1f 100%);
+    color: #111827;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
+body.student-layout-page .portal-user-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+body.student-layout-page .portal-user-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--shell-text);
+}
+
+body.student-layout-page .portal-user-role {
+    color: var(--shell-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.62rem;
+    margin-top: 2px;
+}
+
+body.student-layout-page .student-shell .cards,
+body.student-layout-page .student-shell .content,
+body.student-layout-page .student-shell .page-body {
+    position: relative;
+    z-index: 1;
+}
+
+body.student-layout-page .student-shell.sidebar-collapsed .portal-brand-copy,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-sidebar-status-card,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-nav-label,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-section-title,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-logout-btn .portal-nav-label,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-user-meta {
+    display: none;
+}
+
+body.student-layout-page .portal-sidebar-toggle {
+    display: none;
+}
+
+body.student-layout-page .student-shell.sidebar-collapsed .portal-nav-item,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-logout-btn,
+body.student-layout-page .student-shell.sidebar-collapsed .portal-sidebar-brand {
+    justify-content: center;
+}
+
+@media (max-width: 1080px) {
+    body.student-layout-page .student-shell {
+        --shell-sidebar-width: 240px;
+    }
+
+    body.student-layout-page .portal-header {
+        padding: 16px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    body.student-layout-page .student-shell {
+        --shell-sidebar-width: 220px;
+    }
+
+    body.student-layout-page .portal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px 18px;
+    }
+
+    body.student-layout-page .portal-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    body.student-layout-page .portal-header-title {
+        font-size: 1.34rem;
+    }
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+        .stat{border-radius:24px;background:linear-gradient(180deg,#fff,rgba(249,243,231,.95));border:1px solid rgba(200,146,42,.16);padding:18px;box-shadow:0 14px 36px rgba(24,22,15,.05)}
+        .stat label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a8070;font-weight:700}
+        .stat strong{display:block;margin-top:8px;font-size:30px}
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        @media (max-width:1100px){.stat-grid{grid-template-columns:1fr 1fr}}
+        @media (max-width:768px){.stat-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='analytics')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Analytics', subtitle='Track placement rate, average salary, highest package, and company statistics.')}"></div>
+        <main class="portal-page-body">
+            <section class="stat-grid" style="margin-bottom:18px;">
+                <article class="stat"><label>Open drives</label><strong th:text="${placementDriveOpenCount}">0</strong></article>
+                <article class="stat"><label>Closed drives</label><strong th:text="${placementDriveClosedCount}">0</strong></article>
+                <article class="stat"><label>Applications</label><strong th:text="${placementApplicationCount}">0</strong></article>
+                <article class="stat"><label>Students placed</label><strong th:text="${placementPlacedCount}">0</strong></article>
+            </section>
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Placement Analytics</h2><p>Basic portal metrics can be extended into charts later.</p></div>
+                    <span class="portal-badge portal-badge--info">Insights</span>
+                </div>
+                <div class="panel-body">
+                    <div class="pill-row">
+                        <span class="pill">Placement rate</span>
+                        <span class="pill">Average salary</span>
+                        <span class="pill">Highest package</span>
+                        <span class="pill">Company statistics</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

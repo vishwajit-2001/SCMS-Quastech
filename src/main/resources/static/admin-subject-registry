@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Registry</title>
+    <style>
+        body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f8f6f1;color:#17130f;font-family:Inter,Arial,sans-serif}
+        .box{width:min(680px,calc(100% - 40px));background:#fff;border:1px solid #e8dfcf;border-radius:18px;padding:34px;box-shadow:0 18px 44px rgba(15,23,42,.08);text-align:center}
+        h1{margin:0 0 10px;font-size:30px}
+        p{margin:0 0 22px;color:#7c6f61;line-height:1.6}
+        a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:12px;background:#17130f;color:#fff;text-decoration:none;font-weight:700}
+    </style>
+</head>
+<body>
+<main class="box">
+    <h1>Subject Registry</h1>
+    <p>Please create a course before adding subjects.</p>
+    <a href="/admin-courses">Create Course</a>
+</main>
+</body>
+</html>

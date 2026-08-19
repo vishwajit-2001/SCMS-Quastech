@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Attendance - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='exams')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Exam Attendance', subtitle='Mark attendance for the selected exam before the scheduler closes unmarked students as absent.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-clipboard-check"></i> Exam session</span>
+                    <h2 class="portal-hero-title" th:text="${exam.title}">Exam title</h2>
+                    <p class="portal-hero-subtitle">
+                        <span th:text="${exam.subject}">Subject</span>
+                        <span> | </span>
+                        <span th:text="${exam.examDateLabel}">Date</span>
+                        <span> | </span>
+                        <span th:text="${exam.durationLabel}">Duration</span>
+                    </p>
+                </div>
+            </section>
+
+            <section class="teacher-grid-two">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Mark Attendance</h2>
+                            <p class="teacher-panel-subtitle">Update present / absent states for the exam record.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${examSuccess}" class="teacher-alert teacher-alert--success" th:text="${examSuccess}">Saved</div>
+                    <div th:if="${examError}" class="teacher-alert teacher-alert--error" th:text="${examError}">Error</div>
+
+                    <form method="post" th:action="@{'/teacher-exams/' + ${exam.id} + '/attendance'}">
+                        <div class="teacher-table-wrap">
+                            <table class="teacher-table">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Roll No.</th>
+                                    <th>Name</th>
+                                    <th>Seat</th>
+                                    <th>Attendance</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="student, iterStat : ${examStudents}">
+                                    <td th:text="${iterStat.count}">1</td>
+                                    <td th:text="${student.rollNo} ?: 'N/A'">R1</td>
+                                    <td th:text="${student.name}">Student</td>
+                                    <td th:text="${seatViews[iterStat.index].seatLabel}">Seat</td>
+                                    <td>
+                                        <div class="teacher-toggle-group">
+                                            <button type="button" class="teacher-toggle-btn present"
+                                                    th:classappend="${examStatusByStudent[student.id] == 'PRESENT'} ? ' active' : ''"
+                                                    th:onclick="|setExamStatus(${student.id}, 'PRESENT', this)|">Present</button>
+                                            <button type="button" class="teacher-toggle-btn absent"
+                                                    th:classappend="${examStatusByStudent[student.id] == 'ABSENT'} ? ' active' : ''"
+                                                    th:onclick="|setExamStatus(${student.id}, 'ABSENT', this)|">Absent</button>
+                                        </div>
+                                        <input type="hidden" th:name="'status_' + ${student.id}" th:id="'status_' + ${student.id}"
+                                               th:value="${examStatusByStudent[student.id] != null ? examStatusByStudent[student.id] : 'PENDING'}">
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(examStudents)}">
+                                    <td colspan="5"><div class="teacher-empty">No students assigned to this exam class.</div></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="teacher-actions-row">
+                            <a class="teacher-btn teacher-btn--secondary" th:href="@{/teacher-exams}"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                            <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-floppy-disk"></i> Save attendance</button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Seating Preview</h2>
+                            <p class="teacher-panel-subtitle">Simple row/seat allocation derived from the class roster.</p>
+                        </div>
+                    </div>
+                    <div class="portal-list portal-list--alerts">
+                        <article class="portal-alert" th:each="seat : ${seatViews}">
+                            <div class="portal-alert-icon">
+                                <i class="fa-solid fa-chair"></i>
+                            </div>
+                            <div class="portal-alert-copy">
+                                <div class="portal-alert-head">
+                                    <h3 class="portal-alert-title" th:text="${seat.student.name}">Student</h3>
+                                    <span class="portal-badge portal-badge--neutral" th:text="${seat.seatLabel}">Seat</span>
+                                </div>
+                                <p th:text="${seat.rollNo}">Roll</p>
+                            </div>
+                        </article>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+<script>
+    function setExamStatus(studentId, status, button) {
+        const row = button.closest('tr');
+        row.querySelectorAll('.teacher-toggle-btn').forEach(function (item) {
+            item.classList.remove('active');
+        });
+        button.classList.add('active');
+        const input = document.getElementById('status_' + studentId);
+        if (input) {
+            input.value = status;
+        }
+    }
+</script>
+</body>
+</html>

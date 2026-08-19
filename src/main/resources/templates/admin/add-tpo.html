@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add TPO - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        body{display:flex;min-height:100vh;background:var(--offwhite);font-family:'Inter',sans-serif;overflow-x:hidden}
+        .main{margin-left:var(--sw);width:calc(100% - var(--sw));min-height:100vh;display:flex;flex-direction:column}
+        .header{height:76px;padding:0 40px;background:#fff}
+        .header-title{font-size:26px;line-height:1}
+        .header-right{gap:18px}
+        .header-right .btn-dark{min-height:46px;padding:0 24px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;border:none;font-weight:700;box-shadow:0 10px 26px rgba(75,73,172,.22)}
+        .content{flex:1;padding:32px 40px 48px}
+        .tpo-shell{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}
+        .tpo-card{max-width:1180px}
+        .tpo-form{display:grid;gap:22px}
+        .tpo-form .form-row{grid-template-columns:repeat(2,minmax(280px,1fr));gap:22px 34px;margin-bottom:0}
+        .tpo-field{display:grid;gap:8px;min-width:0}
+        .tpo-field .form-label{display:block;font-weight:700;color:var(--gold);letter-spacing:.09em}
+        .tpo-field .form-input{width:100%;min-height:52px;font-size:14px;color:#1f2937;background:#fff;border-color:#dce2ff}
+        .form-actions{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+        .form-actions .btn-gold{min-height:46px;color:#fff;font-weight:700}
+        .form-actions .btn-outline{min-height:46px;font-weight:700}
+        @media(max-width:1000px){.tpo-shell{grid-template-columns:1fr}.main{margin-left:0;width:100%}.sidebar{transform:translateX(-100%)}}
+        @media(max-width:768px){.header{height:auto;min-height:76px;padding:16px 20px;align-items:flex-start;gap:14px;flex-direction:column}.header-right{width:100%;justify-content:space-between;flex-wrap:wrap}.content{padding:18px}.tpo-form .form-row{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('add-tpo')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Add TPO</div>
+        <div class="header-right">
+            <a href="/admin/tpos" class="btn-dark"><i class="fa fa-briefcase"></i> View TPO</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="alert alert-error" th:if="${error != null}"><i class="fa fa-triangle-exclamation"></i><span th:text="${error}">Error</span></div>
+        <div class="tpo-shell">
+            <div class="box tpo-card">
+                <div class="box-title"><i class="fa fa-user-plus" style="color:var(--gold)"></i> TPO Account Details</div>
+                <form class="tpo-form" method="post" th:action="@{/admin/tpos}">
+                    <div class="form-row">
+                        <div class="tpo-field">
+                            <label class="form-label" for="name">Name</label>
+                            <input class="form-input" id="name" name="name" type="text" placeholder="Enter TPO name" required>
+                        </div>
+                        <div class="tpo-field">
+                            <label class="form-label" for="email">Email</label>
+                            <input class="form-input" id="email" name="email" type="email" placeholder="tpo@institute.edu" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="tpo-field">
+                            <label class="form-label" for="phone">Phone</label>
+                            <input class="form-input" id="phone" name="phone" type="tel" placeholder="Enter phone number" required>
+                        </div>
+                        <div class="tpo-field">
+                            <label class="form-label" for="password">Password</label>
+                            <input class="form-input" id="password" name="password" type="password" placeholder="Create password" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="tpo-field">
+                            <label class="form-label" for="employeeId">Employee ID</label>
+                            <input class="form-input" id="employeeId" name="employeeId" type="text"
+                                   th:value="${nextTpoEmployeeId}" readonly>
+                        </div>
+                        <div class="tpo-field">
+                            <label class="form-label" for="department">Department</label>
+                            <input class="form-input" id="department" name="department" type="text" placeholder="Training and Placement" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <a href="/admin/tpos" class="btn-outline"><i class="fa fa-times"></i> Cancel</a>
+                        <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Create TPO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const tpoForm = document.querySelector(".tpo-form");
+    const employeeIdInput = document.getElementById("employeeId");
+    let employeeIdSubmitReady = false;
+
+    async function refreshTpoEmployeeId() {
+        if (!employeeIdInput) return;
+        try {
+            const response = await fetch("/admin/employee-ids/next?type=tpo", {
+                headers: { "Accept": "application/json" }
+            });
+            if (!response.ok) return;
+            const data = await response.json();
+            if (data.employeeId) {
+                employeeIdInput.value = data.employeeId;
+            }
+        } catch (error) {
+            console.warn("Unable to refresh TPO employee ID", error);
+        }
+    }
+
+    refreshTpoEmployeeId();
+    tpoForm?.addEventListener("submit", async event => {
+        if (employeeIdSubmitReady) return;
+        event.preventDefault();
+        await refreshTpoEmployeeId();
+        employeeIdSubmitReady = true;
+        tpoForm.submit();
+    });
+</script>
+</body>
+</html>

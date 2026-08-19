@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Requests - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Super admin communication</div>
+                <div class="sa-title">Contact Requests</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-grid-2">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Send message to college admin</h2>
+                            <p>Messages are delivered through the ERP notification system.</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div th:if="${superAdminError}" class="sa-notice warning" style="margin-bottom:14px" th:text="${superAdminError}"></div>
+                        <div th:if="${superAdminSuccess}" class="sa-notice success" style="margin-bottom:14px" th:text="${superAdminSuccess}"></div>
+                        <form action="/super-admin/admins/message" method="post" class="sa-form-grid">
+                            <div class="field full">
+                                <label>Select College Admin</label>
+                                <select name="recipientEmail" required>
+                                    <option value="" selected disabled>Choose admin</option>
+                                    <option th:each="admin : ${collegeAdmins}" th:value="${admin.email}" th:text="${admin.adminName + ' - ' + admin.collegeName}"></option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Title</label>
+                                <input type="text" name="title" placeholder="Message title" required>
+                            </div>
+                            <div class="field">
+                                <label>Message</label>
+                                <input type="text" name="message" placeholder="Write your message" required>
+                            </div>
+                            <div class="field full">
+                                <button class="sa-btn primary" type="submit"><i class="fa fa-paper-plane"></i> Send Message</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Recent messages</h2>
+                            <p>Latest contact feed sent to college admins.</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-activity-list">
+                            <div class="sa-activity-item" th:if="${#lists.isEmpty(sentMessages)}">
+                                <div class="sa-activity-dot"></div>
+                                <div class="sa-activity-copy">
+                                    <div class="sa-activity-title">No messages yet</div>
+                                    <div class="sa-activity-sub">Use the message form to contact a college admin.</div>
+                                </div>
+                            </div>
+                            <div class="sa-activity-item" th:each="messageItem : ${sentMessages}">
+                                <div class="sa-activity-dot success"></div>
+                                <div class="sa-activity-copy">
+                                    <div class="sa-activity-title" th:text="${messageItem.title}">Message</div>
+                                    <div class="sa-activity-sub">
+                                        To <span th:text="${messageItem.recipient}">admin@example.com</span> · <span th:text="${messageItem.createdAt}">Now</span>
+                                    </div>
+                                    <div style="margin-top:6px;color:#334155;font-size:13px" th:text="${messageItem.message}">Body</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>College registry links</h2>
+                        <p>Jump to the college admin you need to contact.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div class="sa-table-wrap">
+                        <table class="sa-table">
+                            <thead>
+                            <tr>
+                                <th>College</th>
+                                <th>Admin</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="college : ${collegeSummaries}">
+                                <td>
+                                    <div style="font-weight:800" th:text="${college.collegeName}">College</div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:4px" th:text="${college.collegeCode}">Code</div>
+                                </td>
+                                <td th:text="${college.adminName}">Admin</td>
+                                <td><span class="sa-badge" th:classappend="' ' + ${college.statusTone}" th:text="${college.status}">ACTIVE</span></td>
+                                <td><a class="sa-action view" th:href="@{'/super-admin/colleges/' + ${college.collegeId}}"><i class="fa fa-eye"></i> Open</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

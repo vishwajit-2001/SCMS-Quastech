@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Exam and Results - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='exam-results')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Exam and Results')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Results Published</p>
+                    <h2 class="portal-summary-value">0</h2>
+                    <div class="portal-summary-meta">No result records connected yet</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Subjects</p>
+                    <h2 class="portal-summary-value" th:text="${subjectCount}">0</h2>
+                    <div class="portal-summary-meta">Assigned from timetable</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Academic Scope</p>
+                    <h2 class="portal-summary-value" th:text="${studentClassLabel}">Academic Scope</h2>
+                    <div class="portal-summary-meta">Current semester context</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Status</p>
+                    <h2 class="portal-summary-value" th:text="${resultsAvailable ? 'Available' : 'Pending'}">Pending</h2>
+                    <div class="portal-summary-meta">Waiting for exam backend data</div>
+                </article>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Exam Records</h2>
+                </div>
+
+                <div class="portal-empty-state" th:if="${!resultsAvailable}">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <h3>Exam and result records are not connected yet</h3>
+                    <p>This page is ready for published exam schedules and result records, but nothing has been released for your current semester scope yet.</p>
+                </div>
+            </section>
+
+            <section class="portal-surface" th:if="${!#lists.isEmpty(subjectSummaries)}">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Subjects Waiting for Results</h2>
+                </div>
+
+                <div class="portal-list">
+                    <div class="portal-list-item" th:each="subject : ${subjectSummaries}">
+                        <div class="portal-list-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div>
+                            <h3 class="portal-list-title" th:text="${subject.subjectName}">Subject</h3>
+                            <div class="portal-list-meta" th:text="${subject.teacherName} + ' | ' + ${subject.daySummary}">Teacher | Days</div>
+                        </div>
+                        <div class="portal-list-trail">Pending</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

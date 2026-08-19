@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${'Placements - ' + (collegeName ?: 'AI Campus Institute')}">Placements - AI Campus Institute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .placement-grid{display:grid;gap:18px}
+        .placement-card{border:1px solid rgba(200,146,42,.16);border-radius:24px;background:linear-gradient(135deg,#fff,#faf5ea);padding:18px;box-shadow:0 12px 32px rgba(24,22,15,.05)}
+        .placement-card.is-closed{opacity:.86}
+        .placement-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+        .placement-top h3{margin:0;font-size:22px}
+        .placement-meta{color:#6b6457;margin-top:6px;line-height:1.5}
+        .placement-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .placement-pill{border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.76);border:1px solid rgba(24,22,15,.08);color:#3d352a;font-size:12px;font-weight:600}
+        .placement-form-wrap{margin-top:14px;padding-top:14px;border-top:1px solid rgba(24,22,15,.08)}
+        .placement-apply-form{display:grid;gap:12px}
+        .placement-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .placement-field{display:grid;gap:6px}
+        .placement-field.full{grid-column:1/-1}
+        .placement-field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .placement-field input,.placement-field textarea{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        .placement-field textarea{min-height:92px;resize:vertical}
+        .placement-field input[type="file"]{padding:10px 12px}
+        .placement-actions{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+        .placement-button{border:none;border-radius:999px;min-height:46px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f;font-weight:700;cursor:pointer;box-shadow:0 12px 24px rgba(200,146,42,.22)}
+        .placement-button:disabled{cursor:not-allowed;opacity:.55;box-shadow:none}
+        .placement-note{color:#7f7566;font-size:12px}
+        .interview-section{margin-top:18px;padding-top:18px;border-top:1px solid rgba(24,22,15,.08)}
+        .interview-grid{display:grid;gap:12px}
+        .interview-card{border:1px solid rgba(24,22,15,.08);border-radius:18px;background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:14px}
+        .interview-head{display:flex;justify-content:space-between;gap:12px;align-items:start}
+        .interview-meta{margin-top:6px;color:#6b6457;font-size:13px;line-height:1.5}
+        .interview-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .interview-pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .placement-empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:28px;text-align:center;color:#6b6457;background:rgba(255,255,255,.8)}
+        .msg{border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600}
+        .msg.success{background:rgba(26,158,104,.10);color:#1a7a50;border:1px solid rgba(26,158,104,.18)}
+        .msg.error{background:rgba(208,63,63,.10);color:#9f3939;border:1px solid rgba(208,63,63,.18)}
+        @media (max-width:900px){.placement-form-grid{grid-template-columns:1fr}.placement-field.full{grid-column:auto}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='placements')}"></div>
+    <div class="main-content">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Placements')}"></div>
+        <main class="portal-page-body">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-briefcase"></i> Placement Drives</span>
+                    <h2 class="portal-hero-title">Apply only from the company drives published by your TPO</h2>
+                    <p class="portal-hero-subtitle">
+                        <span th:text="${studentName}">Student</span>
+                        <span> | </span>
+                        <span th:text="${studentCourse}">Course</span>
+                        <span> | </span>
+                        <span th:text="${studentSemesterLabel}">Semester</span>
+                    </p>
+                    <div class="portal-chip-row">
+                        <span class="portal-chip"><i class="fa-solid fa-building"></i><strong th:text="${placementDriveCount}">0</strong><span>live drives</span></span>
+                        <span class="portal-chip"><i class="fa-solid fa-envelope"></i><span th:text="${studentEmail}">student@example.com</span></span>
+                        <span class="portal-chip"><i class="fa-solid fa-user-graduate"></i><span th:text="${studentCourse}">Course</span></span>
+                    </div>
+                </div>
+                <div class="portal-hero-side">
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Course</p>
+                        <p class="portal-side-value" th:text="${studentCourse}">Course</p>
+                        <div class="portal-side-meta" th:text="${studentSemesterLabel}">Semester</div>
+                    </div>
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Applications sent</p>
+                        <p class="portal-side-value" th:text="${#lists.size(placementAppliedDriveIds)}">0</p>
+                        <div class="portal-side-meta">Submitted from your account</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Placement Opportunities</h2>
+                    <a class="portal-link" th:href="@{/placements}">Refresh</a>
+                </div>
+                <section class="interview-section" th:if="${!#lists.isEmpty(placementInterviewNotifications)}" style="margin-top:0;padding-top:0;border-top:0;padding-bottom:18px;">
+                    <div class="portal-surface-head" style="margin-bottom:12px;">
+                        <h2 class="portal-surface-title">Interview Notifications</h2>
+                        <span class="portal-badge portal-badge--info" th:text="|${placementInterviewNotificationCount} alert(s)|">0 alert(s)</span>
+                    </div>
+                    <div class="interview-grid">
+                        <article class="interview-card" th:each="notification : ${placementInterviewNotifications}">
+                            <div class="interview-head">
+                                <div>
+                                    <h3 th:text="${notification.title}">Interview scheduled</h3>
+                                    <div class="interview-meta" th:text="${notification.source}">Placement</div>
+                                </div>
+                                <span class="portal-badge portal-badge--success" th:text="${notification.tone}">success</span>
+                            </div>
+                            <div class="interview-meta" th:text="${notification.description}">Interview description</div>
+                        </article>
+                    </div>
+                </section>
+                <div th:if="${placementSuccess != null}" class="msg success" style="margin-bottom:14px;" th:text="${placementSuccess}">Success</div>
+                <div th:if="${placementError != null}" class="msg error" style="margin-bottom:14px;" th:text="${placementError}">Error</div>
+
+                <div class="placement-grid" th:if="${!#lists.isEmpty(placementDrives)}">
+                    <article class="placement-card" th:each="drive : ${placementDrives}" th:classappend="${!drive.applicationOpen} ? ' is-closed' : ''">
+                        <div class="placement-top">
+                            <div>
+                                <h3 th:text="${drive.companyName}">Company</h3>
+                                <div class="placement-meta">
+                                    <span th:text="${drive.jobTitle}">Role</span>
+                                    <span> | </span>
+                                    <span th:text="${drive.location}">Location</span>
+                                </div>
+                            </div>
+                            <span class="portal-badge" th:classappend="${drive.applicationOpen} ? ' portal-badge--success' : ' portal-badge--warning'"
+                                  th:text="${drive.applicationOpen ? 'Open' : 'Closed'}">Open</span>
+                        </div>
+
+                        <div class="placement-pills">
+                            <span class="placement-pill" th:text="${drive.salaryRange != null ? drive.salaryRange : 'Salary not disclosed'}">Salary</span>
+                            <span class="placement-pill" th:text="${drive.driveType != null ? drive.driveType : 'Drive'}">Type</span>
+                            <span class="placement-pill" th:text="${drive.openings} + ' openings'">0 openings</span>
+                            <span class="placement-pill" th:text="${drive.experience != null ? drive.experience : 'Experience n/a'}">Experience</span>
+                            <span class="placement-pill" th:text="${drive.skillsRequired != null ? drive.skillsRequired : 'Skills not listed'}">Skills</span>
+                            <span class="placement-pill" th:text="${drive.driveDate != null ? 'Drive date: ' + #temporals.format(drive.driveDate, 'dd MMM yyyy') : 'Drive date not set'}">Drive date</span>
+                            <span class="placement-pill" th:text="${drive.applicationDeadline != null ? 'Deadline: ' + #temporals.format(drive.applicationDeadline, 'dd MMM yyyy, hh:mm a') : 'No deadline set'}">Deadline</span>
+                        </div>
+
+                        <div class="placement-meta" th:text="${drive.description != null ? drive.description : 'No drive description provided by the TPO.'}">
+                            Description
+                        </div>
+
+                        <div class="placement-form-wrap">
+                            <div th:if="${#lists.contains(placementAppliedDriveIds, drive.id)}" class="placement-empty">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <h3 style="margin:10px 0 6px;">Already applied</h3>
+                                <p>Your application for this company has already been submitted.</p>
+                            </div>
+
+                            <div th:if="${!#lists.contains(placementAppliedDriveIds, drive.id)}">
+                                <form class="placement-apply-form" method="post" enctype="multipart/form-data" th:action="@{'/placements/apply/' + ${drive.id}}">
+                                    <fieldset style="border:0;padding:0;margin:0;" th:disabled="${!drive.applicationOpen}">
+                                        <div class="placement-form-grid">
+                                            <div class="placement-field full">
+                                                <label>Name</label>
+                                                <input type="text" name="fullName" th:value="${studentName}" required>
+                                            </div>
+                                            <div class="placement-field">
+                                                <label>Email</label>
+                                                <input type="email" name="email" th:value="${studentEmail}" required>
+                                            </div>
+                                            <div class="placement-field">
+                                                <label>Phone</label>
+                                                <input type="text" name="phone" placeholder="Mobile number" required>
+                                            </div>
+                                            <div class="placement-field">
+                                                <label>Course</label>
+                                                <input type="text" name="course" th:value="${studentCourse}" required>
+                                            </div>
+                                            <div class="placement-field">
+                                                <label>Semester</label>
+                                                <input type="text" name="semester" th:value="${studentSemesterLabel}" required>
+                                            </div>
+                                            <div class="placement-field">
+                                                <label>Specialization</label>
+                                                <input type="text" name="specialization" placeholder="CSE, AI, ECE">
+                                            </div>
+                                            <div class="placement-field">
+                                                <label>Current Location</label>
+                                                <input type="text" name="currentLocation" placeholder="Pune, Mumbai">
+                                            </div>
+                                            <div class="placement-field full">
+                                                <label>Skills</label>
+                                                <input type="text" name="skills" placeholder="Java, SQL, Problem Solving">
+                                            </div>
+                                            <div class="placement-field full">
+                                                <label>Cover Note</label>
+                                                <textarea name="coverNote" placeholder="Write a short introduction or why you fit this role."></textarea>
+                                            </div>
+                                            <div class="placement-field full">
+                                                <label>CV / Resume</label>
+                                                <input type="file" name="resume" accept=".pdf,.doc,.docx">
+                                            </div>
+                                        </div>
+                                        <div class="placement-actions" style="margin-top:4px;">
+                                            <span class="placement-note" th:if="${drive.applicationOpen}">
+                                                Application goes directly to the placement TPO before the deadline.
+                                            </span>
+                                            <span class="placement-note" th:if="${!drive.applicationOpen}">
+                                                This drive is closed. The apply button is disabled after the deadline.
+                                            </span>
+                                            <button class="placement-button" type="submit" th:disabled="${!drive.applicationOpen}">
+                                                <i class="fa-solid fa-paper-plane"></i>
+                                                <span th:text="${drive.applicationOpen ? 'Apply now' : 'Deadline closed'}">Apply now</span>
+                                            </button>
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <section class="interview-section" th:if="${!#lists.isEmpty(studentPlacementInterviews)}">
+                    <div class="portal-surface-head" style="margin-bottom:12px;">
+                        <h2 class="portal-surface-title">Your Interview Schedule</h2>
+                        <span class="portal-badge portal-badge--info" th:text="|${#lists.size(studentPlacementInterviews)} scheduled|">0 scheduled</span>
+                    </div>
+                    <div class="interview-grid">
+                        <article class="interview-card" th:each="interview : ${studentPlacementInterviews}">
+                            <div class="interview-head">
+                                <div>
+                                    <h3 th:text="${interview.placementDrive != null ? interview.placementDrive.companyName : 'Company'}">Company</h3>
+                                    <div class="interview-meta">
+                                        <span th:text="${interview.interviewRound}">Round</span>
+                                        <span> | </span>
+                                        <span th:text="${interview.interviewDateTime != null ? #temporals.format(interview.interviewDateTime, 'dd MMM yyyy, hh:mm a') : 'Date pending'}">Date</span>
+                                    </div>
+                                </div>
+                                <span class="portal-badge portal-badge--success" th:text="${interview.status != null ? interview.status : 'Scheduled'}">Scheduled</span>
+                            </div>
+                            <div class="interview-pills">
+                                <span class="interview-pill" th:text="${interview.venue != null ? interview.venue : 'Venue not set'}">Venue</span>
+                                <span class="interview-pill" th:text="${interview.meetingLink != null ? interview.meetingLink : 'No online link'}">Link</span>
+                            </div>
+                            <div class="interview-meta" th:text="${interview.notes != null ? interview.notes : 'The TPO has not added any extra instructions yet.'}">Notes</div>
+                        </article>
+                    </div>
+                </section>
+
+                <div class="placement-empty" th:if="${#lists.isEmpty(placementDrives)}">
+                    <i class="fa-regular fa-building"></i>
+                    <h3 style="margin:10px 0 6px;">No placement drives yet</h3>
+                    <p th:text="${placementEmptyMessage}">No placement drives are live for your profile yet.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

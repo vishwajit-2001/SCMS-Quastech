@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Profile - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='profile')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='My Profile')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-surface portal-surface--profile-hero">
+                <div class="portal-avatar-card">
+                    <div class="portal-avatar">
+                        <img th:if="${studentPhoto != null and !#strings.isEmpty(studentPhoto)}" th:src="${studentPhoto}" alt="Student photo">
+                        <span th:if="${studentPhoto == null or #strings.isEmpty(studentPhoto)}" th:text="${studentInitials}">ST</span>
+                    </div>
+                    <div class="portal-avatar-copy" style="flex:1">
+                        <h2 th:text="${studentName}">Student Name</h2>
+                        <p>
+                            <span th:text="${studentCourse}">Course</span>
+                            <span> | </span>
+                            <span th:text="${studentBatchLabel}">Batch</span>
+                            <span> | </span>
+                            <span th:text="${studentSemesterLabel}">Semester</span>
+                            <span> | </span>
+                            <span th:text="${studentSectionLabel}">Section</span>
+                        </p>
+                        <div class="portal-chip-row">
+                            <span class="portal-chip"><i class="fa-solid fa-id-card"></i><strong th:text="${studentId}">Student ID</strong></span>
+                            <span class="portal-chip"><i class="fa-solid fa-hashtag"></i><span th:text="${studentRollNo}">Roll</span></span>
+                            <span class="portal-chip"><i class="fa-solid fa-circle-check"></i><span th:text="${studentStatus}">Active</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portal-actions-row" style="margin-top:18px">
+                    <a class="portal-muted-link" th:href="@{/fees}"><i class="fa-solid fa-indian-rupee-sign"></i> Fee record</a>
+                    <a class="portal-muted-link" th:href="@{/notifications}"><i class="fa-solid fa-bell"></i> Notifications</a>
+                </div>
+            </section>
+
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Course</p>
+                    <h2 class="portal-summary-value" th:text="${studentCourse}">Course</h2>
+                    <div class="portal-summary-meta">Admin enrolled program</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Batch</p>
+                    <h2 class="portal-summary-value" th:text="${studentBatchLabel}">Batch</h2>
+                    <div class="portal-summary-meta">Admin batch mapping</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Semester</p>
+                    <h2 class="portal-summary-value" th:text="${studentSemesterLabel}">Semester</h2>
+                    <div class="portal-summary-meta" th:text="${studentSectionLabel}">Section</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Academic Year</p>
+                    <h2 class="portal-summary-value" th:text="${studentAcademicYear}">Academic Year</h2>
+                    <div class="portal-summary-meta">Current academic session</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Status</p>
+                    <h2 class="portal-summary-value" th:text="${studentStatus}">Active</h2>
+                    <div class="portal-summary-meta">Student account state</div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid">
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Academic Information</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Student ID</p>
+                            <p class="portal-meta-value" th:text="${studentId}">Student ID</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Roll Number</p>
+                            <p class="portal-meta-value" th:text="${studentRollNo}">Roll</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Course</p>
+                            <p class="portal-meta-value" th:text="${studentCourse}">Course</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Batch</p>
+                            <p class="portal-meta-value" th:text="${studentBatchLabel}">Batch</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Degree</p>
+                            <p class="portal-meta-value" th:text="${student.degree != null and !#strings.isEmpty(student.degree) ? student.degree : 'Not provided'}">Degree</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Semester</p>
+                            <p class="portal-meta-value" th:text="${studentSemesterLabel}">Semester</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Section</p>
+                            <p class="portal-meta-value" th:text="${studentSectionLabel}">Section</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Academic Year</p>
+                            <p class="portal-meta-value" th:text="${studentAcademicYear}">Academic Year</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Medium</p>
+                            <p class="portal-meta-value" th:text="${student.medium != null and !#strings.isEmpty(student.medium) ? student.medium : 'Not provided'}">Medium</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Academic Mapping</p>
+                            <p class="portal-meta-value" th:text="${studentClassLabel}">Academic Mapping</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Room</p>
+                            <p class="portal-meta-value" th:text="${student.classRoom != null and student.classRoom.room != null and !#strings.isEmpty(student.classRoom.room) ? student.classRoom.room : 'Not assigned'}">Room</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Enrollment No</p>
+                            <p class="portal-meta-value" th:text="${studentEnrollmentNo}">Enrollment</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Application No</p>
+                            <p class="portal-meta-value" th:text="${studentRegistrationNo}">Application No</p>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Personal Information</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Date of Birth</p>
+                            <p class="portal-meta-value" th:text="${studentDob}">DOB</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Gender</p>
+                            <p class="portal-meta-value" th:text="${studentGender}">Gender</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Blood Group</p>
+                            <p class="portal-meta-value" th:text="${studentBloodGroup}">Blood Group</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Religion</p>
+                            <p class="portal-meta-value" th:text="${studentReligion}">Religion</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Category</p>
+                            <p class="portal-meta-value" th:text="${studentCategory}">Category</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Admission Date</p>
+                            <p class="portal-meta-value" th:text="${studentAdmissionDate}">Admission date</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Aadhar</p>
+                            <p class="portal-meta-value" th:text="${studentAadharMasked}">Aadhar</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">ABC Number</p>
+                            <p class="portal-meta-value" th:text="${studentAbcNumber}">ABC</p>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid">
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Guardian Information</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Father's Name</p>
+                            <p class="portal-meta-value" th:text="${studentFatherName}">Father</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Mother's Name</p>
+                            <p class="portal-meta-value" th:text="${studentMotherName}">Mother</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Guardian Name</p>
+                            <p class="portal-meta-value" th:text="${studentGuardianName}">Guardian</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Registered Mobile</p>
+                            <p class="portal-meta-value" th:text="${studentMobile}">Mobile</p>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Account and Banking</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Email</p>
+                            <p class="portal-meta-value" th:text="${studentEmail}">Email</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Bank Name</p>
+                            <p class="portal-meta-value" th:text="${studentBankName}">Bank</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Account Number</p>
+                            <p class="portal-meta-value" th:text="${studentBankAccMasked}">Account</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">IFSC Code</p>
+                            <p class="portal-meta-value" th:text="${studentIfscCode}">IFSC</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">PRN Number</p>
+                            <p class="portal-meta-value" th:text="${studentPrnNumber}">PRN</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Status</p>
+                            <p class="portal-meta-value" th:text="${studentStatus}">Active</p>
+                        </div>
+                    </div>
+
+                    <div class="portal-note">
+                        Profile editing is intentionally hidden here because no student profile update API is connected yet. This page now shows only data already stored in the backend by admin.
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

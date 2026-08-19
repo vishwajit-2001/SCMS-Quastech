@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Batches - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .page-grid { display:grid; grid-template-columns: 1fr 1.45fr; gap:22px; }
+        .filters { display:grid; grid-template-columns: 1.2fr repeat(3,minmax(0,1fr)) auto; gap:12px; margin-bottom:18px; }
+        .stat-grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:18px; padding:28px 36px 0; }
+        .mini-stat { background: var(--white); border:1px solid var(--light); border-radius:18px; padding:22px; }
+        .mini-stat.dark { background: var(--black); border-color: var(--gold-br); color: var(--white); }
+        .mini-num { font-family: var(--serif); font-size: 30px; font-weight:700; line-height:1; margin-top:6px; }
+        .mini-label { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#a09080; font-weight:700; }
+        .mini-stat.dark .mini-label { color: rgba(255,255,255,0.35); }
+        .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+        .modal-shell{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(13,12,10,.58);backdrop-filter:blur(8px);z-index:700}
+        .modal-shell.open{display:flex}
+        .modal-card{width:min(720px,100%);max-height:88vh;overflow:auto;background:var(--white);border:1px solid var(--gold-br);border-radius:24px;box-shadow:0 28px 70px rgba(13,12,10,.32)}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px 22px;background:linear-gradient(135deg,var(--black),#191512);border-bottom:1px solid var(--gold-br)}
+        .modal-head h3{color:var(--white);font:700 26px var(--serif)}
+        .modal-head p{color:rgba(255,255,255,.58);margin-top:4px;font-size:13px}
+        .modal-close{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+        .modal-body{padding:22px}
+        .modal-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:18px}
+        .danger-note{padding:12px 14px;border-radius:14px;background:rgba(232,64,64,.08);border:1px solid rgba(232,64,64,.18);color:#b91c1c;font-size:13px;line-height:1.5}
+        @media (max-width:1100px) { .page-grid { grid-template-columns: 1fr; } .stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .filters { grid-template-columns: 1fr 1fr; } }
+        @media (max-width:700px) { .stat-grid { grid-template-columns: 1fr; } .filters { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('batches')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Batches</div>
+        <div class="header-right">
+            <a href="/admin-courses" class="btn-dark"><i class="fa fa-book"></i> Courses</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="stat-grid">
+        <div class="mini-stat">
+            <div class="mini-label">Total Batches</div>
+            <div class="mini-num" th:text="${#lists.size(batches)}">0</div>
+        </div>
+        <div class="mini-stat dark">
+            <div class="mini-label">Courses Linked</div>
+            <div class="mini-num" th:text="${#lists.size(courses)}">0</div>
+        </div>
+        <div class="mini-stat">
+            <div class="mini-label">Created</div>
+            <div class="mini-num" style="font-size:20px">Ready</div>
+        </div>
+        <div class="mini-stat dark">
+            <div class="mini-label">Status</div>
+            <div class="mini-num" style="font-size:20px">Active</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="alert alert-success" th:if="${param.success}" th:text="${param.success}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+        <div class="alert" th:if="${param.warning}" style="background:#fff7db;color:#8a6500;border:1px solid #f1df96" th:text="${param.warning}"></div>
+
+        <div class="page-grid">
+            <div class="box">
+                <div class="box-title"><i class="fa fa-layer-group" style="color:var(--gold)"></i> Create Batch</div>
+                <form action="/admin-batches" method="post">
+                    <div class="form-group">
+                        <label class="form-label">Course *</label>
+                        <select class="form-select" name="courseId" id="batchCourseId" required>
+                            <option value="">Select course</option>
+                            <option th:each="course : ${courses}" th:value="${course.id}" th:attr="data-duration=${course.durationYears}" th:text="${course.code + ' - ' + course.name}">Course</option>
+                        </select>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Start Year *</label>
+                            <input class="form-input" type="number" name="startYear" id="batchStartYearInput" min="2020" max="2100" placeholder="2025" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Year *</label>
+                            <input class="form-input" type="number" name="endYear" id="batchEndYearInput" min="2020" max="2100" placeholder="2027" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Display Name</label>
+                        <input class="form-input" name="displayName" placeholder="e.g. Computer Applications 2025-2027">
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:18px">
+                        <button class="btn-gold" type="submit"><i class="fa fa-save"></i> Save Batch</button>
+                        <a class="btn-outline" href="/admin-academic-structure"><i class="fa fa-sitemap"></i> Structure</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="box">
+                <div class="box-title"><i class="fa fa-list" style="color:var(--gold)"></i> Batch Registry</div>
+                <div class="filters">
+                    <input class="form-input" id="batchSearch" type="search" placeholder="Search batch or course">
+                    <select class="form-select" id="batchCourseFilter">
+                        <option value="">All Courses</option>
+                        <option th:each="course : ${courses}" th:value="${course.code}" th:text="${course.code}">Course</option>
+                    </select>
+                    <select class="form-select" id="batchStartFilter">
+                        <option value="">All Start Years</option>
+                        <option th:each="batch : ${batches}" th:if="${batch.startYear != null}" th:value="${batch.startYear}" th:text="${batch.startYear}">2025</option>
+                    </select>
+                    <select class="form-select" id="batchEndFilter">
+                        <option value="">All End Years</option>
+                        <option th:each="batch : ${batches}" th:if="${batch.endYear != null}" th:value="${batch.endYear}" th:text="${batch.endYear}">2027</option>
+                    </select>
+                    <button class="btn-outline" type="button" onclick="resetBatchFilters()"><i class="fa fa-rotate-right"></i> Reset</button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table id="batchTable">
+                        <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Batch</th>
+                            <th>Batch Year</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="batch : ${batches}"
+                            th:attr="data-id=${batch.id},
+                                     data-course-id=${batch.course.id},
+                                     data-course=${batch.course.code},
+                                     data-name=${batch.displayName},
+                                     data-start=${batch.startYear ?: ''},
+                                     data-end=${batch.endYear ?: ''}">
+                            <td th:text="${batch.course.code}">Course</td>
+                            <td th:text="${batch.displayName}">Course 2025-2027</td>
+                            <td th:text="${batch.startYear != null and batch.endYear != null ? batch.startYear + '-' + batch.endYear : '-'}">2025-2027</td>
+                            <td th:text="${batch.startYear != null ? batch.startYear : '-'}">2025</td>
+                            <td th:text="${batch.endYear != null ? batch.endYear : '-'}">2027</td>
+                            <td>
+                                <div class="row-actions">
+                                    <a class="btn-dark" th:href="@{/admin-batches/{id}(id=${batch.id})}"><i class="fa fa-eye"></i> Open</a>
+                                    <button class="btn-outline" type="button" onclick="openBatchEditModal(this)"><i class="fa fa-pen-to-square"></i> Edit</button>
+                                    <button class="btn-red" type="button" onclick="openBatchDeleteModal(this)"><i class="fa fa-trash"></i> Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${batches == null or #lists.isEmpty(batches)}">
+                            <td colspan="6" style="text-align:center;color:#b0a898;padding:24px">No batches created yet.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="batchEditModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3>Edit Batch</h3><p>Saving refreshes academic structure and subject mappings.</p></div>
+            <button type="button" class="modal-close" onclick="closeModal('batchEditModal')"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form method="post" id="batchEditForm">
+                <div class="form-group">
+                    <label class="form-label">Course *</label>
+                    <select class="form-select" name="courseId" id="editBatchCourseId" required>
+                        <option th:each="course : ${courses}" th:value="${course.id}" th:attr="data-duration=${course.durationYears}" th:text="${course.code + ' - ' + course.name}">Course</option>
+                    </select>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group"><label class="form-label">Start Year *</label><input class="form-input" type="number" id="editBatchStart" name="startYear" min="2020" max="2100" required></div>
+                    <div class="form-group"><label class="form-label">End Year *</label><input class="form-input" type="number" id="editBatchEnd" name="endYear" min="2020" max="2100" required></div>
+                </div>
+                <div class="form-group"><label class="form-label">Display Name</label><input class="form-input" id="editBatchName" name="displayName"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" onclick="closeModal('batchEditModal')">Cancel</button>
+                    <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="batchDeleteModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3>Delete Batch?</h3><p>Linked subject and academic structure rows will be refreshed.</p></div>
+            <button type="button" class="modal-close" onclick="closeModal('batchDeleteModal')"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="danger-note" id="batchDeleteText">Delete this batch?</div>
+            <form method="post" id="batchDeleteForm">
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" onclick="closeModal('batchDeleteModal')">Cancel</button>
+                    <button type="submit" class="btn-red"><i class="fa fa-trash"></i> Delete Batch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const batchSearchEl = document.getElementById('batchSearch');
+    const batchCourseFilterEl = document.getElementById('batchCourseFilter');
+    const batchStartFilterEl = document.getElementById('batchStartFilter');
+    const batchEndFilterEl = document.getElementById('batchEndFilter');
+    const batchRows = Array.from(document.querySelectorAll('#batchTable tbody tr')).filter(row => row.dataset);
+    const batchCourseIdInput = document.getElementById('batchCourseId');
+    const batchStartYearInput = document.getElementById('batchStartYearInput');
+    const batchEndYearInput = document.getElementById('batchEndYearInput');
+    let lastAutoBatchEndYear = '';
+    let batchEndYearOverridden = false;
+
+    function applyBatchFilters() {
+        const search = batchSearchEl.value.trim().toLowerCase();
+        const course = batchCourseFilterEl.value;
+        const start = batchStartFilterEl.value;
+        const end = batchEndFilterEl.value;
+        batchRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const visible = (!search || text.includes(search))
+                && (!course || row.dataset.course === course)
+                && (!start || row.dataset.start === start)
+                && (!end || row.dataset.end === end);
+            row.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function resetBatchFilters() {
+        batchSearchEl.value = '';
+        batchCourseFilterEl.value = '';
+        batchStartFilterEl.value = '';
+        batchEndFilterEl.value = '';
+        applyBatchFilters();
+    }
+
+    [batchSearchEl, batchCourseFilterEl, batchStartFilterEl, batchEndFilterEl].forEach(el => {
+        el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', applyBatchFilters);
+    });
+
+    function selectedBatchCourseDuration() {
+        const duration = Number(batchCourseIdInput?.selectedOptions?.[0]?.dataset?.duration || 0);
+        return Number.isFinite(duration) && duration > 0 ? duration : 2;
+    }
+
+    function syncBatchEndYear() {
+        if (!batchStartYearInput || !batchEndYearInput) return;
+        const startYear = Number(batchStartYearInput.value);
+        if (!Number.isFinite(startYear) || startYear <= 0) {
+            if (!batchEndYearOverridden || batchEndYearInput.value === lastAutoBatchEndYear) {
+                batchEndYearInput.value = '';
+            }
+            lastAutoBatchEndYear = '';
+            batchEndYearOverridden = false;
+            return;
+        }
+
+        const nextEndYear = String(startYear + selectedBatchCourseDuration());
+        const currentValue = batchEndYearInput.value.trim();
+        if (!currentValue || !batchEndYearOverridden || currentValue === lastAutoBatchEndYear) {
+            batchEndYearInput.value = nextEndYear;
+            batchEndYearOverridden = false;
+        }
+        lastAutoBatchEndYear = nextEndYear;
+    }
+
+    batchCourseIdInput?.addEventListener('change', syncBatchEndYear);
+    batchStartYearInput?.addEventListener('input', syncBatchEndYear);
+    batchEndYearInput?.addEventListener('input', () => {
+        batchEndYearOverridden = batchEndYearInput.value.trim() !== '' && batchEndYearInput.value.trim() !== lastAutoBatchEndYear;
+    });
+
+    function closeModal(id) {
+        document.getElementById(id)?.classList.remove('open');
+    }
+
+    function openBatchEditModal(button) {
+        const row = button.closest('tr');
+        document.getElementById('batchEditForm').action = `/admin-batches/${row.dataset.id}/update`;
+        document.getElementById('editBatchCourseId').value = row.dataset.courseId || '';
+        document.getElementById('editBatchStart').value = row.dataset.start || '';
+        document.getElementById('editBatchEnd').value = row.dataset.end || '';
+        document.getElementById('editBatchName').value = row.dataset.name || '';
+        document.getElementById('batchEditModal').classList.add('open');
+    }
+
+    function openBatchDeleteModal(button) {
+        const row = button.closest('tr');
+        document.getElementById('batchDeleteText').textContent = `Delete ${row.dataset.name}? Related batch subjects, student batch links, fee batch links and academic structure mappings will be refreshed safely.`;
+        document.getElementById('batchDeleteForm').action = `/admin-batches/${row.dataset.id}/delete`;
+        document.getElementById('batchDeleteModal').classList.add('open');
+    }
+
+    document.querySelectorAll('.modal-shell').forEach(modal => {
+        modal.addEventListener('click', event => {
+            if (event.target === modal) closeModal(modal.id);
+        });
+    });
+</script>
+</body>
+</html>
+

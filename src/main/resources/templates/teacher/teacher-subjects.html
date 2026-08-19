@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjects - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='subjects')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Subjects', subtitle='This list is built from your assigned semester subjects and timetable rows so the registry, batch access, and schedule stay aligned.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-book-open"></i> Academic Component</span>
+                    <h2 class="portal-hero-title">Teacher Subjects</h2>
+                    <p class="portal-hero-subtitle">These are the subjects mapped to your assigned academic scope and semester.</p>
+                    <div class="portal-chip-row">
+                        <span class="portal-chip"><i class="fa-solid fa-layer-group"></i><strong th:text="${teacherClassLabel}">Academic Scope</strong></span>
+                        <span class="portal-chip"><i class="fa-solid fa-book"></i><strong th:text="${teacherAssignedSubjectCount}">0</strong><span> subject(s)</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-panel">
+                <div class="teacher-panel-head">
+                    <div>
+                        <h2 class="teacher-panel-title">Mapped Subjects</h2>
+                        <p class="teacher-panel-subtitle">Each card below reflects timetable entries grouped by subject name.</p>
+                    </div>
+                </div>
+
+                <div class="teacher-grid-two">
+                    <article class="teacher-panel" th:if="${!#lists.isEmpty(teacherAssignedSubjectObjects)}" th:each="subject : ${teacherAssignedSubjectObjects}">
+                        <div class="teacher-panel-head">
+                            <div>
+                                <h2 class="teacher-panel-title" th:text="${subject.name}">Subject</h2>
+                                <p class="teacher-panel-subtitle" th:text="${subject.code + ' · Sem ' + subject.semester}">Academic label</p>
+                            </div>
+                            <span class="teacher-status-chip teacher-status-chip--info" th:text="${subject.credits != null ? subject.credits + ' credits' : 'Credits pending'}">Credits</span>
+                        </div>
+                        <div class="teacher-inline-tags">
+                            <span class="teacher-pill"><i class="fa-solid fa-layer-group"></i><span th:text="${teacherAssignedBatchLabel}">Batch</span></span>
+                            <span class="teacher-pill"><i class="fa-solid fa-arrows-split-up-and-left"></i><span th:text="${'Sem ' + subject.semester}">Semester</span></span>
+                            <span class="teacher-pill"><i class="fa-solid fa-book"></i><span th:text="${subject.courseCategory != null ? subject.courseCategory : 'Core'}">Category</span></span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="teacher-empty" th:if="${#lists.isEmpty(teacherAssignedSubjectObjects)}">
+                    No subjects found yet in the Subject Registry for this teacher assignment.
+                </div>
+            </section>
+
+            <section class="teacher-panel">
+                <div class="teacher-panel-head">
+                    <div>
+                        <h2 class="teacher-panel-title">How It Stays Linked</h2>
+                        <p class="teacher-panel-subtitle">Use the same subject names in timetable rows, attendance, marks, and assignment forms.</p>
+                    </div>
+                </div>
+                <div class="teacher-list">
+                    <div class="teacher-list-item">
+                        <div class="teacher-list-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="teacher-list-copy">
+                            <h3 class="teacher-list-title">Timetable is the schedule</h3>
+                            <p class="teacher-list-text">Every lecture row in the timetable contributes to this subject list.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-list-item">
+                        <div class="teacher-list-icon"><i class="fa-solid fa-book"></i></div>
+                        <div class="teacher-list-copy">
+                            <h3 class="teacher-list-title">Subject section is the reference</h3>
+                            <p class="teacher-list-text">Use the subject names here when creating assignments or entering marks.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-list-item">
+                        <div class="teacher-list-icon"><i class="fa-solid fa-link"></i></div>
+                        <div class="teacher-list-copy">
+                            <h3 class="teacher-list-title">Student view stays separate</h3>
+                        <p class="teacher-list-text">Student subjects are loaded from the central Subject Registry, not from teacher timetable pages.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

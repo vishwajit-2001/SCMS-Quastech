@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Timetable - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='timetable')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Timetable')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Subjects Assigned</p>
+                    <h2 class="portal-summary-value" th:text="${subjectCount}">0</h2>
+                    <div class="portal-summary-meta">Current semester subject count</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Weekly Slots</p>
+                    <h2 class="portal-summary-value" th:text="${weeklyClassCount}">0</h2>
+                    <div class="portal-summary-meta">All scheduled periods</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Today's Slots</p>
+                    <h2 class="portal-summary-value" th:text="${todayScheduleCount}">0</h2>
+                    <div class="portal-summary-meta" th:text="${todayLabel}">Today</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Academic Scope</p>
+                    <h2 class="portal-summary-value" th:text="${studentClassLabel}">Academic Scope</h2>
+                    <div class="portal-summary-meta">Batch, year, semester, and section scope</div>
+                </article>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Weekly Semester Schedule</h2>
+                    <div class="portal-surface-head-actions">
+                        <span class="portal-badge portal-badge--neutral">Monday to Saturday</span>
+                        <span class="portal-badge portal-badge--warning">Lunch break 1:00 PM - 2:00 PM</span>
+                    </div>
+                </div>
+
+                <div class="portal-schedule-board" th:if="${!#lists.isEmpty(weeklyTimetableRows)}">
+                    <table class="portal-schedule-table">
+                        <thead>
+                        <tr>
+                            <th class="portal-schedule-time-head">Time</th>
+                            <th th:each="day : ${workingDayNames}"
+                                class="portal-schedule-head"
+                                th:classappend="${day == todayLabel} ? ' portal-schedule-head--today' : ''"
+                                th:text="${#strings.toUpperCase(#strings.substring(day, 0, 3))}">MON</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="row : ${weeklyTimetableRows}">
+                            <td class="portal-schedule-time" th:text="${row.timeLabel}">09:00 AM - 10:00 AM</td>
+                            <td th:if="${row.breakRow}"
+                                class="portal-schedule-break-wrap"
+                                th:attr="colspan=${workingDayNames.size()}">
+                                <div class="portal-schedule-break-line">
+                                    <span class="portal-schedule-break-line__label">
+                                        <i class="fa-solid fa-utensils"></i>
+                                        Lunch Break
+                                    </span>
+                                </div>
+                            </td>
+                            <th:block th:if="${!row.breakRow}">
+                                <td th:each="day : ${workingDayNames}"
+                                    class="portal-schedule-slot-wrap"
+                                    th:classappend="${day == todayLabel} ? ' portal-schedule-slot-wrap--today' : ''"
+                                    th:with="slot=${row.getSlotForDay(day)}">
+                                    <div th:if="${slot != null}"
+                                         class="portal-schedule-cell"
+                                         th:classappend="| portal-schedule-cell--${slot.subjectClass}|"
+                                         th:attr="data-day=${day},data-start=${slot.startTime},data-end=${slot.endTime},data-slot-type=${slot.isBreakSlot() ? 'break' : 'class'}">
+                                        <strong th:text="${slot.subject}">Subject</strong>
+                                        <span th:if="${!slot.isBreakSlot()}" th:text="${slot.teacher}">Teacher</span>
+                                        <span th:text="${slot.room}">Room</span>
+                                        <em class="portal-schedule-status" th:text="${slot.isBreakSlot() ? 'Lunch Break' : 'Scheduled'}">Scheduled</em>
+                                    </div>
+                                    <div th:if="${slot == null}" class="portal-schedule-cell portal-schedule-cell--empty">
+                                        <span>--</span>
+                                    </div>
+                                </td>
+                            </th:block>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(weeklyTimetableRows)}">
+                    <i class="fa-regular fa-calendar-xmark"></i>
+                    <h3>Timetable not published yet by admin.</h3>
+                    <p>Timetable not published yet by admin.</p>
+                </div>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Date-wise Timetable</h2>
+                    <span class="portal-badge portal-badge--neutral" th:text="${todayFullDate}">Saturday, 11 Apr 2026</span>
+                </div>
+
+                <div class="portal-live-alert" th:if="${todayCurrentSlot != null}">
+                    <div class="portal-live-alert__icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="portal-live-alert__copy">
+                        <span class="portal-live-alert__eyebrow">Live section in progress</span>
+                        <h3 th:text="${todayCurrentSlot.subject}">Current subject</h3>
+                        <p th:text="${todayCurrentSlot.startTime} + ' - ' + ${todayCurrentSlot.endTime} + ' | ' + ${todayCurrentSlot.teacher} + ' | ' + ${todayCurrentSlot.room}">Current section detail</p>
+                    </div>
+                    <span class="portal-live-alert__badge">LIVE NOW</span>
+                </div>
+
+                <div class="portal-timetable-status-row" th:if="${!#lists.isEmpty(todaySchedule)}">
+                    <span class="portal-status-pill"><i class="fa-solid fa-check"></i><span th:text="${todayCompletedCount} + ' completed'">0 completed</span></span>
+                    <span class="portal-status-pill portal-status-pill--accent"><i class="fa-solid fa-bolt"></i><span th:text="${todayCurrentSlot != null ? 'Current section live' : 'No live section right now'}">No live section right now</span></span>
+                    <span class="portal-status-pill"><i class="fa-regular fa-clock"></i><span th:text="${todayUpcomingCount} + ' upcoming'">0 upcoming</span></span>
+                    <span class="portal-live-clock"><i class="fa-regular fa-clock"></i><span class="js-live-clock">--:--</span></span>
+                </div>
+
+                <div class="portal-list portal-list--timetable" th:if="${!#lists.isEmpty(todaySchedule)}">
+                        <article class="portal-list-item portal-list-item--slot"
+                                 th:each="slot : ${todaySchedule}"
+                                 th:attr="data-start=${slot.startTime},data-end=${slot.endTime}">
+                            <div class="portal-list-icon portal-list-icon--slot" th:classappend="| portal-list-icon--${slot.subjectClass}|">
+                                <i class="fa-regular fa-clock"></i>
+                            </div>
+                            <div class="portal-slot-body">
+                                <div class="portal-slot-head">
+                                    <h3 class="portal-list-title" th:text="${slot.subject}">Subject</h3>
+                                    <span class="portal-slot-state">Upcoming</span>
+                                </div>
+                                <div class="portal-list-meta" th:text="${slot.teacher} + ' | ' + ${slot.room}">Teacher | Room</div>
+                                <div class="portal-slot-progress"><span class="portal-slot-progress-bar"></span></div>
+                            </div>
+                            <div class="portal-list-trail portal-list-trail--time">
+                                <strong th:text="${slot.startTime}">09:00 AM</strong>
+                                <span th:text="${slot.endTime}">10:00 AM</span>
+                            </div>
+                        </article>
+                    </div>
+
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(todaySchedule)}">
+                    <i class="fa-regular fa-calendar-xmark"></i>
+                    <h3>No timetable for this date</h3>
+                    <p th:text="'There are no classes scheduled on ' + ${todayFullDate} + '.'">There are no classes scheduled for this date.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage College - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">College workspace</div>
+                <div class="sa-title" th:text="${college.collegeName}">College</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" th:href="@{'/super-admin/colleges/' + ${college.collegeId}}"><i class="fa fa-eye"></i> View</a>
+                <a class="sa-btn primary" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/edit'}"><i class="fa fa-pen"></i> Edit</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Management hub</h2>
+                        <p>Operate only the college record and its linked admin account.</p>
+                    </div>
+                    <span class="sa-badge" th:classappend="' ' + ${college.statusTone}" th:text="${college.status}">Active</span>
+                </div>
+                <div class="sa-panel-body">
+                    <div class="sa-grid-2">
+                        <a class="sa-card" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/edit'}" style="text-decoration:none">
+                            <div class="sa-stat">
+                                <div>
+                                    <div class="sa-stat-label">Edit college</div>
+                                    <div class="sa-stat-sub">Update college identity and address</div>
+                                </div>
+                                <div class="sa-stat-icon primary"><i class="fa fa-pen"></i></div>
+                            </div>
+                        </a>
+                        <a class="sa-card" href="/super-admin/admins" style="text-decoration:none">
+                            <div class="sa-stat">
+                                <div>
+                                    <div class="sa-stat-label">College admins</div>
+                                    <div class="sa-stat-sub">Create and manage the linked admin</div>
+                                </div>
+                                <div class="sa-stat-icon info"><i class="fa fa-user-tie"></i></div>
+                            </div>
+                        </a>
+                        <a class="sa-card" href="/super-admin/notifications" style="text-decoration:none">
+                            <div class="sa-stat">
+                                <div>
+                                    <div class="sa-stat-label">Notifications</div>
+                                    <div class="sa-stat-sub">Platform-level alerts only</div>
+                                </div>
+                                <div class="sa-stat-icon success"><i class="fa fa-bell"></i></div>
+                            </div>
+                        </a>
+                        <a class="sa-card" href="/super-admin/reports" style="text-decoration:none">
+                            <div class="sa-stat">
+                                <div>
+                                    <div class="sa-stat-label">Reports</div>
+                                    <div class="sa-stat-sub">College registry reporting</div>
+                                </div>
+                                <div class="sa-stat-icon warning"><i class="fa fa-chart-line"></i></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>College admin summary</h2>
+                        <p>Only the linked admin account is managed here.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div class="sa-notice">
+                        <i class="fa fa-user-tie"></i>
+                        <div>
+                            <div style="font-weight:800" th:text="${college.adminName}">Admin</div>
+                            <div style="margin-top:4px" th:text="${college.adminEmail}">admin@example.com</div>
+                            <div style="margin-top:4px;color:var(--sa-muted)" th:text="${college.latestSummary}">summary</div>
+                        </div>
+                    </div>
+                    <div th:if="${college.adminId != null}" style="margin-top:12px">
+                        <form th:action="@{'/super-admin/admins/' + ${college.adminId} + '/delete'}" method="post" onsubmit="return confirm('Delete this college admin?');">
+                            <button class="sa-btn danger" type="submit"><i class="fa fa-trash"></i> Delete linked admin</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

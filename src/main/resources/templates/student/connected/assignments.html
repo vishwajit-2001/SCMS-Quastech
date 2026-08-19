@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Assignments - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .portal-callout{margin:0 0 18px;padding:14px 16px;border-radius:18px;font:600 14px Jost,sans-serif}
+        .portal-callout--success{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+        .portal-callout--warning{background:#fff7ed;color:#b45309;border:1px solid #fdba74}
+        .portal-action-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#fff7ed;border:1px solid #f6d6a4;color:#9a6b16;font:600 13px Jost,sans-serif}
+        .portal-primary-btn{border:0;border-radius:14px;padding:12px 16px;background:linear-gradient(135deg,#d8a53a,#f3d37c);color:#2f2412;font:700 14px Jost,sans-serif;cursor:pointer}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='assignments')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Assignments')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Assignments Published</p>
+                    <h2 class="portal-summary-value" th:text="${assignmentCount}">0</h2>
+                    <div class="portal-summary-meta">Visible for your class</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Subjects Assigned</p>
+                    <h2 class="portal-summary-value" th:text="${subjectCount}">0</h2>
+                    <div class="portal-summary-meta">Potential assignment subjects</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Open Now</p>
+                    <h2 class="portal-summary-value" th:text="${assignmentOpenCount}">0</h2>
+                    <div class="portal-summary-meta">Accepting uploads</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Submitted</p>
+                    <h2 class="portal-summary-value" th:text="${assignmentSubmittedCount}">0</h2>
+                    <div class="portal-summary-meta">Your uploaded responses</div>
+                </article>
+            </section>
+
+            <div th:if="${assignmentSuccess}" class="portal-callout portal-callout--success" th:text="${assignmentSuccess}">Success</div>
+            <div th:if="${assignmentError}" class="portal-callout portal-callout--warning" th:text="${assignmentError}">Error</div>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Live Assignment Feed</h2>
+                </div>
+
+                <div class="portal-empty-state" th:if="${!assignmentsAvailable}">
+                    <i class="fa-solid fa-pen-ruler"></i>
+                    <h3>No assignment data available yet</h3>
+                    <p>This page will fill up when teachers begin sharing assignments for your assigned subjects.</p>
+                </div>
+
+                <div class="portal-list" th:if="${assignmentsAvailable}">
+                    <article class="portal-list-item" th:each="assignment : ${studentAssignments}" style="align-items:flex-start;flex-direction:column;gap:16px">
+                        <div style="width:100%;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+                            <div style="display:flex;gap:14px">
+                                <div class="portal-list-icon"><i class="fa-solid fa-book-open"></i></div>
+                                <div>
+                                    <h3 class="portal-list-title" th:text="${assignment.title}">Assignment</h3>
+                                    <div class="portal-list-meta">
+                                        <span th:text="${assignment.subject}">Subject</span>
+                                        <span> | </span>
+                                        <span th:text="${assignment.dueDateLabel}">Due Date</span>
+                                        <span> | </span>
+                                        <span th:text="${assignment.maxMarks != null ? assignment.maxMarks + ' marks' : 'Marks not set'}">20 marks</span>
+                                    </div>
+                                    <p style="margin-top:8px;color:#6b7280;font-size:14px" th:text="${assignment.description}">Description</p>
+                                </div>
+                            </div>
+                            <div class="portal-list-trail" th:text="${studentAssignmentSubmissions.get(assignment.id) != null ? 'Submitted' : assignment.statusLabel}">Open</div>
+                        </div>
+
+                        <div style="width:100%;display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap">
+                            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                                <a th:if="${assignment.hasAttachment()}" th:href="@{/assignments/file/{id}(id=${assignment.id})}" class="portal-action-chip" style="text-decoration:none">
+                                    <i class="fa-solid fa-download"></i><span th:text="${assignment.originalFileName}">Download brief</span>
+                                </a>
+                                <span th:if="${!assignment.hasAttachment()}" class="portal-action-chip">
+                                    <i class="fa-solid fa-file-circle-xmark"></i><span>No attachment</span>
+                                </span>
+                                <a th:if="${studentAssignmentSubmissions.get(assignment.id) != null}" th:href="@{/assignments/submission/{id}/download(id=${studentAssignmentSubmissions.get(assignment.id).id})}" class="portal-action-chip" style="text-decoration:none">
+                                    <i class="fa-solid fa-file-arrow-down"></i><span>Your upload</span>
+                                </a>
+                            </div>
+
+                            <form th:if="${assignment.dueDate == null or !assignment.dueDate.isBefore(T(java.time.LocalDate).now())}" th:action="@{/assignments/{id}/submit(id=${assignment.id})}" method="post" enctype="multipart/form-data" style="display:grid;gap:10px;min-width:min(100%,360px)">
+                                <input type="file" name="submissionFile" required accept=".pdf,.doc,.docx,.txt,.zip,.png,.jpg,.jpeg,.ppt,.pptx,.xls,.xlsx">
+                                <textarea name="notes" placeholder="Optional notes for your teacher" style="min-height:84px"></textarea>
+                                <button type="submit" class="portal-primary-btn"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Submission</button>
+                            </form>
+                            <div th:if="${assignment.dueDate != null and assignment.dueDate.isBefore(T(java.time.LocalDate).now())}" class="portal-action-chip">
+                                <i class="fa-solid fa-clock"></i><span>Submission closed</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="portal-surface" th:if="${!#lists.isEmpty(subjectSummaries)}">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Subjects That Can Receive Assignments</h2>
+                </div>
+
+                <div class="portal-list">
+                    <div class="portal-list-item" th:each="subject : ${subjectSummaries}">
+                        <div class="portal-list-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div>
+                            <h3 class="portal-list-title" th:text="${subject.subjectName}">Subject</h3>
+                            <div class="portal-list-meta" th:text="${subject.teacherName + ' | ' + subject.daySummary}">Teacher | Days</div>
+                        </div>
+                        <div class="portal-list-trail">Ready</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

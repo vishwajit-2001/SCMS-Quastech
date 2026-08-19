@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subjects - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .layout { display:grid; grid-template-columns: 1fr 1.55fr; gap:22px; }
+        .form-grid { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:16px; }
+        .full { grid-column: 1 / -1; }
+        .filters { display:grid; grid-template-columns: 1.2fr repeat(4,minmax(0,1fr)) auto; gap:12px; margin-bottom:18px; }
+        .stat-grid { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:18px; padding:28px 36px 0; }
+        .mini-stat { background: var(--white); border:1px solid var(--light); border-radius:18px; padding:22px; }
+        .mini-stat.dark { background: var(--black); border-color: var(--gold-br); color: var(--white); }
+        .mini-num { font-family: var(--serif); font-size: 30px; font-weight:700; line-height:1; margin-top:6px; }
+        .mini-label { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#a09080; font-weight:700; }
+        .mini-stat.dark .mini-label { color: rgba(255,255,255,0.35); }
+        .muted { font-size:12px; color:#8b7f72; }
+        @media (max-width:1100px) { .layout { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } .stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .filters { grid-template-columns: 1fr 1fr; } }
+        @media (max-width:700px) { .stat-grid { grid-template-columns: 1fr; } .filters { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('subjects')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Subjects</div>
+        <div class="header-right">
+            <a href="/admin-academic-structure" class="btn-dark"><i class="fa fa-sitemap"></i> Structure</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="stat-grid">
+        <div class="mini-stat">
+            <div class="mini-label">Subjects</div>
+            <div class="mini-num" th:text="${#lists.size(subjects)}">0</div>
+        </div>
+        <div class="mini-stat dark">
+            <div class="mini-label">Courses</div>
+            <div class="mini-num" th:text="${#lists.size(courses)}">0</div>
+        </div>
+        <div class="mini-stat">
+            <div class="mini-label">Batches</div>
+            <div class="mini-num" th:text="${#lists.size(batches)}">0</div>
+        </div>
+        <div class="mini-stat dark">
+            <div class="mini-label">Mode</div>
+            <div class="mini-num" style="font-size:20px" th:text="${editingSubject != null ? 'Edit' : 'Create'}">Create</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="alert alert-success" th:if="${param.success}" th:text="${param.success}"></div>
+        <div class="alert alert-error" th:if="${param.error}" th:text="${param.error}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="layout">
+            <div class="box">
+                <div class="box-title"><i class="fa fa-book-open" style="color:var(--gold)"></i> Subject Master</div>
+                <form action="/admin-subjects" method="post">
+                    <input type="hidden" name="id" th:value="${editingSubject != null ? editingSubject.id : ''}">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Course *</label>
+                            <select class="form-select" name="courseId" id="subjectCourseId" required>
+                                <option value="">Select course</option>
+                                <option th:each="course : ${courses}"
+                                        th:value="${course.id}"
+                                        th:selected="${editingSubject != null && editingSubject.courseRef != null && editingSubject.courseRef.id == course.id}"
+                                        th:text="${course.code + ' - ' + course.name}">Course</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Batch *</label>
+                            <select class="form-select" name="batchId" id="subjectBatchId" required>
+                                <option value="">Select batch</option>
+                                <option th:each="batch : ${batches}"
+                                        th:value="${batch.id}"
+                                        th:attr="data-course-id=${batch.course.id}"
+                                        th:selected="${editingSubject != null && editingSubject.batchRef != null && editingSubject.batchRef.id == batch.id}"
+                                        th:text="${batch.displayName}">Course 2025-2027</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Semester *</label>
+                            <input class="form-input" type="number" min="1" name="semester" th:value="${editingSubject != null ? editingSubject.semester : ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject Code *</label>
+                            <input class="form-input" id="subjectCodeInput" name="code" th:value="${editingSubject != null ? editingSubject.code : ''}" placeholder="e.g. MCA101" required>
+                            <div class="muted" id="subjectCodeStatus">Choose course, batch, semester and code to check availability.</div>
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">Subject Name *</label>
+                            <input class="form-input" name="name" th:value="${editingSubject != null ? editingSubject.name : ''}" placeholder="e.g. Database Management" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Course Category</label>
+                            <input class="form-input" name="courseCategory" th:value="${editingSubject != null ? editingSubject.courseCategory : 'COMPULSORY (CORE)'}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Credits</label>
+                            <input class="form-input" type="number" min="0" step="0.01" name="credits" th:value="${editingSubject != null && editingSubject.credits != null ? editingSubject.credits : 4.0}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Term</label>
+                            <input class="form-input" name="term" th:value="${editingSubject != null ? editingSubject.term : ''}" placeholder="1 SEMESTER">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cycle</label>
+                            <input class="form-input" name="cycle" th:value="${editingSubject != null ? editingSubject.cycle : ''}" placeholder="2025-26">
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap">
+                        <button class="btn-gold" type="submit">
+                            <i class="fa fa-save"></i>
+                            <span th:text="${editingSubject != null ? 'Update Subject' : 'Add Subject'}">Add Subject</span>
+                        </button>
+                        <a class="btn-outline" href="/admin-subjects"><i class="fa fa-rotate-right"></i> Reset</a>
+                    </div>
+                    <div class="muted" style="margin-top:12px">Subject code must be unique within the same course, batch and semester. You can reuse the same code in a different batch or semester.</div>
+                </form>
+            </div>
+
+            <div class="box">
+                <div class="box-title"><i class="fa fa-table" style="color:var(--gold)"></i> Subject Registry</div>
+                <div class="filters">
+                    <input class="form-input" id="subjectSearch" type="search" placeholder="Search name, code, course, batch">
+                    <select class="form-select" id="subjectCourseFilter">
+                        <option value="">All Courses</option>
+                        <option th:each="course : ${courses}" th:value="${course.code}" th:text="${course.code}">Course</option>
+                    </select>
+                    <select class="form-select" id="subjectBatchFilter">
+                        <option value="">All Batches</option>
+                        <option th:each="batch : ${batches}" th:value="${batch.displayName}" th:text="${batch.displayName}">Batch</option>
+                    </select>
+                    <select class="form-select" id="subjectSemesterFilter">
+                        <option value="">All Semesters</option>
+                        <option th:each="subject : ${subjects}" th:if="${subject.semester != null}" th:value="${subject.semester}" th:text="${'Sem ' + subject.semester}">Sem 1</option>
+                    </select>
+                    <select class="form-select" id="subjectCategoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="COMPULSORY (CORE)">COMPULSORY (CORE)</option>
+                        <option value="ELECTIVE">ELECTIVE</option>
+                        <option value="OPEN ELECTIVE">OPEN ELECTIVE</option>
+                    </select>
+                    <button class="btn-outline" type="button" onclick="resetSubjectFilters()"><i class="fa fa-rotate-right"></i> Reset</button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table id="subjectTable">
+                        <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Batch</th>
+                            <th>Sem</th>
+                            <th>Credits</th>
+                            <th>Category</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="subject : ${subjects}"
+                            th:attr="data-course=${subject.courseRef.code},data-batch=${subject.batchRef.displayName},data-semester=${subject.semester},data-category=${subject.courseCategory}">
+                            <td th:text="${subject.code}">MCA101</td>
+                            <td th:text="${subject.name}">Database Management</td>
+                            <td th:text="${subject.courseRef.code}">Course</td>
+                            <td th:text="${subject.batchRef.displayName}">Course 2025-2027</td>
+                            <td th:text="${'Sem ' + subject.semester}">Sem 1</td>
+                            <td th:text="${subject.credits != null ? subject.credits : '-'}">4</td>
+                            <td th:text="${subject.courseCategory != null ? subject.courseCategory : '-'}">COMPULSORY (CORE)</td>
+                            <td>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                    <a class="btn-dark" th:href="@{/admin-subjects(editId=${subject.id})}"><i class="fa fa-pen-to-square"></i> Edit</a>
+                                    <a class="btn-red" th:href="@{/delete-subject/{id}(id=${subject.id})}" onclick="return confirm('Delete this subject?')"><i class="fa fa-trash"></i> Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${subjects == null or #lists.isEmpty(subjects)}">
+                            <td colspan="8" style="text-align:center;color:#b0a898;padding:24px">No subjects created yet.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const subjectCourse = document.getElementById('subjectCourseId');
+    const subjectBatch = document.getElementById('subjectBatchId');
+    const subjectSearchEl = document.getElementById('subjectSearch');
+    const subjectCourseFilterEl = document.getElementById('subjectCourseFilter');
+    const subjectBatchFilterEl = document.getElementById('subjectBatchFilter');
+    const subjectSemesterFilterEl = document.getElementById('subjectSemesterFilter');
+    const subjectCategoryFilterEl = document.getElementById('subjectCategoryFilter');
+    const subjectRows = Array.from(document.querySelectorAll('#subjectTable tbody tr')).filter(row => row.dataset);
+    const subjectCodeInput = document.getElementById('subjectCodeInput');
+    const subjectCodeStatus = document.getElementById('subjectCodeStatus');
+    const editingSubjectId = /*[[${editingSubject != null ? editingSubject.id : null}]]*/ null;
+    let subjectCodeTimer;
+
+    function filterSubjectBatches() {
+        if (!subjectCourse || !subjectBatch) return;
+        const selectedCourseId = subjectCourse.value;
+        Array.from(subjectBatch.options).forEach(option => {
+            if (!option.value) return;
+            const allowed = !selectedCourseId || option.dataset.courseId === selectedCourseId;
+            option.hidden = !allowed;
+            option.disabled = !allowed;
+        });
+        if (subjectBatch.selectedOptions.length && subjectBatch.selectedOptions[0].hidden) {
+            subjectBatch.value = '';
+        }
+    }
+
+    function applySubjectFilters() {
+        const search = subjectSearchEl.value.trim().toLowerCase();
+        const course = subjectCourseFilterEl.value;
+        const batch = subjectBatchFilterEl.value;
+        const semester = subjectSemesterFilterEl.value;
+        const category = subjectCategoryFilterEl.value;
+
+        subjectRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const visible = (!search || text.includes(search))
+                && (!course || row.dataset.course === course)
+                && (!batch || row.dataset.batch === batch)
+                && (!semester || row.dataset.semester === semester)
+                && (!category || row.dataset.category === category);
+            row.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function resetSubjectFilters() {
+        subjectSearchEl.value = '';
+        subjectCourseFilterEl.value = '';
+        subjectBatchFilterEl.value = '';
+        subjectSemesterFilterEl.value = '';
+        subjectCategoryFilterEl.value = '';
+        applySubjectFilters();
+    }
+
+    if (subjectCourse) {
+        subjectCourse.addEventListener('change', filterSubjectBatches);
+        filterSubjectBatches();
+    }
+
+    function updateSubjectCodeStatus(message, state) {
+        subjectCodeStatus.textContent = message;
+        subjectCodeStatus.style.color = state === 'ok' ? '#15803d' : state === 'error' ? '#dc2626' : '#8b7f72';
+    }
+
+    async function checkSubjectCodeAvailability() {
+        const courseId = subjectCourse.value;
+        const batchId = subjectBatch.value;
+        const semester = document.querySelector('input[name="semester"], select[name="semester"]').value;
+        const code = subjectCodeInput.value.trim();
+        if (!courseId || !batchId || !semester || !code) {
+            updateSubjectCodeStatus('Choose course, batch, semester and code to check availability.', 'idle');
+            return;
+        }
+        updateSubjectCodeStatus('Checking subject code...', 'idle');
+        const params = new URLSearchParams({ courseId, batchId, semester, code });
+        if (editingSubjectId) {
+            params.set('excludeId', editingSubjectId);
+        }
+        const response = await fetch('/admin-subjects/check-code?' + params.toString());
+        const data = await response.json();
+        updateSubjectCodeStatus((data.available ? 'Available: ' : 'Duplicate: ') + data.message, data.available ? 'ok' : 'error');
+    }
+
+    [subjectCourse, subjectBatch, subjectCodeInput, document.querySelector('input[name="semester"], select[name="semester"]')]
+        .forEach(el => el && el.addEventListener('input', () => {
+            window.clearTimeout(subjectCodeTimer);
+            subjectCodeTimer = window.setTimeout(checkSubjectCodeAvailability, 300);
+        }));
+
+    [subjectSearchEl, subjectCourseFilterEl, subjectBatchFilterEl, subjectSemesterFilterEl, subjectCategoryFilterEl]
+        .forEach(el => el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', applySubjectFilters));
+
+    applySubjectFilters();
+    checkSubjectCodeAvailability();
+</script>
+</body>
+</html>
+

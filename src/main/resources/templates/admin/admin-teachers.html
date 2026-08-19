@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Teachers - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .search-bar{display:flex;align-items:center;gap:10px;background:var(--offwhite);border:1px solid var(--light);border-radius:50px;padding:9px 18px;width:280px}
+        .search-bar:focus-within{border-color:var(--gold-br);background:var(--cream);box-shadow:0 0 0 3px rgba(201,151,42,.08)}
+        .search-bar input{border:none;background:transparent;outline:none;font:inherit;width:100%}
+        .filter-section{margin-bottom:18px;display:flex;flex-direction:column;gap:10px}
+        .subject-tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .subject-tabs .tab-label,.filter-info{font-size:12px;color:#8a7a6a}
+        .subject-tabs a{display:inline-flex;align-items:center;padding:7px 16px;border-radius:50px;border:1px solid var(--light);background:var(--offwhite);color:#7a6a5a;text-decoration:none;font:600 13px var(--sans)}
+        .subject-tabs a.active{background:var(--black);color:#fff;border-color:var(--black)}
+        .filter-info{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        .filter-info .chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;background:var(--gold-bg2);border:1px solid var(--gold-br);color:var(--gold);font-weight:700}
+        .row-actions{display:inline-flex;gap:8px;flex-wrap:wrap}
+        .btn-view{padding:8px 16px;border-radius:50px;border:1px solid rgba(74,154,240,.25);background:rgba(74,154,240,.08);color:var(--blue);font:600 12px var(--sans);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+        .teacher-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(13,12,10,.58);backdrop-filter:blur(8px);z-index:500;padding:20px}
+        .teacher-modal.open{display:flex}
+        .teacher-modal-card{width:min(960px,100%);max-height:min(86vh,900px);overflow:auto;background:var(--white);border:1px solid var(--gold-br);border-radius:24px;box-shadow:0 28px 70px rgba(13,12,10,.32)}
+        .teacher-modal-head{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:20px 22px;background:linear-gradient(135deg,var(--black),#191512);border-bottom:1px solid var(--gold-br)}
+        .teacher-modal-head h3{color:var(--white);font:700 26px var(--serif)}
+        .teacher-modal-head p{color:rgba(255,255,255,.55);margin-top:4px;font-size:13px}
+        .teacher-modal-close{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+        .teacher-modal-body{padding:22px}
+        .teacher-modal-actions,.teacher-modal-save-row{display:flex;gap:10px;flex-wrap:wrap}
+        .teacher-modal-actions{margin-bottom:16px}
+        .teacher-modal-pill{border:1px solid var(--light);background:var(--offwhite);color:#6a6050}
+        .teacher-modal-pill.active{background:var(--black);color:var(--white);border-color:var(--gold-br)}
+        .teacher-modal-profile{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+        .teacher-modal-avatar{width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:var(--black);overflow:hidden;flex-shrink:0}
+        .teacher-modal-avatar img{width:100%;height:100%;object-fit:cover}
+        .teacher-modal-name{font:700 28px var(--serif)}
+        .teacher-modal-sub{color:#8a7a6a;font-size:13px;margin-top:4px}
+        .teacher-modal-grid,.teacher-modal-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .teacher-modal-item,.teacher-modal-field input,.teacher-modal-field select{background:var(--offwhite);border:1px solid var(--light);border-radius:14px}
+        .teacher-modal-item{padding:12px 14px}
+        .teacher-modal-label{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:700;margin-bottom:6px}
+        .teacher-modal-value{font-size:13.5px;font-weight:600;color:var(--black);word-break:break-word}
+        .teacher-modal-edit{display:none}
+        .teacher-modal-field{display:grid;gap:6px}
+        .teacher-modal-field.full{grid-column:1/-1}
+        .teacher-modal-field label{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);font-weight:700}
+        .teacher-modal-field input,.teacher-modal-field select{width:100%;padding:11px 13px;font:inherit;color:var(--black)}
+        .import-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(13,12,10,.58);backdrop-filter:blur(8px);z-index:700;padding:20px}
+        .import-modal.open{display:flex}
+        .import-modal-card{width:min(1100px,100%);max-height:min(90vh,920px);overflow:auto;background:var(--white);border:1px solid var(--gold-br);border-radius:24px;box-shadow:0 28px 70px rgba(13,12,10,.32)}
+        .import-modal-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px 22px;background:linear-gradient(135deg,var(--black),#191512);border-bottom:1px solid var(--gold-br)}
+        .import-modal-head h3{color:var(--white);font:700 26px var(--serif)}
+        .import-modal-head p{color:rgba(255,255,255,.55);margin-top:4px;font-size:13px}
+        .import-modal-body{padding:22px}
+        .import-grid{display:grid;grid-template-columns:320px 1fr;gap:18px}
+        .import-panel,.import-summary-card,.import-preview-wrap{border:1px solid var(--light);border-radius:18px}
+        .import-panel{background:var(--offwhite);padding:16px}
+        .import-step,.import-summary-card .label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:700}
+        .import-step{margin-bottom:8px}
+        .import-dropzone{border:1.5px dashed var(--gold-br);border-radius:18px;background:linear-gradient(180deg,#fff,#faf7f0);padding:24px 18px;text-align:center;cursor:pointer;transition:all .2s}
+        .import-dropzone.dragover{border-color:var(--gold);background:var(--gold-bg2)}
+        .import-dropzone i{font-size:28px;color:var(--gold);margin-bottom:10px}
+        .import-dropzone strong{display:block;font-size:15px;margin-bottom:6px}
+        .import-dropzone p,.import-note{color:#8a7a6a;font-size:12.5px;line-height:1.5}
+        .import-note{margin-top:10px;font-size:12px}
+        .import-status{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:13px;display:none}
+        .import-status.show{display:block}
+        .import-status.info{background:#eef2ff;color:#4b49ac;border:1px solid rgba(75,73,172,.16)}
+        .import-status.success{background:rgba(34,201,122,.10);color:var(--green);border:1px solid rgba(34,201,122,.22)}
+        .import-status.error{background:rgba(232,64,64,.08);color:var(--red);border:1px solid rgba(232,64,64,.18)}
+        .import-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
+        .import-summary-card{background:var(--offwhite);padding:14px 16px}
+        .import-summary-card .value{font-size:24px;font-family:var(--serif);font-weight:700}
+        .import-preview-wrap{overflow:hidden;background:var(--white)}
+        .import-preview-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;background:var(--offwhite);border-bottom:1px solid var(--light)}
+        .import-preview-head h4{font-size:16px;font-weight:700}
+        .import-preview{max-height:420px;overflow:auto}
+        .import-preview table{min-width:1180px}
+        .row-valid{background:rgba(34,201,122,.07)}
+        .row-error{background:rgba(232,64,64,.07)}
+        .error-text{color:var(--red);font-weight:600}
+        .success-text{color:var(--green);font-weight:600}
+        .import-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+        .import-actions-right{display:flex;gap:10px;flex-wrap:wrap}
+        @media (max-width:768px){.teacher-modal-grid,.teacher-modal-edit-grid,.import-grid,.import-summary{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('teachers')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">All Teachers</div>
+        <div class="header-right">
+            <div class="search-bar"><i class="fa fa-search"></i><input type="text" id="searchInput" placeholder="Search teachers..." oninput="searchTable()"></div>
+            <a href="/add-teacher" class="btn-gold"><i class="fa fa-chalkboard-teacher"></i> Add Teacher</a>
+            <button type="button" class="btn-dark" onclick="openTeacherImportModal()"><i class="fa fa-file-arrow-up"></i> Import Teachers</button>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+    <div class="alert alert-success" th:if="${teacherSuccess != null}" style="margin: 0 36px 10px"><i class="fa fa-check-circle"></i><span th:text="${teacherSuccess}"></span></div>
+    <div class="cards">
+        <div class="card"><div class="card-icon">👨‍🏫</div><h3>Total Teachers</h3><p th:text="${totalTeachers}">0</p><div class="card-trend trend-up">All faculty</div></div>
+        <div class="card"><div class="card-icon">✅</div><h3>Active</h3><p th:text="${totalTeachers}">0</p><div class="card-trend">Currently teaching</div></div>
+        <div class="card"><div class="card-icon">🆕</div><h3>New This Month</h3><p>—</p><div class="card-trend">Recent joins</div></div>
+    </div>
+    <div class="content">
+        <div class="box" style="animation-delay:0.08s">
+            <div class="box-title"><i class="fa fa-user-tie" style="color:var(--gold)"></i> Teacher List</div>
+            <div style="overflow-x:auto">
+                <table id="teacherTable">
+                    <thead><tr><th>#</th><th>Teacher ID</th><th>Full Name</th><th>Email</th><th>Department</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                    <tr th:each="teacher, iterStat : ${teachers}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td><span style="background:rgba(80,120,220,.10);color:#3a6abf;border:1px solid rgba(80,120,220,.25);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700" th:text="${teacher.employeeId != null ? teacher.employeeId : 'Not assigned'}">TCH001</span></td>
+                        <td style="font-weight:600" th:text="${teacher.name}">-</td>
+                        <td th:text="${teacher.email}">-</td>
+                        <td th:text="${teacher.department != null ? teacher.department : '-'}">-</td>
+                        <td><span class="badge badge-green" th:text="${teacher.status != null ? teacher.status : 'Active'}">Active</span></td>
+                        <td><div class="row-actions"><button type="button" class="btn-view" onclick="openTeacherModal(this,'view')" th:attr="data-id=${teacher.id},data-name=${teacher.name},data-email=${teacher.email},data-phone=${teacher.phone},data-designation=${teacher.designation},data-department=${teacher.department},data-status=${teacher.status},data-experience=${teacher.experience},data-academicyear=${teacher.academicYear},data-qualification=${teacher.qualification},data-photo=${teacher.photo},data-gender=${teacher.gender},data-employeeid=${teacher.employeeId},data-joiningdate=${teacher.joiningDate}"><i class="fa fa-eye"></i> View</button><button type="button" class="btn-view" onclick="openTeacherModal(this,'edit')" th:attr="data-id=${teacher.id},data-name=${teacher.name},data-email=${teacher.email},data-phone=${teacher.phone},data-designation=${teacher.designation},data-department=${teacher.department},data-status=${teacher.status},data-experience=${teacher.experience},data-academicyear=${teacher.academicYear},data-qualification=${teacher.qualification},data-photo=${teacher.photo},data-gender=${teacher.gender},data-employeeid=${teacher.employeeId},data-joiningdate=${teacher.joiningDate}"><i class="fa fa-pen-to-square"></i> Edit</button><a th:href="@{/delete-teacher/{id}(id=${teacher.id})}" class="btn-red" onclick="return confirm('Are you sure you want to delete this teacher?')"><i class="fa fa-trash"></i> Delete</a></div></td>
+                    </tr>
+                    <tr th:if="${teachers == null or #lists.isEmpty(teachers)}"><td colspan="7" style="text-align:center;color:#b0a898;padding:30px;font-size:15px">— No teachers found — <a href="/add-teacher" style="color:var(--gold);font-weight:600">Add first teacher →</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="import-modal" id="teacherImportModal" aria-hidden="true">
+    <div class="import-modal-card" role="dialog" aria-modal="true" aria-labelledby="teacherImportModalTitle">
+        <div class="import-modal-head"><div><h3 id="teacherImportModalTitle">Import Teachers</h3><p>Download the template, upload a CSV, review errors, then import only valid rows.</p></div><button type="button" class="teacher-modal-close" onclick="closeTeacherImportModal()"><i class="fa fa-times"></i></button></div>
+        <div class="import-modal-body">
+            <div class="import-grid">
+                <div class="import-panel">
+                    <div class="import-step">Step 1</div>
+                    <button type="button" class="btn-gold" onclick="window.location.href='/admin/teachers/import/template'"><i class="fa fa-download"></i> Download CSV Template</button>
+                    <div class="import-step" style="margin-top:18px">Step 2</div>
+                    <input type="file" id="teacherImportFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden>
+                    <div class="import-dropzone" id="teacherImportDropzone"><i class="fa fa-cloud-arrow-up"></i><strong>Upload Teacher File</strong><p>Drag and drop your file here, or click to browse.<br>CSV, TSV, TXT, XLSX, XLS accepted.</p></div>
+                    <div class="import-note" id="teacherImportFileName">No file selected yet.</div>
+                    <div class="import-status info" id="teacherImportStatus"></div>
+                </div>
+                <div>
+                    <div class="import-summary">
+                        <div class="import-summary-card"><div class="label">Ready To Import</div><div class="value" id="teacherImportReadyCount">0</div></div>
+                        <div class="import-summary-card"><div class="label">Rows With Errors</div><div class="value" id="teacherImportErrorCount">0</div></div>
+                    </div>
+                    <div class="import-preview-wrap">
+                        <div class="import-preview-head"><h4>Preview</h4><span id="teacherImportSummaryText" style="font-size:12.5px;color:#8a7a6a">Upload a file to preview rows.</span></div>
+                        <div class="import-preview">
+                            <table>
+                                <thead><tr><th>Row</th><th>Full Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th>Error Reason</th></tr></thead>
+                                <tbody id="teacherImportPreviewBody"><tr><td colspan="7" style="text-align:center;color:#b0a898;padding:28px">No data available yet.</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="import-actions">
+                        <div style="font-size:12.5px;color:#8a7a6a" id="teacherImportConfirmText">0 teachers ready to import. 0 rows have errors (will be skipped).</div>
+                        <div class="import-actions-right">
+                            <button type="button" class="btn-outline" onclick="closeTeacherImportModal()">Cancel</button>
+                            <button type="button" class="btn-dark" id="teacherImportFailedBtn" style="display:none" onclick="downloadTeacherFailedRows()"><i class="fa fa-download"></i> Download Failed Rows</button>
+                            <button type="button" class="btn-gold" id="teacherImportSubmitBtn" onclick="submitTeacherImport()" disabled><i class="fa fa-file-import"></i> Import Valid Rows</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="teacher-modal" id="teacherModal" aria-hidden="true">
+    <div class="teacher-modal-card" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle">
+        <div class="teacher-modal-head"><div><h3 id="teacherModalTitle">Teacher Details</h3><p>Basic information from the database record</p></div><button type="button" class="teacher-modal-close" onclick="closeTeacherModal()"><i class="fa fa-times"></i></button></div>
+        <div class="teacher-modal-body">
+            <div class="teacher-modal-actions"><button type="button" class="btn-view teacher-modal-pill active" id="teacherModalViewBtn" onclick="switchTeacherModalMode('view')">View Details</button><button type="button" class="btn-view teacher-modal-pill" id="teacherModalEditBtn" onclick="switchTeacherModalMode('edit')">Edit Details</button></div>
+            <div class="teacher-modal-profile"><div class="teacher-modal-avatar"><img id="teacherModalPhoto" alt="Teacher photo" style="display:none;"><span id="teacherModalInitials">TE</span></div><div><div class="teacher-modal-name" id="teacherModalName">Teacher</div><div class="teacher-modal-sub" id="teacherModalEmail">teacher@example.com</div></div></div>
+            <div class="teacher-modal-view" id="teacherModalView">
+                <div class="teacher-modal-grid">
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Phone</div><div class="teacher-modal-value" id="teacherModalPhone">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Designation</div><div class="teacher-modal-value" id="teacherModalDesignation">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Department</div><div class="teacher-modal-value" id="teacherModalDepartment">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Status</div><div class="teacher-modal-value" id="teacherModalStatus">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Experience</div><div class="teacher-modal-value" id="teacherModalExperience">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Academic Year</div><div class="teacher-modal-value" id="teacherModalAcademicYear">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Employee ID</div><div class="teacher-modal-value" id="teacherModalEmployeeId">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Joining Date</div><div class="teacher-modal-value" id="teacherModalJoiningDate">-</div></div>
+                    <div class="teacher-modal-item" style="grid-column:1/-1;"><div class="teacher-modal-label">Qualification</div><div class="teacher-modal-value" id="teacherModalQualification">-</div></div>
+                    <div class="teacher-modal-item"><div class="teacher-modal-label">Gender</div><div class="teacher-modal-value" id="teacherModalGender">-</div></div>
+                </div>
+            </div>
+            <form class="teacher-modal-edit" id="teacherModalEdit" method="post">
+                <input type="hidden" id="teacherEditId" name="id">
+                <div class="teacher-modal-edit-grid">
+                    <div class="teacher-modal-field"><label>Employee ID</label><input type="text" id="teacherEditEmployeeId" readonly></div>
+                    <div class="teacher-modal-field full"><label>Name</label><input type="text" id="teacherEditName" name="name" required></div>
+                    <div class="teacher-modal-field"><label>Email</label><input type="email" id="teacherEditEmail" name="email" required></div>
+                    <div class="teacher-modal-field"><label>Phone</label><input type="text" id="teacherEditPhone" name="phone"></div>
+                    <div class="teacher-modal-field"><label>Designation</label><input type="text" id="teacherEditDesignation" name="designation"></div>
+                    <div class="teacher-modal-field"><label>Department</label><input type="text" id="teacherEditDepartment" name="department"></div>
+                    <div class="teacher-modal-field"><label>Status</label><input type="text" id="teacherEditStatus" name="status"></div>
+                    <div class="teacher-modal-field"><label>Experience</label><input type="text" id="teacherEditExperience" name="experience"></div>
+                    <div class="teacher-modal-field"><label>Academic Year</label><input type="text" id="teacherEditAcademicYear" name="academicYear"></div>
+                </div>
+                <div class="teacher-modal-save-row"><button type="button" class="btn-red" onclick="switchTeacherModalMode('view')">Cancel</button><button type="submit" class="btn-view"><i class="fa fa-save"></i> Save Changes</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+let teacherImportFile=null;
+let teacherImportFailedRowsCsv='';
+let currentTeacherId='';
+function searchTable(){const v=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('#teacherTable tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(v)?'':'none')}
+function teacherDisplay(value,fallback){return value&&String(value).trim()?value:fallback}
+function teacherEndpoint(id){return '/admin/teachers/'+encodeURIComponent(id)+'?ts='+Date.now()}
+function showTeacherMessage(message,type){let box=document.getElementById('teacherLiveMessage');if(!box){box=document.createElement('div');box.id='teacherLiveMessage';box.style.margin='0 36px 10px';document.querySelector('.main .cards')?.before(box)}box.className='alert '+(type==='error'?'alert-danger':'alert-success');box.innerHTML='<i class="fa '+(type==='error'?'fa-triangle-exclamation':'fa-check-circle')+'"></i><span>'+escapeHtml(message||'')+'</span>';window.setTimeout(()=>{if(box)box.remove()},3200)}
+function applyTeacherToModal(teacher){const n=teacherDisplay(teacher.name,'Teacher'),e=teacherDisplay(teacher.email,'Not available');currentTeacherId=String(teacher.id||'');document.getElementById('teacherModalTitle').textContent=n+' Details';document.getElementById('teacherModalName').textContent=n;document.getElementById('teacherModalEmail').textContent=e;document.getElementById('teacherModalPhone').textContent=teacherDisplay(teacher.phone,'Not available');document.getElementById('teacherModalDesignation').textContent=teacherDisplay(teacher.designation,'Not assigned');document.getElementById('teacherModalDepartment').textContent=teacherDisplay(teacher.department,'Not assigned');document.getElementById('teacherModalStatus').textContent=teacherDisplay(teacher.status,'Active');document.getElementById('teacherModalExperience').textContent=teacherDisplay(teacher.experience,'Not assigned');document.getElementById('teacherModalAcademicYear').textContent=teacherDisplay(teacher.academicYear,'Not assigned');document.getElementById('teacherModalEmployeeId').textContent=teacherDisplay(teacher.employeeId,'Not assigned');document.getElementById('teacherModalJoiningDate').textContent=teacherDisplay(teacher.joiningDate,'Not assigned');document.getElementById('teacherModalQualification').textContent=teacherDisplay(teacher.qualification,'Not assigned');document.getElementById('teacherModalGender').textContent=teacherDisplay(teacher.gender,'Not provided');document.getElementById('teacherEditId').value=currentTeacherId;document.getElementById('teacherModalEdit').action='/update-teacher/'+encodeURIComponent(currentTeacherId);document.getElementById('teacherEditEmployeeId').value=teacherDisplay(teacher.employeeId,'Auto-generated');document.getElementById('teacherEditName').value=n;document.getElementById('teacherEditEmail').value=e;document.getElementById('teacherEditPhone').value=teacher.phone||'';document.getElementById('teacherEditDesignation').value=teacher.designation||'';document.getElementById('teacherEditDepartment').value=teacher.department||'';document.getElementById('teacherEditStatus').value=teacher.status||'';document.getElementById('teacherEditExperience').value=teacher.experience||'';document.getElementById('teacherEditAcademicYear').value=teacher.academicYear||'';const p=teacher.photo||'',img=document.getElementById('teacherModalPhoto'),ini=document.getElementById('teacherModalInitials');if(p){img.src=p;img.style.display='block';ini.style.display='none'}else{img.removeAttribute('src');img.style.display='none';ini.textContent=initialsFromName(n);ini.style.display='block'}}
+function updateTeacherRow(teacher){const btn=document.querySelector(`button[data-id="${CSS.escape(String(teacher.id))}"]`);if(!btn)return;const row=btn.closest('tr');if(row){const cells=row.querySelectorAll('td');if(cells[1])cells[1].querySelector('span').textContent=teacher.employeeId||teacher.teacherCode||('TCH'+(100+Number(teacher.id||0)));if(cells[2])cells[2].textContent=teacherDisplay(teacher.name,'-');if(cells[3])cells[3].textContent=teacherDisplay(teacher.email,'-');if(cells[4])cells[4].textContent=teacherDisplay(teacher.department,'-');if(cells[5])cells[5].querySelector('span').textContent=teacherDisplay(teacher.status,'Active')}document.querySelectorAll(`button[data-id="${CSS.escape(String(teacher.id))}"]`).forEach(button=>{button.dataset.name=teacher.name||'';button.dataset.email=teacher.email||'';button.dataset.phone=teacher.phone||'';button.dataset.designation=teacher.designation||'';button.dataset.department=teacher.department||'';button.dataset.status=teacher.status||'';button.dataset.experience=teacher.experience||'';button.dataset.academicyear=teacher.academicYear||'';button.dataset.qualification=teacher.qualification||'';button.dataset.photo=teacher.photo||'';button.dataset.gender=teacher.gender||'';button.dataset.employeeid=teacher.employeeId||'';button.dataset.joiningdate=teacher.joiningDate||''})}
+async function fetchLatestTeacher(id){const response=await fetch(teacherEndpoint(id),{headers:{'Accept':'application/json'},cache:'no-store'});const result=await response.json();if(!response.ok||!result.success)throw new Error(result.message||'Teacher record could not be loaded.');return result.teacher}
+async function openTeacherModal(btn,mode){const id=btn.dataset.id||'';if(!id){showTeacherMessage('Teacher ID is missing. Please refresh the page.','error');return}currentTeacherId='';const m=document.getElementById('teacherModal');m.classList.add('open');m.setAttribute('aria-hidden','false');switchTeacherModalMode(mode||'view');document.getElementById('teacherModalName').textContent='Loading teacher...';document.getElementById('teacherModalEmail').textContent='Fetching latest database record';try{const teacher=await fetchLatestTeacher(id);applyTeacherToModal(teacher);updateTeacherRow(teacher);if(mode==='edit')switchTeacherModalMode('edit')}catch(error){showTeacherMessage(error.message,'error');closeTeacherModal()}}
+function closeTeacherModal(){const m=document.getElementById('teacherModal');m.classList.remove('open');m.setAttribute('aria-hidden','true')}
+async function switchTeacherModalMode(mode){const v=document.getElementById('teacherModalView'),e=document.getElementById('teacherModalEdit'),vb=document.getElementById('teacherModalViewBtn'),eb=document.getElementById('teacherModalEditBtn');if(mode==='edit'){v.style.display='none';e.style.display='block';vb.classList.remove('active');eb.classList.add('active')}else{v.style.display='block';e.style.display='none';vb.classList.add('active');eb.classList.remove('active');if(currentTeacherId){try{const teacher=await fetchLatestTeacher(currentTeacherId);applyTeacherToModal(teacher);updateTeacherRow(teacher)}catch(error){showTeacherMessage(error.message,'error')}}}}
+function initialsFromName(name){const p=(name||'').trim().split(/\s+/).filter(Boolean);if(p.length===0)return'TE';if(p.length===1)return p[0].slice(0,2).toUpperCase();return(p[0].charAt(0)+p[p.length-1].charAt(0)).toUpperCase()}
+document.getElementById('teacherModal').addEventListener('click',function(e){if(e.target===this)closeTeacherModal()})
+document.getElementById('teacherModalEdit').addEventListener('submit',async function(event){event.preventDefault();const id=document.getElementById('teacherEditId').value||currentTeacherId;if(!id){showTeacherMessage('Teacher ID is missing. Please refresh the page.','error');return}const button=this.querySelector('button[type="submit"]');const original=button.innerHTML;button.disabled=true;button.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving';try{const response=await fetch('/update-teacher/'+encodeURIComponent(id),{method:'POST',body:new FormData(this),headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},cache:'no-store'});const result=await response.json();if(!response.ok||!result.success)throw new Error(result.message||'Teacher record could not be updated.');applyTeacherToModal(result.teacher);updateTeacherRow(result.teacher);switchTeacherModalMode('view');showTeacherMessage(result.message||'Teacher record updated successfully.','success')}catch(error){showTeacherMessage(error.message,'error')}finally{button.disabled=false;button.innerHTML=original}})
+function openTeacherImportModal(){document.getElementById('teacherImportModal').classList.add('open');document.getElementById('teacherImportModal').setAttribute('aria-hidden','false')}
+function closeTeacherImportModal(){document.getElementById('teacherImportModal').classList.remove('open');document.getElementById('teacherImportModal').setAttribute('aria-hidden','true')}
+function setTeacherImportStatus(message,type){const box=document.getElementById('teacherImportStatus');box.textContent=message||'';box.className='import-status show '+(type||'info')}
+function escapeHtml(value){return String(value||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;')}
+function renderTeacherImportPreview(rows){const body=document.getElementById('teacherImportPreviewBody');const ready=rows.filter(row=>row.valid).length;const errors=rows.filter(row=>!row.valid).length;document.getElementById('teacherImportReadyCount').textContent=String(ready);document.getElementById('teacherImportErrorCount').textContent=String(errors);document.getElementById('teacherImportSummaryText').textContent=rows.length?(ready+' teachers ready, '+errors+' row(s) with errors'):'Upload a file to preview rows.';document.getElementById('teacherImportConfirmText').textContent=ready+' teachers ready to import. '+errors+' rows have errors (will be skipped).';document.getElementById('teacherImportSubmitBtn').disabled=ready===0||!teacherImportFile;document.getElementById('teacherImportFailedBtn').style.display=errors>0&&teacherImportFailedRowsCsv?'inline-flex':'none';if(!rows.length){body.innerHTML='<tr><td colspan=\"7\" style=\"text-align:center;color:#b0a898;padding:28px\">No data available yet.</td></tr>';return}body.innerHTML=rows.map(row=>{const values=row.values||{};return `<tr class=\"${row.valid?'row-valid':'row-error'}\"><td>${row.rowNumber??''}</td><td>${escapeHtml(values['Full Name'])}</td><td>${escapeHtml(values['Email'])}</td><td>${escapeHtml(values['Department'])}</td><td>${escapeHtml(values['Designation'])}</td><td class=\"${row.valid?'success-text':'error-text'}\">${row.valid?'Valid':'Error'}</td><td class=\"${row.valid?'':'error-text'}\">${escapeHtml(row.errorReason||'')}</td></tr>`}).join('')}
+async function previewTeacherImport(file){if(!file)return;teacherImportFile=file;document.getElementById('teacherImportFileName').textContent='Selected file: '+file.name;setTeacherImportStatus('Parsing CSV and validating rows...','info');const formData=new FormData();formData.append('file',file);formData.append('mode','preview');try{const response=await fetch('/admin/teachers/import',{method:'POST',body:formData});const result=await response.json();if(result.error){teacherImportFailedRowsCsv='';renderTeacherImportPreview([]);setTeacherImportStatus(result.error,'error');return}teacherImportFailedRowsCsv=result.failedRowsCsv||'';renderTeacherImportPreview(result.rows||[]);setTeacherImportStatus((result.readyCount||0)+' teachers ready to import. '+(result.errorCount||0)+' row(s) have errors.',(result.readyCount||0)>0?'success':'info')}catch(error){teacherImportFailedRowsCsv='';renderTeacherImportPreview([]);setTeacherImportStatus('Could not read the CSV right now. Please try again.','error')}}
+async function submitTeacherImport(){if(!teacherImportFile){setTeacherImportStatus('Please choose a CSV file first.','error');return}const formData=new FormData();formData.append('file',teacherImportFile);formData.append('mode','import');setTeacherImportStatus('Importing valid teacher rows...','info');try{const response=await fetch('/admin/teachers/import',{method:'POST',body:formData});const result=await response.json();if(result.error){setTeacherImportStatus(result.error,'error');return}teacherImportFailedRowsCsv=result.failedRowsCsv||'';renderTeacherImportPreview(result.rows||[]);setTeacherImportStatus((result.successCount||0)+' teachers imported successfully.','success');if(!teacherImportFailedRowsCsv){window.setTimeout(()=>window.location.reload(),1200)}else{document.getElementById('teacherImportFailedBtn').style.display='inline-flex'}}catch(error){setTeacherImportStatus('Import failed. Please try again.','error')}}
+function downloadTeacherFailedRows(){if(!teacherImportFailedRowsCsv)return;const blob=new Blob([teacherImportFailedRowsCsv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='teacher-import-failed-rows.csv';link.click();URL.revokeObjectURL(url)}
+document.getElementById('teacherImportModal').addEventListener('click',function(e){if(e.target===this)closeTeacherImportModal()})
+document.getElementById('teacherImportDropzone').addEventListener('click',function(){document.getElementById('teacherImportFile').click()})
+document.getElementById('teacherImportFile').addEventListener('change',function(event){const file=event.target.files&&event.target.files[0];if(file)previewTeacherImport(file)})
+document.getElementById('teacherImportDropzone').addEventListener('dragover',function(event){event.preventDefault();this.classList.add('dragover')})
+document.getElementById('teacherImportDropzone').addEventListener('dragleave',function(){this.classList.remove('dragover')})
+document.getElementById('teacherImportDropzone').addEventListener('drop',function(event){event.preventDefault();this.classList.remove('dragover');const file=event.dataTransfer.files&&event.dataTransfer.files[0];if(file){document.getElementById('teacherImportFile').files=event.dataTransfer.files;previewTeacherImport(file)}})
+if(new URLSearchParams(window.location.search).get('openImport')==='1'){openTeacherImportModal()}
+</script>
+</body>
+</html>
+

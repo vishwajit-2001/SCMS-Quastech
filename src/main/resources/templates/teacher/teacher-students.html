@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Students - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='students')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='My Students', subtitle='Review your assigned learners, search records quickly, and keep the student roster in one cleaner workspace.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-users"></i> Academic Component</span>
+                    <h2 class="portal-hero-title">Student Roster</h2>
+                    <p class="portal-hero-subtitle">
+                        <span th:text="${teacherClassLabel}">Assigned academic scope</span>
+                        <span> | </span>
+                        <span th:text="${teacherCourseLabel}">Course</span>
+                        <span> | </span>
+                        <span th:text="${teacherSectionLabel}">Section</span>
+                    </p>
+                    <div class="portal-hero-actions">
+                        <a class="portal-hero-action portal-hero-action--primary" th:href="@{/teacher-attendance}">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            Mark attendance
+                        </a>
+                        <a class="portal-hero-action" th:href="@{/teacher-marks}">
+                            <i class="fa-solid fa-square-poll-vertical"></i>
+                            Enter marks
+                        </a>
+                    </div>
+                </div>
+                <div class="portal-hero-side">
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Student Strength</p>
+                        <p class="portal-side-value" th:text="${totalStudents}">0</p>
+                        <div class="portal-side-meta">Visible student records</div>
+                    </div>
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Faculty</p>
+                        <p class="portal-side-value" th:text="${teacherSubject} ?: 'Faculty'">Faculty</p>
+                        <div class="portal-side-meta" th:text="${teacherDepartmentLabel}">Department</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-kpi-grid">
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Total Students</p>
+                    <h3 class="teacher-kpi-value" th:text="${totalStudents}">0</h3>
+                    <p class="teacher-kpi-meta">All registered learners in your view</p>
+                </article>
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Course</p>
+                    <h3 class="teacher-kpi-value" th:text="${teacherCourseLabel}">Course</h3>
+                    <p class="teacher-kpi-meta">Assigned academic program</p>
+                </article>
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Section</p>
+                    <h3 class="teacher-kpi-value" th:text="${teacherSectionLabel}">A</h3>
+                        <p class="teacher-kpi-meta">Current academic grouping</p>
+                </article>
+                <article class="teacher-kpi-card">
+                    <p class="teacher-kpi-label">Room</p>
+                    <h3 class="teacher-kpi-value" th:text="${teacherRoomLabel}">101</h3>
+                    <p class="teacher-kpi-meta">Primary teaching room</p>
+                </article>
+            </section>
+
+            <section class="teacher-grid-two">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Search Students</h2>
+                            <p class="teacher-panel-subtitle">Filter the roster instantly by name, email, course, or ID.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input class="teacher-search-input" id="searchInput" type="text" placeholder="Search students..." oninput="searchTable()">
+                    </div>
+                    <div class="teacher-filter-row" style="margin-top:12px">
+                        <select class="teacher-search-input" id="semesterFilter" onchange="searchTable()">
+                            <option value="">All semesters</option>
+                        </select>
+                        <select class="teacher-search-input" id="sectionFilter" onchange="searchTable()">
+                            <option value="">All sections</option>
+                        </select>
+                    </div>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Quick Context</h2>
+                            <p class="teacher-panel-subtitle">Use these shortcuts to move into daily academic work.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-inline-tags">
+                        <span class="teacher-pill"><i class="fa-solid fa-user-graduate"></i><span th:text="${totalStudents} + ' students'">0 students</span></span>
+                        <span class="teacher-pill"><i class="fa-solid fa-book-open"></i><span th:text="${teacherSubject} ?: 'Subjects pending assignment'">Subject</span></span>
+                        <span class="teacher-pill"><i class="fa-solid fa-layer-group"></i><span th:text="${teacherClassLabel}">Academic Scope</span></span>
+                    </div>
+                </article>
+            </section>
+
+            <section class="teacher-panel">
+                <div class="teacher-panel-head">
+                    <div>
+                        <h2 class="teacher-panel-title">All Students</h2>
+                        <p class="teacher-panel-subtitle">A refreshed roster view for attendance, marks, and student follow-up.</p>
+                    </div>
+                    <span class="teacher-status-chip teacher-status-chip--info" th:text="${totalStudents} + ' total'">0 total</span>
+                </div>
+
+                <div class="teacher-table-wrap">
+                    <table class="teacher-table" id="studentTable">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Section</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="student, iterStat : ${students}"
+                            th:attr="data-semester=${student.semester != null ? student.semester : teacherAssignedSemesterLabel},data-section=${student.sectionName != null ? student.sectionName : teacherSectionLabel}">
+                            <td th:text="${iterStat.count}">1</td>
+                            <td><span class="teacher-id-chip" th:text="${student.id}">1</span></td>
+                            <td th:text="${student.name}">Student Name</td>
+                            <td th:text="${student.email}">student@example.com</td>
+                            <td th:text="${student.course} ?: 'Not assigned'">Course</td>
+                            <td th:text="${student.semester != null and !#strings.isEmpty(student.semester) ? student.semester : teacherAssignedSemesterLabel}">Sem 1</td>
+                            <td th:text="${student.sectionName != null and !#strings.isEmpty(student.sectionName) ? student.sectionName : teacherSectionLabel}">A</td>
+                            <td><span class="teacher-status-chip teacher-status-chip--success" th:text="${student.admissionStatus != null ? student.admissionStatus : 'Active'}">Active</span></td>
+                        </tr>
+                        <tr th:if="${students == null or #lists.isEmpty(students)}">
+                            <td colspan="8">
+                                <div class="teacher-empty">No students found for this teacher yet.</div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script src="/js/student/student-dashboard-layout.js"></script>
+<script>
+    function searchTable() {
+        const value = document.getElementById('searchInput').value.toLowerCase();
+        const semester = document.getElementById('semesterFilter').value.toLowerCase();
+        const section = document.getElementById('sectionFilter').value.toLowerCase();
+        document.querySelectorAll('#studentTable tbody tr').forEach(function (row) {
+            if (!row.innerText.trim()) {
+                return;
+            }
+            const matchesText = row.innerText.toLowerCase().includes(value);
+            const matchesSemester = !semester || (row.dataset.semester || '').toLowerCase() === semester;
+            const matchesSection = !section || (row.dataset.section || '').toLowerCase() === section;
+            row.style.display = matchesText && matchesSemester && matchesSection ? '' : 'none';
+        });
+    }
+
+    function fillRosterFilters() {
+        const semesters = new Set();
+        const sections = new Set();
+        document.querySelectorAll('#studentTable tbody tr[data-semester]').forEach(row => {
+            if (row.dataset.semester) semesters.add(row.dataset.semester);
+            if (row.dataset.section) sections.add(row.dataset.section);
+        });
+        const semesterFilter = document.getElementById('semesterFilter');
+        const sectionFilter = document.getElementById('sectionFilter');
+        [...semesters].sort().forEach(value => semesterFilter.appendChild(new Option(value, value)));
+        [...sections].sort().forEach(value => sectionFilter.appendChild(new Option(value, value)));
+    }
+    fillRosterFilters();
+</script>
+</body>
+</html>

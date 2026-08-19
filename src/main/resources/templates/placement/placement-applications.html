@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .panel-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+        .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .field{display:grid;gap:6px}.field.full{grid-column:1/-1}
+        .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .field input{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        .table{width:100%;border-collapse:collapse;font-size:13px}
+        .table th,.table td{padding:12px 10px;border-bottom:1px solid rgba(24,22,15,.08);text-align:left;vertical-align:top}
+        .table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:24px;color:#6b6457;text-align:center;background:rgba(255,255,255,.78)}
+        .btn{min-height:46px;padding:0 16px;border-radius:999px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+        .btn.primary{background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f}
+        .btn.ghost{background:rgba(24,22,15,.05);border:1px solid rgba(24,22,15,.08);color:#18160f}
+        @media (max-width:900px){.form-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='applications')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Applications', subtitle='View student applications, filter by company, and shortlist candidates for the next round.')}"></div>
+        <main class="portal-page-body">
+            <section class="panel" style="margin-bottom:18px;">
+                <div class="panel-head">
+                    <div><h2>Filter Applications</h2><p>Search applications by company name.</p></div>
+                    <div class="panel-actions">
+                        <span class="portal-badge portal-badge--neutral" th:text="|${placementApplicationCount != null ? placementApplicationCount : 0} total|">0 total</span>
+                        <a class="btn ghost" th:href="@{/placement-applications/export.xlsx(company=${applicationCompanyFilter})}">
+                            <i class="fa-solid fa-file-excel"></i>
+                            Excel
+                        </a>
+                        <a class="btn primary" th:href="@{/placement-applications/export-resumes.zip(company=${applicationCompanyFilter})}">
+                            <i class="fa-solid fa-file-zipper"></i>
+                            CV ZIP
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <form method="get" th:action="@{/placement-applications}">
+                        <div class="form-grid">
+                            <div class="field full">
+                                <label>Company filter</label>
+                                <input type="text" name="company" th:value="${applicationCompanyFilter}" placeholder="Type company name, for example TCS">
+                            </div>
+                        </div>
+                        <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:10px;">
+                            <a class="btn" style="background:rgba(24,22,15,.05);border:1px solid rgba(24,22,15,.08);color:#18160f;" th:href="@{/placement-applications}">Clear</a>
+                            <button class="btn primary" type="submit">Apply Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Student Applications</h2><p>View each application with candidate details.</p></div>
+                    <span class="portal-badge portal-badge--info" th:text="|${filteredPlacementApplications != null ? filteredPlacementApplications.size() : 0} shown|">0 shown</span>
+                </div>
+                <div class="panel-body">
+                    <table class="table" th:if="${!#lists.isEmpty(filteredPlacementApplications)}">
+                        <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Company</th>
+                            <th>Course</th>
+                            <th>Profile</th>
+                            <th>Resume</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="placementApplication : ${filteredPlacementApplications}">
+                            <td>
+                                <strong th:text="${placementApplication.fullName}">Student</strong><br>
+                                <span th:text="${placementApplication.email}">email</span><br>
+                                <span th:text="${placementApplication.phone}">phone</span>
+                            </td>
+                            <td th:text="${placementApplication.placementDrive != null ? placementApplication.placementDrive.companyName : 'Company'}">Company</td>
+                            <td>
+                                <span th:text="${placementApplication.course}">Course</span><br>
+                                <span th:text="${placementApplication.semester}">Semester</span>
+                            </td>
+                            <td>
+                                <div class="pill-row">
+                                    <span class="pill" th:text="${placementApplication.specialization != null ? placementApplication.specialization : 'Specialization n/a'}">Specialization</span>
+                                    <span class="pill" th:text="${placementApplication.currentLocation != null ? placementApplication.currentLocation : 'Location n/a'}">Location</span>
+                                </div>
+                            </td>
+                            <td>
+                                <a th:if="${placementApplication.resumePath != null}"
+                                   th:href="${placementApplication.resumePath}"
+                                   th:attr="download=${placementApplication.resumeName}"
+                                   th:text="${placementApplication.resumeName != null ? placementApplication.resumeName : 'Resume'}">Resume</a>
+                                <span th:unless="${placementApplication.resumePath != null}">Not uploaded</span>
+                            </td>
+                            <td th:text="${placementApplication.status}">Submitted</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="empty" th:if="${#lists.isEmpty(filteredPlacementApplications)}">
+                        <i class="fa-regular fa-file-lines"></i>
+                        <h3 style="margin:10px 0 6px;">No applications to show</h3>
+                        <p>Try a different company filter or wait for students to apply.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

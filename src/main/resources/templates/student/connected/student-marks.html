@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Marks - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='exam-results')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='My Marks')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Marks Published</p>
+                    <h2 class="portal-summary-value">0</h2>
+                    <div class="portal-summary-meta">No marks records saved yet</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Subjects</p>
+                    <h2 class="portal-summary-value" th:text="${subjectCount}">0</h2>
+                    <div class="portal-summary-meta">Mapped from timetable</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Student</p>
+                    <h2 class="portal-summary-value" th:text="${studentRollNo}">Roll</h2>
+                    <div class="portal-summary-meta" th:text="${studentCourse}">Course</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Status</p>
+                    <h2 class="portal-summary-value" th:text="${resultsAvailable ? 'Available' : 'Pending'}">Pending</h2>
+                    <div class="portal-summary-meta">Waiting for marks backend</div>
+                </article>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Marks Status</h2>
+                </div>
+
+                <div class="portal-empty-state">
+                    <i class="fa-solid fa-chart-column"></i>
+                    <h3>No marks have been published yet</h3>
+                    <p>The old demo marks were removed. This page will show actual marks only after the result backend starts writing subject-wise scores for the student.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

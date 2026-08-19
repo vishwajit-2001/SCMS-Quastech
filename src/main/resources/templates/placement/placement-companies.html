@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Companies - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .company-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+        .company-card{border-radius:20px;border:1px solid rgba(24,22,15,.08);background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:16px}
+        .company-card h3{margin:0 0 6px}
+        .meta{color:#6b6457;font-size:13px;line-height:1.5}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:24px;color:#6b6457;text-align:center;background:rgba(255,255,255,.78)}
+        @media (max-width:1100px){.company-grid{grid-template-columns:1fr 1fr}}
+        @media (max-width:768px){.company-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='companies')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Companies', subtitle='Add company details, contact info, and review past recruiters from the drives posted in the portal.')}"></div>
+        <main class="portal-page-body">
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Recruiting Companies</h2><p>Company list built from the published drives.</p></div>
+                    <span class="portal-badge portal-badge--neutral" th:text="${placementCompanyCount} + ' companies'">0 companies</span>
+                </div>
+                <div class="panel-body">
+                    <div class="company-grid" th:if="${!#lists.isEmpty(placementCompanies)}">
+                        <article class="company-card" th:each="company : ${placementCompanies}">
+                            <h3 th:text="${company}">Company</h3>
+                            <div class="meta">Recruiter contact and history can be connected here next.</div>
+                            <div class="pill-row">
+                                <span class="pill"><i class="fa-solid fa-building"></i> Past recruiter</span>
+                                <span class="pill"><i class="fa-solid fa-phone"></i> Contact info</span>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="empty" th:if="${#lists.isEmpty(placementCompanies)}">
+                        <i class="fa-solid fa-industry"></i>
+                        <h3 style="margin:10px 0 6px;">No company data yet</h3>
+                        <p>Publish a drive first so companies appear here automatically.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

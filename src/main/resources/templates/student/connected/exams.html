@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${'Exams - ' + (collegeName ?: 'AI Campus Institute')}">Exams - AI Campus Institute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='exams')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Exams')}"></div>
+
+        <main class="portal-page-body">
+            <div th:if="${examSuccess}" class="teacher-alert teacher-alert--success" th:text="${examSuccess}">Exam action completed.</div>
+            <div th:if="${examError}" class="teacher-alert teacher-alert--error" th:text="${examError}">Exam error</div>
+            <section class="portal-hero-banner portal-hero-banner--college">
+                <div class="portal-hero-copy portal-hero-college-copy">
+                    <div class="portal-hero-college-head">
+                        <div class="portal-hero-college-avatar">
+                            <span th:text="${studentInitials}">ST</span>
+                        </div>
+                        <div class="portal-hero-college-text">
+                            <h2 class="portal-hero-student-name" th:text="${studentName}">Student</h2>
+                            <p class="portal-hero-subtitle">Exam reminders, syllabi, and room details in one place.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-hero-side portal-hero-college-side">
+                    <h2 class="portal-hero-college-name portal-hero-college-name--side" th:text="${collegeName}">College</h2>
+                    <p class="portal-hero-college-year portal-hero-college-year--side" th:text="${studentCourse}">Course</p>
+                    <div class="portal-chip-row portal-chip-row--hero portal-chip-row--hero-right">
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-book"></i><strong th:text="${studentExamCount}">0</strong><span>exams</span></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-list-check"></i><strong th:text="${studentQuizCount}">0</strong><span>quizzes</span></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-bell"></i><strong th:text="${studentUnreadNotifications}">0</strong><span>alerts</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Upcoming Exams</p>
+                    <h2 class="portal-summary-value" th:text="${studentExamCount}">0</h2>
+                    <div class="portal-summary-meta">Scheduled for your class</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Online Quizzes</p>
+                    <h2 class="portal-summary-value" th:text="${studentQuizCount}">0</h2>
+                    <div class="portal-summary-meta">Timed MCQ tests</div>
+                </article>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Exam List</h2>
+                    <span class="portal-badge portal-badge--neutral">Student view</span>
+                </div>
+
+                <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(studentExams)}">
+                    <a class="portal-alert portal-alert--interactive" th:each="exam : ${studentExams}" th:href="@{'/student-exams/' + ${exam.id}}">
+                        <div class="portal-alert-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="portal-alert-copy">
+                            <div class="portal-alert-head">
+                                <h3 class="portal-alert-title" th:text="${exam.title}">Exam title</h3>
+                                <span class="portal-badge portal-badge--info" th:text="${exam.statusLabel}">Scheduled</span>
+                            </div>
+                            <p>
+                                <span th:text="${exam.subject}">Subject</span>
+                                <span> | </span>
+                                <span th:text="${exam.examDateLabel}">Date</span>
+                                <span> | </span>
+                                <span th:text="${exam.durationLabel}">Duration</span>
+                            </p>
+                        </div>
+                        <div class="portal-alert-trail"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    </a>
+                </div>
+
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(studentExams)}">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <h3>No exams scheduled yet</h3>
+                    <p>Once your teacher publishes an exam, it will appear here with reminders and syllabus details.</p>
+                </div>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Online Quiz Center</h2>
+                    <span class="portal-badge portal-badge--warning">Auto-checked MCQ</span>
+                </div>
+
+                <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(studentQuizzes)}">
+                    <a class="portal-alert portal-alert--interactive" th:each="quiz : ${studentQuizzes}" th:href="@{'/student-exams/' + ${quiz.id}}">
+                        <div class="portal-alert-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="portal-alert-copy">
+                            <div class="portal-alert-head">
+                                <h3 class="portal-alert-title" th:text="${quiz.title}">Quiz title</h3>
+                                <span class="portal-badge portal-badge--warning" th:text="${quiz.examModeLabel}">Online Quiz</span>
+                            </div>
+                            <p>
+                                <span th:text="${quiz.subject}">Subject</span>
+                                <span> | </span>
+                                <span th:text="${quiz.examDateLabel}">Date</span>
+                                <span> | </span>
+                                <span th:text="${quiz.durationLabel}">Duration</span>
+                                <span> | </span>
+                                <span th:text="${quiz.quizQuestionCount + ' MCQs'}">10 MCQs</span>
+                            </p>
+                        </div>
+                        <div class="portal-alert-trail"><i class="fa-solid fa-play"></i></div>
+                    </a>
+                </div>
+
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(studentQuizzes)}">
+                    <i class="fa-solid fa-file-circle-question"></i>
+                    <h3>No online quiz published yet</h3>
+                    <p>Once a teacher generates an MCQ quiz from notes, it will appear here with the countdown timer.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

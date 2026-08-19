@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Teacher Assignment - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .assignment-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);gap:18px}
+        .assignment-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .form-field{display:grid;gap:7px}
+        .form-field.full{grid-column:1/-1}
+        .form-field label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);font-weight:800}
+        .form-field input,.form-field select{width:100%;border:1px solid var(--light);background:var(--offwhite);border-radius:14px;padding:12px 13px;font:inherit;color:var(--black);outline:none}
+        .subject-picker{min-height:180px;border:1px solid var(--light);background:var(--offwhite);border-radius:16px;padding:12px;display:grid;gap:8px}
+        .subject-option{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid transparent;border-radius:12px;background:#fff}
+        .subject-option input{width:auto;margin-top:3px}
+        .subject-option strong{display:block;font-size:13px}
+        .subject-option span{font-size:12px;color:#8a7a6a}
+        .scope-preview{display:grid;gap:10px}
+        .scope-chip{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--light);border-radius:14px;background:var(--offwhite)}
+        .scope-chip i{color:var(--gold)}
+        .mapping-table-wrap{overflow:auto}
+        .mapping-table-wrap table{min-width:980px}
+        .alert{margin-bottom:14px}
+        @media(max-width:980px){.assignment-grid,.assignment-form{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('teacher-assignment')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div>
+            <div class="header-title">Teacher Assignment</div>
+            <p style="color:#8a7a6a;margin-top:4px">Helper mapping only. Timetable entries remain the source of truth for subject, section, room, and schedule visibility.</p>
+        </div>
+        <div class="header-right">
+            <a href="/admin-teachers" class="btn-dark"><i class="fa fa-user-tie"></i> Teachers</a>
+            <a href="/admin-subject-registry" class="btn-gold"><i class="fa fa-book-open"></i> Subject Registry</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="alert alert-success" id="assignmentSuccess" th:style="${teacherAssignmentSuccess != null ? '' : 'display:none'}"><i class="fa fa-check-circle"></i><span th:text="${teacherAssignmentSuccess}">Saved</span></div>
+        <div class="alert alert-error" id="assignmentError" th:style="${teacherAssignmentError != null ? '' : 'display:none'}"><i class="fa fa-triangle-exclamation"></i><span th:text="${teacherAssignmentError}">Error</span></div>
+
+        <div class="assignment-grid">
+            <section class="box">
+                <div class="box-title"><i class="fa fa-diagram-project" style="color:var(--gold)"></i> Create Academic Mapping</div>
+                <form action="/teacher-assignment" method="post" class="assignment-form" id="assignmentForm">
+                    <div class="form-field">
+                        <label for="teacherId">Teacher</label>
+                        <select id="teacherId" name="teacherId" required>
+                            <option value="">Select teacher</option>
+                            <option th:each="teacher : ${teachers}" th:value="${teacher.id}" th:text="${teacher.name + ' · ' + (teacher.employeeId != null ? teacher.employeeId : 'ID pending')}">Teacher</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="courseId">Course</label>
+                        <select id="courseId" name="courseId" required>
+                            <option value="">Select course</option>
+                            <option th:each="course : ${courses}" th:value="${course.id}" th:text="${course.code + ' - ' + course.name}" th:attr="data-code=${course.code},data-name=${course.name},data-semesters=${course.totalSemesters ?: 8}">Course</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="batchId">Batch</label>
+                        <select id="batchId" name="batchId" required>
+                            <option value="">Select batch</option>
+                            <option th:each="batch : ${batches}" th:value="${batch.id}" th:text="${batch.displayName}" th:attr="data-course-id=${batch.course != null ? batch.course.id : ''},data-start=${batch.startYear},data-end=${batch.endYear}">Batch</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="academicYear">Academic Year</label>
+                        <select id="academicYear" name="academicYear" required>
+                            <option value="">Academic year</option>
+                            <option th:each="year : ${academicYears}" th:value="${year}" th:text="${year}">2025-26</option>
+                        </select>
+                    </div>
+                    <div class="form-field full">
+                        <button type="submit" class="btn-gold"><i class="fa fa-floppy-disk"></i> Save Assignment</button>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="box">
+                <div class="box-title"><i class="fa fa-chart-simple" style="color:var(--gold)"></i> Workload Summary</div>
+                <div class="scope-preview">
+                    <div class="scope-chip"><i class="fa fa-user-tie"></i><span id="previewTeacher">No teacher selected</span></div>
+                    <div class="scope-chip"><i class="fa fa-book"></i><span id="previewCourse">No course selected</span></div>
+                    <div class="scope-chip"><i class="fa fa-layer-group"></i><span id="previewBatch">No batch selected</span></div>
+                    <div class="scope-chip"><i class="fa fa-arrows-split-up-and-left"></i><span>All semesters and sections from Academic Structure</span></div>
+                    <div class="scope-chip"><i class="fa fa-book-open"></i><span>Subjects auto-fetched from Subject Registry</span></div>
+                    <div class="scope-chip"><i class="fa fa-calendar-days"></i><span>Timetable rooms and periods sync from timetable entries</span></div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="box" style="margin-top:18px">
+            <div class="box-title"><i class="fa fa-list-check" style="color:var(--gold)"></i> Existing Assignments</div>
+            <div class="mapping-table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Teacher</th>
+                        <th>Course</th>
+                        <th>Batch</th>
+                        <th>Academic Year</th>
+                        <th>Coverage</th>
+                        <th>Subject Source</th>
+                        <th>Timetable Source</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="assignmentTableBody">
+                    <tr th:each="mapping, stat : ${mappings}">
+                        <td th:text="${stat.count}">1</td>
+                        <td th:text="${mapping.teacher != null ? mapping.teacher.name : '-'}">Teacher</td>
+                        <td th:text="${mapping.course != null ? mapping.course.code + ' - ' + mapping.course.name : '-'}">Course</td>
+                        <td th:text="${mapping.batch != null ? mapping.batch.displayName : '-'}">Batch</td>
+                        <td th:text="${mapping.academicYear}">2025-26</td>
+                        <td>All semesters · All sections</td>
+                        <td>Subject Registry</td>
+                        <td>Course + Batch + Academic Year</td>
+                        <td>
+                            <form class="assignment-delete-form" th:action="@{/teacher-assignment/{id}/delete(id=${mapping.id})}" method="post">
+                                <button type="submit" class="btn-red"><i class="fa fa-trash"></i> Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${mappings == null or #lists.isEmpty(mappings)}">
+                        <td colspan="9" style="text-align:center;color:#8a7a6a;padding:24px">No teacher assignments created yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const teacherSelect = document.getElementById('teacherId');
+    const courseSelect = document.getElementById('courseId');
+    const batchSelect = document.getElementById('batchId');
+    const assignmentForm = document.getElementById('assignmentForm');
+    const assignmentTableBody = document.getElementById('assignmentTableBody');
+    const successAlert = document.getElementById('assignmentSuccess');
+    const errorAlert = document.getElementById('assignmentError');
+
+    function selectedText(select, fallback) {
+        const option = select.options[select.selectedIndex];
+        return option && option.value ? option.textContent.trim() : fallback;
+    }
+
+    function filterBatches() {
+        const courseId = courseSelect.value;
+        Array.from(batchSelect.options).forEach(option => {
+            if (!option.value) return;
+            option.hidden = courseId && option.dataset.courseId !== courseId;
+        });
+        const selected = batchSelect.options[batchSelect.selectedIndex];
+        if (selected && selected.hidden) batchSelect.value = '';
+    }
+
+    function refreshPreview() {
+        document.getElementById('previewTeacher').textContent = selectedText(teacherSelect, 'No teacher selected');
+        document.getElementById('previewCourse').textContent = selectedText(courseSelect, 'No course selected');
+        document.getElementById('previewBatch').textContent = selectedText(batchSelect, 'No batch selected');
+    }
+
+    function showMessage(type, message) {
+        const target = type === 'success' ? successAlert : errorAlert;
+        const other = type === 'success' ? errorAlert : successAlert;
+        target.querySelector('span').textContent = message || '';
+        target.style.display = '';
+        other.style.display = 'none';
+    }
+
+    function assignmentCell(value) {
+        return value == null || value === '' ? '-' : String(value);
+    }
+
+    function renderAssignments(assignments) {
+        assignmentTableBody.innerHTML = '';
+        if (!assignments || assignments.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="9" style="text-align:center;color:#8a7a6a;padding:24px">No teacher assignments created yet.</td>';
+            assignmentTableBody.appendChild(row);
+            return;
+        }
+        assignments.forEach((mapping, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${assignmentCell(mapping.teacherName)}</td>
+                <td>${assignmentCell(mapping.course)} - ${assignmentCell(mapping.courseName)}</td>
+                <td>${assignmentCell(mapping.batch)}</td>
+                <td>${assignmentCell(mapping.academicYear)}</td>
+                <td>All semesters · All sections</td>
+                <td>Subject Registry</td>
+                <td>Course + Batch + Academic Year</td>
+                <td>
+                    <form class="assignment-delete-form" action="/teacher-assignment/${mapping.id}/delete" method="post">
+                        <button type="submit" class="btn-red"><i class="fa fa-trash"></i> Delete</button>
+                    </form>
+                </td>`;
+            assignmentTableBody.appendChild(row);
+        });
+    }
+
+    async function postForm(url, formData) {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        if (response.status === 401) {
+            window.location.href = '/login-admin';
+            return null;
+        }
+        const payload = await response.json().catch(() => ({ success: false, message: 'Unexpected server response.' }));
+        if (!response.ok || payload.success === false) {
+            throw payload;
+        }
+        return payload;
+    }
+
+    assignmentForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = assignmentForm.querySelector('button[type="submit"]');
+        button.disabled = true;
+        try {
+            const payload = await postForm(assignmentForm.action, new FormData(assignmentForm));
+            if (!payload) return;
+            renderAssignments(payload.assignments);
+            showMessage('success', payload.message || 'Teacher assignment saved.');
+        } catch (error) {
+            if (error.assignments) renderAssignments(error.assignments);
+            showMessage('error', error.message || 'Unable to save teacher assignment.');
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    assignmentTableBody.addEventListener('submit', async event => {
+        const form = event.target.closest('.assignment-delete-form');
+        if (!form) return;
+        event.preventDefault();
+        if (!confirm('Remove this teacher assignment?')) return;
+        const button = form.querySelector('button[type="submit"]');
+        button.disabled = true;
+        try {
+            const payload = await postForm(form.action, new FormData(form));
+            if (!payload) return;
+            renderAssignments(payload.assignments);
+            showMessage('success', payload.message || 'Teacher assignment removed.');
+        } catch (error) {
+            if (error.assignments) renderAssignments(error.assignments);
+            showMessage('error', error.message || 'Unable to remove teacher assignment.');
+            button.disabled = false;
+        }
+    });
+
+    teacherSelect.addEventListener('change', refreshPreview);
+    courseSelect.addEventListener('change', () => { filterBatches(); refreshPreview(); });
+    batchSelect.addEventListener('change', refreshPreview);
+    filterBatches();
+    refreshPreview();
+</script>
+</body>
+</html>

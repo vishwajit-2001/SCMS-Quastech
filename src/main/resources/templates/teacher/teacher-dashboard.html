@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <script defer src="/js/chatbot.js"></script>
+    <style>
+        body.teacher-layout-page {
+            background:
+                radial-gradient(circle at top right, rgba(24, 181, 155, 0.18), transparent 24%),
+                radial-gradient(circle at left 18%, rgba(255, 166, 77, 0.12), transparent 20%),
+                linear-gradient(180deg, #f2fbfb 0%, #e7f5f3 46%, #f9fbf7 100%);
+        }
+
+        body.teacher-layout-page::before {
+            background-image:
+                linear-gradient(rgba(20, 128, 110, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20, 128, 110, 0.06) 1px, transparent 1px);
+        }
+
+        body.teacher-layout-page .student-shell {
+            --shell-bg-dark: #062c31;
+            --shell-bg-dark-2: #0b3a42;
+            --shell-gold: #10b39b;
+            --shell-gold-2: #ffd166;
+            --shell-surface-strong: rgba(255, 255, 255, 0.94);
+            --shell-border: rgba(10, 76, 83, 0.12);
+            --shell-text: #0f1720;
+            --shell-muted: #587074;
+        }
+
+        body.teacher-layout-page .portal-header-kicker,
+        body.teacher-layout-page .portal-link,
+        body.teacher-layout-page .portal-summary-label,
+        body.teacher-layout-page .portal-meta-label,
+        body.teacher-layout-page .portal-mini-note-label {
+            color: #0e8c7a;
+        }
+
+        body.teacher-layout-page .portal-header {
+            border-bottom-color: rgba(13, 121, 108, 0.12);
+            background: rgba(249, 255, 253, 0.78);
+        }
+
+        body.teacher-layout-page .portal-user-pill,
+        body.teacher-layout-page .portal-header-btn {
+            border-color: rgba(16, 179, 155, 0.16);
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        body.teacher-layout-page .portal-avatar {
+            background: linear-gradient(135deg, #10b39b 0%, #ffd166 100%);
+            color: #07363c;
+        }
+
+        body.teacher-layout-page .portal-hero-banner {
+            background:
+                radial-gradient(circle at top right, rgba(255, 209, 102, 0.22), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(16, 179, 155, 0.24), transparent 26%),
+                linear-gradient(135deg, #062c31 0%, #0e4048 55%, #16636a 100%);
+            box-shadow: 0 30px 60px rgba(4, 44, 49, 0.18);
+        }
+
+        body.teacher-layout-page .portal-hero-banner--college {
+            grid-template-columns: minmax(0, 1.25fr) minmax(240px, 0.75fr);
+            gap: 18px;
+            align-items: center;
+        }
+
+        body.teacher-layout-page .portal-hero-college-copy {
+            display: grid;
+            align-items: center;
+        }
+
+        body.teacher-layout-page .portal-hero-college-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        body.teacher-layout-page .portal-hero-college-text {
+            display: grid;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        body.teacher-layout-page .portal-hero-college-avatar {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(231, 235, 244, 0.14) 0%, rgba(250, 251, 253, 0.08) 100%);
+            border: 4px solid rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 24px rgba(8, 12, 20, 0.24);
+            flex-shrink: 0;
+        }
+
+        body.teacher-layout-page .portal-hero-college-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        body.teacher-layout-page .portal-hero-college-avatar span {
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+            font-weight: 700;
+            color: #f7f4eb;
+        }
+
+        body.teacher-layout-page .portal-hero-student-name {
+            margin: 0;
+            color: #ffffff;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(2.2rem, 4.8vw, 3.6rem);
+            line-height: 0.95;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        body.teacher-layout-page .portal-hero-teacher-meta {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        body.teacher-layout-page .portal-hero-college-side {
+            display: grid;
+            justify-items: end;
+            align-content: center;
+            gap: 6px;
+            text-align: right;
+            min-width: 0;
+        }
+
+        body.teacher-layout-page .portal-hero-college-name {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.86);
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(1.45rem, 3vw, 2.1rem);
+            line-height: 0.96;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+        }
+
+        body.teacher-layout-page .portal-hero-college-year {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.82);
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(1.25rem, 2.5vw, 1.85rem);
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        body.teacher-layout-page .portal-chip-row--hero {
+            margin-top: 8px;
+            gap: 8px;
+        }
+
+        body.teacher-layout-page .portal-chip-row--hero-right {
+            justify-content: flex-end;
+        }
+
+        body.teacher-layout-page .portal-chip--hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 34px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            font-size: 0.85rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        body.teacher-layout-page .portal-hero-kicker {
+            background: rgba(255, 255, 255, 0.16);
+            color: #d8fff1;
+            border-color: rgba(216, 255, 241, 0.14);
+        }
+
+        body.teacher-layout-page .portal-chip strong {
+            color: #ffd97e;
+        }
+
+        body.teacher-layout-page .portal-hero-action {
+            border-color: rgba(255, 209, 102, 0.2);
+            color: #effff9;
+        }
+
+        body.teacher-layout-page .portal-hero-action--primary {
+            background: linear-gradient(135deg, #10b39b 0%, #ffd166 100%);
+            color: #062c31;
+            box-shadow: 0 16px 30px rgba(16, 179, 155, 0.26);
+        }
+
+        body.teacher-layout-page .portal-hero-action--primary:hover {
+            background: linear-gradient(135deg, #1bc6ad 0%, #ffd97e 100%);
+            box-shadow: 0 18px 34px rgba(16, 179, 155, 0.34);
+        }
+
+        body.teacher-layout-page .portal-summary-card::before,
+        body.teacher-layout-page .portal-summary-card--dark::before {
+            background: linear-gradient(90deg, #10b39b, #ffd166);
+        }
+
+        body.teacher-layout-page .portal-summary-card:hover {
+            border-color: rgba(16, 179, 155, 0.22);
+        }
+
+        body.teacher-layout-page .portal-summary-card--dark {
+            background: linear-gradient(160deg, #072d32 0%, #10444a 58%, #165d65 100%);
+            border-color: rgba(16, 179, 155, 0.24);
+            box-shadow: 0 24px 40px rgba(7, 45, 50, 0.22);
+        }
+
+        body.teacher-layout-page .portal-summary-card--dark .portal-summary-label {
+            color: rgba(216, 255, 241, 0.88);
+        }
+
+        body.teacher-layout-page .portal-summary-card--dark .portal-summary-value,
+        body.teacher-layout-page .portal-summary-card--dark .portal-summary-meta,
+        body.teacher-layout-page .portal-summary-card--dark .portal-summary-action {
+            color: #ffffff;
+        }
+
+        body.teacher-layout-page .portal-surface,
+        body.teacher-layout-page .portal-summary-card {
+            border-color: rgba(9, 94, 96, 0.1);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 255, 252, 0.94) 100%);
+        }
+
+        body.teacher-layout-page .portal-summary-card--dark {
+            background: linear-gradient(160deg, #072d32 0%, #10444a 58%, #165d65 100%);
+            border-color: rgba(16, 179, 155, 0.24);
+            box-shadow: 0 24px 40px rgba(7, 45, 50, 0.22);
+        }
+
+        body.teacher-layout-page .portal-badge--info {
+            background: rgba(16, 179, 155, 0.14);
+            color: #087564;
+            border-color: rgba(16, 179, 155, 0.2);
+        }
+
+        body.teacher-layout-page .portal-badge--neutral {
+            background: rgba(255, 209, 102, 0.16);
+            color: #946200;
+            border-color: rgba(255, 209, 102, 0.22);
+        }
+
+        body.teacher-layout-page .portal-focus-panel,
+        body.teacher-layout-page .portal-task-panel,
+        body.teacher-layout-page .portal-empty-state,
+        body.teacher-layout-page .portal-mini-note,
+        body.teacher-layout-page .portal-mini-stat,
+        body.teacher-layout-page .portal-quick-link {
+            border-color: rgba(10, 110, 106, 0.1);
+            background: rgba(247, 255, 252, 0.86);
+        }
+
+        body.teacher-layout-page .portal-status-pill--accent,
+        body.teacher-layout-page .portal-slot-progress-bar,
+        body.teacher-layout-page .portal-progress-bar {
+            background: linear-gradient(90deg, #10b39b 0%, #ffd166 100%);
+        }
+
+        body.teacher-layout-page .teacher-roster-photo {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid rgba(16, 179, 155, 0.14);
+            background: #ecfffa;
+        }
+
+        body.teacher-layout-page .teacher-roster-fallback {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(16, 179, 155, 0.16), rgba(255, 209, 102, 0.28));
+            color: #0b5b5d;
+            font-weight: 700;
+        }
+
+        body.teacher-layout-page .teacher-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        @media (max-width: 768px) {
+            body.teacher-layout-page .portal-hero-banner--college {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            body.teacher-layout-page .portal-hero-college-head {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            body.teacher-layout-page .portal-hero-college-side {
+                justify-items: center;
+                text-align: center;
+            }
+
+            body.teacher-layout-page .portal-chip-row--hero-right {
+                justify-content: center;
+            }
+        }
+
+        body.teacher-layout-page .teacher-field {
+            display: grid;
+            gap: 8px;
+        }
+
+        body.teacher-layout-page .teacher-field--full {
+            grid-column: 1 / -1;
+        }
+
+        body.teacher-layout-page .teacher-field label {
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #0e8c7a;
+        }
+
+        body.teacher-layout-page .teacher-field input,
+        body.teacher-layout-page .teacher-field textarea {
+            width: 100%;
+            border: 1px solid rgba(9, 94, 96, 0.14);
+            border-radius: 18px;
+            padding: 13px 15px;
+            font: inherit;
+            background: rgba(255, 255, 255, 0.94);
+            color: #122028;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        body.teacher-layout-page .teacher-field textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        body.teacher-layout-page .teacher-field input:focus,
+        body.teacher-layout-page .teacher-field textarea:focus {
+            border-color: rgba(16, 179, 155, 0.42);
+            box-shadow: 0 0 0 4px rgba(16, 179, 155, 0.12);
+        }
+
+        body.teacher-layout-page .teacher-upload-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        body.teacher-layout-page .teacher-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 46px;
+            padding: 0 18px;
+            border-radius: 999px;
+            border: 0;
+            cursor: pointer;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b39b 0%, #ffd166 100%);
+            color: #062c31;
+            box-shadow: 0 16px 30px rgba(16, 179, 155, 0.2);
+        }
+
+        body.teacher-layout-page .teacher-inline-note {
+            color: #4b676b;
+            font-size: 0.92rem;
+        }
+
+        body.teacher-layout-page .teacher-alert {
+            padding: 12px 14px;
+            border-radius: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        body.teacher-layout-page .teacher-alert--success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #16753e;
+            border: 1px solid rgba(34, 197, 94, 0.16);
+        }
+
+        body.teacher-layout-page .teacher-alert--error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b02626;
+            border: 1px solid rgba(239, 68, 68, 0.16);
+        }
+
+        body.teacher-layout-page .teacher-upload-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            body.teacher-layout-page .teacher-form-grid,
+            body.teacher-layout-page .portal-summary-grid,
+        body.teacher-layout-page .portal-section-grid--dashboard-top,
+        body.teacher-layout-page .portal-section-grid--subject-fee,
+        body.teacher-layout-page .portal-section-grid--bottom {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        body.teacher-layout-page .portal-section-grid--dashboard-top {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        body.teacher-layout-page .portal-section-grid--subject-fee {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+    </style>
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='dashboard')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Teacher Dashboard', subtitle='Track your academic scope, publish study resources, and move between daily teaching tasks from one refreshed workspace.')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-hero-banner portal-hero-banner--college">
+                <div class="portal-hero-copy portal-hero-college-copy">
+
+                    <div class="portal-hero-college-head">
+                        <div class="portal-hero-college-avatar">
+                            <img th:if="${teacherPhoto != null and !#strings.isEmpty(teacherPhoto)}" th:src="${teacherPhoto}" alt="Teacher photo">
+                            <span th:if="${teacherPhoto == null or #strings.isEmpty(teacherPhoto)}" th:text="${teacherInitials}">TE</span>
+                        </div>
+                        <div class="portal-hero-college-text">
+                            <h2 class="portal-hero-student-name" th:text="${teacherName}">Teacher Name</h2>
+                            <p class="portal-hero-teacher-meta" th:text="${teacherDesignationLabel + ' | ' + teacherDepartmentLabel + ' | ' + teacherStatusLabel}">Faculty | Department | Active</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-hero-side portal-hero-college-side">
+                    <div th:if="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}" style="width:58px;height:58px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);margin-bottom:10px">
+                        <img th:src="${collegeLogoPath}" alt="College logo" style="width:100%;height:100%;object-fit:cover">
+                    </div>
+                    <h2 class="portal-hero-college-name portal-hero-college-name--side" th:text="${collegeName}">College Name</h2>
+                    <p class="portal-hero-college-year portal-hero-college-year--side" th:text="${teacherAcademicYearLabel}">2025-2026</p>
+                    <div class="portal-chip-row portal-chip-row--hero portal-chip-row--hero-right">
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-id-card"></i><strong th:text="${teacherEmployeeIdLabel}">EMP-001</strong></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-book-open"></i><span th:text="${teacherSubject} ?: 'General'">Subject</span></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-chalkboard-user"></i><span th:text="${teacherClassLabel}">Academic Scope</span></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-arrows-split-up-and-left"></i><span th:text="${teacherAssignedSemesterLabel}">Sem 1</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="portal-summary-grid">
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/teacher-students}">
+                    <p class="portal-summary-label">Student Strength</p>
+                    <h2 class="portal-summary-value" th:text="${totalStudents}">0</h2>
+                    <div class="portal-summary-meta" th:text="${teacherAssignedBatchLabel + ' · ' + teacherAssignedSemesterLabel}">Assigned batch</div>
+                    <div class="portal-summary-action">Open roster <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/teacher-study-materials}">
+                    <p class="portal-summary-label">Assigned Course</p>
+                    <h2 class="portal-summary-value" th:text="${teacherCourseLabel}">Course</h2>
+                    <div class="portal-summary-meta" th:text="${teacherAssignedBatchLabel}">Batch</div>
+                    <div class="portal-summary-action">Review course <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/teacher-timetable}">
+                    <p class="portal-summary-label">Assigned Semester</p>
+                    <h2 class="portal-summary-value" th:text="${teacherAssignedSemesterLabel}">Sem 1</h2>
+                    <div class="portal-summary-meta" th:text="${teacherAcademicYearLabel}">Academic year</div>
+                    <div class="portal-summary-action">Open timetable <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/teacher-profile}">
+                    <p class="portal-summary-label">Assigned Section</p>
+                    <h2 class="portal-summary-value" th:text="${teacherSectionLabel}">A</h2>
+                    <div class="portal-summary-meta" th:text="${teacherClassLabel}">Academic scope</div>
+                    <div class="portal-summary-action">Profile details <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/teacher-subjects}">
+                    <p class="portal-summary-label">Subject Count</p>
+                    <h2 class="portal-summary-value" th:text="${teacherAssignedSubjectCount}">0</h2>
+                    <div class="portal-summary-meta" th:text="${teacherAssignedSubjectCount > 0 ? teacherAssignedSubjects[0] : 'No subject linked yet'}">Assigned subject</div>
+                    <div class="portal-summary-action">View subjects <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Upcoming Exams</h2>
+                    <a class="portal-link" th:href="@{/teacher-exams}">Open exam center</a>
+                </div>
+                <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(teacherUpcomingExams)}">
+                    <a class="portal-alert portal-alert--interactive" th:each="exam : ${teacherUpcomingExams}" th:href="@{'/teacher-exams/' + ${exam.id} + '/attendance'}">
+                        <div class="portal-alert-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="portal-alert-copy">
+                            <div class="portal-alert-head">
+                                <h3 class="portal-alert-title" th:text="${exam.title}">Exam title</h3>
+                                <span class="portal-badge portal-badge--info" th:text="${exam.statusLabel}">Scheduled</span>
+                            </div>
+                            <p>
+                                <span th:text="${exam.subject}">Subject</span>
+                                <span> | </span>
+                                <span th:text="${exam.examDateLabel}">Date</span>
+                                <span> | </span>
+                                <span th:text="${exam.durationLabel}">Duration</span>
+                            </p>
+                        </div>
+                        <div class="portal-alert-trail"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    </a>
+                </div>
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(teacherUpcomingExams)}">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <h3>No exams scheduled yet</h3>
+                    <p>Create the first test from the exam center to activate reminders, seating, and student notifications.</p>
+                </div>
+            </section>
+
+            <section class="portal-section-grid portal-section-grid--dashboard-top">
+                <article class="portal-surface portal-surface--overview">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Teacher Overview</h2>
+                        <a class="portal-link" th:href="@{/teacher-profile}">Open profile</a>
+                    </div>
+
+                    <div class="portal-overview-layout">
+                        <div class="portal-overview-profile">
+                            <div class="portal-avatar-card">
+                                <div class="portal-avatar">
+                                    <img th:if="${teacher.photo != null and !#strings.isEmpty(teacher.photo)}" th:src="${teacher.photo}" alt="Teacher photo">
+                                    <span th:if="${teacher.photo == null or #strings.isEmpty(teacher.photo)}" th:text="${teacherInitials}">TE</span>
+                                </div>
+                                <div class="portal-avatar-copy">
+                                    <h2 th:text="${teacherName}">Teacher Name</h2>
+                                    <p>
+                                        <span th:text="${teacherDesignationLabel}">Faculty</span>
+                                        <span> | </span>
+                                        <span th:text="${teacherDepartmentLabel}">Department</span>
+                                        <span> | </span>
+                                        <span th:text="${teacherStatusLabel}">Status</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="portal-chip-row portal-chip-row--light">
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-book-open"></i><strong th:text="${teacherSubject} ?: 'General'">Subject</strong></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-users"></i><span th:text="${totalStudents} + ' students'">0 students</span></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-layer-group"></i><span th:text="${teacherAssignedBatchLabel}">Batch</span></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-door-open"></i><span th:text="${teacherRoomLabel}">Room</span></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-arrows-split-up-and-left"></i><span th:text="${teacherAssignedSemesterLabel}">Sem 1</span></span>
+                            </div>
+
+                            <div class="portal-focus-panel">
+                                <span class="portal-focus-kicker"><i class="fa-solid fa-bullseye"></i> Priority Focus</span>
+                                <h3 th:text="${teacherStudentWithPendingFees > 0 ? 'Academic follow-up needs attention' : 'Your teaching workspace looks healthy'}">Priority summary</h3>
+                                <p th:text="${teacherStudentWithPendingFees > 0 ? teacherStudentWithPendingFees + ' student(s) still have pending fees. Use the roster and notifications pages to coordinate follow-up.' : 'Study materials, student roster, and faculty profile are all available from this dashboard.'}">Priority detail</p>
+                            </div>
+
+                            <div class="portal-task-panel">
+                                <div class="portal-task-panel-head">
+                                    <span class="portal-task-panel-kicker"><i class="fa-solid fa-bolt"></i> Quick Teaching Tasks</span>
+                                    <span class="portal-badge portal-badge--neutral" th:text="${teacherCurrentDateLabel}">Today</span>
+                                </div>
+                                <div class="portal-task-list">
+                                    <div class="portal-task-item">
+                                        <strong>Review student roster</strong>
+                                        <span th:text="${totalStudents} + ' learner record(s) available in your assigned academic scope.'">Roster detail</span>
+                                    </div>
+                                    <div class="portal-task-item">
+                                        <strong>Update materials</strong>
+                                        <span th:text="${teacherStudyMaterialCount} + ' resource file(s) already uploaded for your academic scope.'">Material detail</span>
+                                    </div>
+                                    <div class="portal-task-item">
+                                        <strong>Check planning details</strong>
+                                        <span th:text="${teacherClassLabel + ' | ' + teacherAssignedYearLabel + ' | ' + teacherAssignedSemesterLabel}">Academic planning detail</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="portal-overview-meta">
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Employee ID</p>
+                                <p class="portal-meta-value" th:text="${teacherEmployeeIdLabel}">EMP</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Subject</p>
+                                <p class="portal-meta-value" th:text="${teacherSubject} ?: 'General'">Subject</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Department</p>
+                                <p class="portal-meta-value" th:text="${teacherDepartmentLabel}">Department</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Academic Scope</p>
+                                <p class="portal-meta-value" th:text="${teacherClassLabel}">Academic Scope</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Course</p>
+                                <p class="portal-meta-value" th:text="${teacherCourseLabel}">Course</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Batch</p>
+                                <p class="portal-meta-value" th:text="${teacherAssignedBatchLabel}">Batch</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Section</p>
+                                <p class="portal-meta-value" th:text="${teacherSectionLabel}">Section</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Semester</p>
+                                <p class="portal-meta-value" th:text="${teacherAssignedSemesterLabel}">Sem 1</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Joining Date</p>
+                                <p class="portal-meta-value" th:text="${teacherJoiningDateLabel}">Joining Date</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Academic Year</p>
+                                <p class="portal-meta-value" th:text="${teacherAcademicYearLabel}">Academic Year</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="portal-surface portal-surface--timetable">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Teaching Snapshot</h2>
+                        <a class="portal-link" th:href="@{/teacher-students}">Open full roster</a>
+                    </div>
+
+                    <div class="portal-timetable-status-row">
+                        <span class="portal-status-pill"><i class="fa-solid fa-users"></i><span th:text="${totalStudents} + ' students'">0 students</span></span>
+                        <span class="portal-status-pill portal-status-pill--accent"><i class="fa-solid fa-folder-tree"></i><span th:text="${teacherStudyMaterialCount} + ' files uploaded'">0 files</span></span>
+                        <span class="portal-status-pill"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${teacherStudentWithPendingFees} + ' fee follow-up'">0 follow-up</span></span>
+                        <span class="portal-live-clock"><i class="fa-regular fa-clock"></i><span class="js-live-clock">--:--</span></span>
+                    </div>
+
+                    <div class="portal-list portal-list--timetable" th:if="${!#lists.isEmpty(students)}">
+                        <article class="portal-list-item portal-list-item--slot" th:each="student, stat : ${students}" th:if="${stat.index < 5}">
+                            <div class="portal-list-icon portal-list-icon--slot">
+                                <img class="teacher-roster-photo" th:if="${student.photo != null and !#strings.isEmpty(student.photo)}" th:src="${student.photo}" alt="Student photo">
+                                <span class="teacher-roster-fallback" th:if="${student.photo == null or #strings.isEmpty(student.photo)}" th:text="${student.name != null and !#strings.isEmpty(student.name) ? #strings.substring(student.name,0,1) : 'S'}">S</span>
+                            </div>
+                            <div class="portal-slot-body">
+                                <div class="portal-slot-head">
+                                    <h3 class="portal-list-title" th:text="${student.name}">Student Name</h3>
+                                    <span class="portal-slot-state" th:text="${student.pendingFees != null and student.pendingFees > 0 ? 'Pending Fees' : 'Updated'}">Updated</span>
+                                </div>
+                                <div class="portal-list-meta" th:text="${student.rollNo != null and !#strings.isEmpty(student.rollNo) ? 'Roll No ' + student.rollNo : student.email}">Student identity</div>
+                                <div class="portal-slot-progress">
+                                    <span class="portal-slot-progress-bar" th:style="${'width:' + ((student.pendingFees != null and student.pendingFees > 0) ? 48 : 100) + '%'}"></span>
+                                </div>
+                            </div>
+                            <div class="portal-list-trail portal-list-trail--time">
+                                <strong th:text="${student.pendingFees != null ? 'Rs ' + #numbers.formatDecimal(student.pendingFees, 1, 'COMMA', 0, 'POINT') : 'Rs 0'}">Rs 0</strong>
+                                <span>Pending</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="portal-empty-state" th:if="${#lists.isEmpty(students)}">
+                        <i class="fa-regular fa-user"></i>
+                        <h3>No students assigned yet</h3>
+                        <p>Assign a batch, semester, and academic scope to this faculty member to populate the dashboard with live student records.</p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid portal-section-grid--subject-fee">
+                <article class="portal-surface portal-surface--subjects-overview" id="study-materials">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Study Material Upload</h2>
+                        <a class="portal-link" th:href="@{/teacher-study-materials}">Open materials</a>
+                    </div>
+
+                    <div th:if="${teacherStudyMaterialSuccess != null}" class="teacher-alert teacher-alert--success" th:text="${teacherStudyMaterialSuccess}">Upload success</div>
+                    <div th:if="${teacherStudyMaterialError != null}" class="teacher-alert teacher-alert--error" th:text="${teacherStudyMaterialError}">Upload error</div>
+
+                    <div class="portal-section-intro">
+                        <p>Share notes, presentations, worksheets, or PDFs directly with your assigned semester scope from the dashboard.</p>
+                    </div>
+
+                    <form method="post" th:action="@{/teacher-study-materials/upload}" enctype="multipart/form-data">
+                        <div class="teacher-form-grid">
+                            <div class="teacher-field teacher-field--full">
+                                <label for="studyTitle">Title</label>
+                                <input id="studyTitle" name="title" type="text" placeholder="Unit 1 - OOP Basics" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="studySubject">Subject</label>
+                                <input id="studySubject" name="subject" type="text" th:value="${teacherDefaultSubject}" placeholder="Java Programming" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="studySemester">Semester</label>
+                                <input id="studySemester" name="semester" type="text" th:value="${teacherDefaultSemester}" placeholder="1" required>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="studyDescription">Description</label>
+                                <textarea id="studyDescription" name="description" placeholder="Short note about the uploaded resource"></textarea>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="studyFile">File</label>
+                                <input id="studyFile" name="file" type="file" required>
+                            </div>
+                        </div>
+
+                        <div class="teacher-upload-actions">
+                            <div class="teacher-upload-meta">
+                                <span class="portal-badge portal-badge--info" th:text="${teacherClassLabel}">Academic Scope</span>
+                                <span class="portal-badge portal-badge--neutral" th:text="${teacherStudyMaterialCount} + ' current file(s)'">0 files</span>
+                            </div>
+                            <button class="teacher-upload-btn" type="submit">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                Upload resource
+                            </button>
+                        </div>
+                    </form>
+                </article>
+
+            </section>
+
+            <section class="portal-section-grid portal-section-grid--bottom">
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Recent Material Library</h2>
+                        <a class="portal-link" th:href="@{/teacher-study-materials}">All materials</a>
+                    </div>
+
+                    <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(teacherStudyMaterials)}">
+                        <a class="portal-alert portal-alert--interactive"
+                           th:each="material, stat : ${teacherStudyMaterials}"
+                           th:if="${stat.index < 4}"
+                           th:href="@{'/study-materials/view/' + ${material.id}}">
+                            <div class="portal-alert-icon">
+                                <i class="fa-solid fa-file-arrow-up"></i>
+                            </div>
+                            <div class="portal-alert-copy">
+                                <div class="portal-alert-head">
+                                    <h3 class="portal-alert-title" th:text="${material.title}">Material title</h3>
+                                    <span class="portal-badge portal-badge--info" th:text="${material.displayFileType}">PDF</span>
+                                </div>
+                                <p th:text="${material.subject + ' | ' + material.uploadedAtLabel + ' | ' + material.readableFileSize}">Material description</p>
+                            </div>
+                            <div class="portal-alert-trail"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                        </a>
+                    </div>
+
+                    <div class="portal-empty-state" th:if="${#lists.isEmpty(teacherStudyMaterials)}">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <h3>No study materials yet</h3>
+                        <p>Upload a first file from this dashboard to start building your class resource library.</p>
+                    </div>
+                </article>
+
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Teacher Workspace</h2>
+                        <span class="portal-badge portal-badge--neutral">Quick links</span>
+                    </div>
+
+                    <div class="portal-quick-link-grid">
+                        <a class="portal-quick-link" th:href="@{/teacher-profile}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-user"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Profile</strong>
+                                <small>Faculty identity and records</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-students}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Students</strong>
+                                <small>View the assigned class roster</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-attendance}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-clipboard-check"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Attendance</strong>
+                                <small>Track and update attendance</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-marks}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-square-poll-vertical"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Marks</strong>
+                                <small>Manage grading and scores</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-assignments}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-pen-ruler"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Assignments</strong>
+                                <small>Create and review coursework</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-study-materials}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-folder-open"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Study Materials</strong>
+                                <small>Notes, PDFs, and slides for students</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-events}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-calendar-check"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Events</strong>
+                                <small>Publish activities and registrations</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-timetable}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Timetable</strong>
+                                <small>Review weekly teaching schedule</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-notifications}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-bell"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Notifications</strong>
+                                <small>Stay on top of updates and alerts</small>
+                            </span>
+                        </a>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="scms-chatbot"
+     th:attr="data-role='TEACHER',
+              data-display-name=${teacherName},
+              data-college-name=${collegeName},
+              data-message-endpoint='/api/chatbot/message',
+              data-context-endpoint='/api/chatbot/context'">
+    <button class="scms-chatbot-launcher" type="button" aria-expanded="false" aria-label="Open CHATBOT">
+        <span class="scms-chatbot-launcher-mark" aria-hidden="true">
+            <span class="scms-chatbot-launcher-dot scms-chatbot-launcher-dot--blue"></span>
+            <span class="scms-chatbot-launcher-dot scms-chatbot-launcher-dot--orange"></span>
+        </span>
+        <span class="scms-chatbot-launcher-copy">
+            <strong>CHATBOT</strong>
+        </span>
+    </button>
+    <div class="scms-chatbot-shell" hidden>
+        <button class="scms-chatbot-backdrop" type="button" aria-label="Close assistant"></button>
+        <section class="scms-chatbot-panel" role="dialog" aria-modal="true" aria-label="Campus Assistant">
+            <header class="scms-chatbot-header">
+                <div class="scms-chatbot-header-copy">
+                    <span class="scms-chatbot-kicker">Teacher console</span>
+                    <h2 class="scms-chatbot-title">Campus Assistant</h2>
+                    <p class="scms-chatbot-subtitle" th:text="${collegeName}">College</p>
+                </div>
+                <div class="scms-chatbot-header-actions">
+                    <div class="scms-chatbot-status">
+                        <span class="scms-chatbot-status-dot"></span>
+                        <span>Live</span>
+                    </div>
+                    <button class="scms-chatbot-close" type="button" aria-label="Close assistant">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </header>
+            <div class="scms-chatbot-body">
+                <div class="scms-chatbot-intro">
+                    <span class="scms-chatbot-intro-label">Quick help</span>
+                    <p>Ask about timetable, fees, subjects, assignments, or profile details.</p>
+                </div>
+                <div class="scms-chatbot-messages" aria-live="polite" aria-relevant="additions"></div>
+                <div class="scms-chatbot-suggestions" aria-label="Quick prompts"></div>
+            </div>
+            <form class="scms-chatbot-form" autocomplete="off">
+                <label class="sr-only" for="scmsChatInput">Ask the assistant</label>
+                <textarea id="scmsChatInput" class="scms-chatbot-input" rows="1" placeholder="Ask about timetable, fees, students..." maxlength="1000"></textarea>
+                <button type="submit" class="scms-chatbot-send">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

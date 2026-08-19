@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Import Center - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .content-wrap{padding:28px 32px 48px}
+        .import-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+        .import-card{border:1px solid var(--light);border-radius:22px;background:var(--white);padding:22px;box-shadow:0 12px 30px rgba(31,41,55,.05)}
+        .import-card h3{font-family:var(--serif);font-size:28px;margin-bottom:8px}
+        .import-card p{color:#8a7a6a;font-size:13px;line-height:1.6;margin-bottom:16px}
+        .import-points{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;color:#6a6050;font-size:13px}
+        .import-points span{display:flex;align-items:center;gap:8px}
+        .upload-box{border:1.5px dashed var(--gold-br);border-radius:18px;background:linear-gradient(180deg,#fff,#faf7f0);padding:18px}
+        .upload-box label{display:block;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+        .upload-box input{width:100%;padding:12px;border:1px solid var(--light);border-radius:12px;background:var(--offwhite)}
+        .template-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+        .form-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:22px}
+        @media (max-width:900px){.import-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('import-center')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Bulk Import Center</div>
+        <div class="header-right">
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content-wrap">
+        <div class="alert alert-success" th:if="${importSuccess != null}">
+            <i class="fa fa-check-circle"></i>
+            <span th:text="${importSuccess}"></span>
+        </div>
+        <div class="alert alert-error" th:if="${importError != null}">
+            <i class="fa fa-exclamation-circle"></i>
+            <span th:text="${importError}"></span>
+        </div>
+
+        <div class="box" style="margin-bottom:22px">
+            <div class="box-title"><i class="fa fa-file-import" style="color:var(--gold)"></i> Import Students And Teachers Together</div>
+            <div style="color:#8a7a6a;font-size:13px;line-height:1.6">
+                Ek hi submit me student aur teacher dono files upload kar sakte ho. Har file independently validate hogi, valid rows import hongi, aur invalid rows skip ho jayengi.
+            </div>
+        </div>
+
+        <form action="/admin-import-center/import" method="post" enctype="multipart/form-data">
+            <div class="import-grid">
+                <div class="import-card">
+                    <h3>Students</h3>
+                    <p>CSV, TSV, TXT, XLSX, aur XLS support hai. Photo ke liye optional <strong>Photo Path</strong> column use kar sakte ho.</p>
+                    <div class="import-points">
+                        <span><i class="fa fa-circle-check" style="color:var(--green)"></i> Template same header order me hona chahiye</span>
+                        <span><i class="fa fa-circle-check" style="color:var(--green)"></i> Batch aur Course database me exist karne chahiye</span>
+                        <span><i class="fa fa-circle-check" style="color:var(--green)"></i> Photo file 2 MB se chhoti honi chahiye</span>
+                    </div>
+                    <div class="upload-box">
+                        <label for="studentFile">Student File</label>
+                        <input type="file" id="studentFile" name="studentFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
+                    </div>
+                    <div class="template-row">
+                        <a href="/admin/students/import/template" class="btn-outline"><i class="fa fa-download"></i> Download Student Template</a>
+                        <a href="/admin-students?openImport=1" class="btn-dark"><i class="fa fa-eye"></i> Preview Student Import</a>
+                    </div>
+                </div>
+
+                <div class="import-card">
+                    <h3>Teachers</h3>
+                    <p>CSV, TSV, TXT, XLSX, aur XLS support hai. Photo ke liye optional <strong>Photo Path</strong> column use kar sakte ho.</p>
+                    <div class="import-points">
+                        <span><i class="fa fa-circle-check" style="color:var(--green)"></i> Subject Specialization required hai</span>
+                        <span><i class="fa fa-circle-check" style="color:var(--green)"></i> Duplicate email rows reject hongi</span>
+                        <span><i class="fa fa-circle-check" style="color:var(--green)"></i> Photo file 2 MB se chhoti honi chahiye</span>
+                    </div>
+                    <div class="upload-box">
+                        <label for="teacherFile">Teacher File</label>
+                        <input type="file" id="teacherFile" name="teacherFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
+                    </div>
+                    <div class="template-row">
+                        <a href="/admin/teachers/import/template" class="btn-outline"><i class="fa fa-download"></i> Download Teacher Template</a>
+                        <a href="/admin-teachers?openImport=1" class="btn-dark"><i class="fa fa-eye"></i> Preview Teacher Import</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="/admin-dashboard" class="btn-outline"><i class="fa fa-times"></i> Cancel</a>
+                <button type="submit" class="btn-gold"><i class="fa fa-file-import"></i> Import Selected Files</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

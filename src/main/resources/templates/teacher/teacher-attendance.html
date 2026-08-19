@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='attendance')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Attendance', subtitle='Mark daily attendance with a cleaner table, faster actions, and a consistent teacher workspace.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-clipboard-check"></i> Academic Component</span>
+                    <h2 class="portal-hero-title">Attendance Manager</h2>
+                    <p class="portal-hero-subtitle">
+                        <span th:text="${teacherClassLabel}">Assigned academic scope</span>
+                        <span> | </span>
+                        <span th:text="${teacherSubject} ?: 'Subject'">Subject</span>
+                    </p>
+                    <div class="portal-hero-actions">
+                        <button type="button" class="portal-hero-action portal-hero-action--primary" onclick="markAll('present')">
+                            <i class="fa-solid fa-check"></i>
+                            Mark all present
+                        </button>
+                        <button type="button" class="portal-hero-action" onclick="markAll('absent')">
+                            <i class="fa-solid fa-xmark"></i>
+                            Mark all absent
+                        </button>
+                    </div>
+                </div>
+                <div class="portal-hero-side">
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">History Sessions</p>
+                        <p class="portal-side-value" th:text="${teacherAttendanceHistoryCount}">0</p>
+                        <div class="portal-side-meta">Editable saved records</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-grid-two">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Session Details</h2>
+                            <p class="teacher-panel-subtitle">Choose one of your assigned timetable slots before saving attendance.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-form-grid teacher-form-grid--three">
+                        <div class="teacher-field">
+                            <label for="timetableSlotId">Timetable Slot</label>
+                            <select id="timetableSlotId" name="timetableSlotId" form="attendanceForm" required>
+                                <option value="">Select assigned slot</option>
+                                <option th:each="slot : ${teacherAttendanceSlots}"
+                                        th:value="${slot.id}"
+                                        th:text="${slot.displayLabel}">Monday 10:00-11:00 | Subject</option>
+                            </select>
+                        </div>
+                        <div class="teacher-field">
+                            <label for="attDate">Date</label>
+                            <input id="attDate" name="attendanceDate" form="attendanceForm" type="date" required>
+                        </div>
+                        <div class="teacher-field">
+                            <label for="lectureNo">Slot / Lecture Note</label>
+                            <input id="lectureNo" name="lectureNo" form="attendanceForm" type="text" placeholder="Optional">
+                        </div>
+                    </div>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Live Summary</h2>
+                            <p class="teacher-panel-subtitle">Counters update as you toggle attendance below.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-stat-row">
+                        <span class="teacher-stat-chip"><i class="fa-solid fa-circle-check"></i> Present: <strong id="cnt-present">0</strong></span>
+                        <span class="teacher-stat-chip"><i class="fa-solid fa-circle-xmark"></i> Absent: <strong id="cnt-absent">0</strong></span>
+                        <span class="teacher-stat-chip"><i class="fa-solid fa-clock"></i> Late: <strong id="cnt-late">0</strong></span>
+                        <span class="teacher-stat-chip"><i class="fa-solid fa-users"></i> Total: <strong id="cnt-total">0</strong></span>
+                    </div>
+                </article>
+            </section>
+
+            <section class="teacher-panel">
+                <div class="teacher-panel-head">
+                    <div>
+                        <h2 class="teacher-panel-title">Mark Attendance</h2>
+                        <p class="teacher-panel-subtitle">Use the segmented controls to save present, late, or absent status per student.</p>
+                    </div>
+                </div>
+
+                <div th:if="${success}" class="teacher-alert teacher-alert--success" th:text="${success}">Attendance saved!</div>
+                <div th:if="${attendanceError}" class="teacher-alert teacher-alert--danger" th:text="${attendanceError}">Attendance error</div>
+
+                <form id="attendanceForm" action="/teacher-attendance-submit" method="post">
+                    <div class="teacher-table-wrap">
+                        <table class="teacher-table" id="attTable">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Roll No.</th>
+                                <th>Name</th>
+                                <th>Course</th>
+                                <th>Semester</th>
+                                <th>Section</th>
+                                <th>Attendance</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="student, iterStat : ${students}">
+                                <td th:text="${iterStat.count}">1</td>
+                                <td>
+                                    <span class="teacher-id-chip" th:text="${student.rollNo != null and !#strings.isEmpty(student.rollNo) ? student.rollNo : student.id}">1</span>
+                                    <input type="hidden" th:name="'studentId_' + ${student.id}" th:value="${student.id}">
+                                </td>
+                                <td th:text="${student.name}">Student Name</td>
+                                <td th:text="${student.course} ?: 'Not assigned'">Course</td>
+                                <td th:text="${student.semester != null and !#strings.isEmpty(student.semester) ? student.semester : teacherAssignedSemesterLabel}">Sem 1</td>
+                                <td th:text="${student.sectionName != null and !#strings.isEmpty(student.sectionName) ? student.sectionName : teacherSectionLabel}">A</td>
+                                <td>
+                                    <div class="teacher-toggle-group">
+                                        <button type="button" class="teacher-toggle-btn present active" th:attr="data-student-id=${student.id}" onclick="setAtt(this, 'present')">Present</button>
+                                        <button type="button" class="teacher-toggle-btn late" th:attr="data-student-id=${student.id}" onclick="setAtt(this, 'late')">Late</button>
+                                        <button type="button" class="teacher-toggle-btn absent" th:attr="data-student-id=${student.id}" onclick="setAtt(this, 'absent')">Absent</button>
+                                    </div>
+                                    <input type="hidden" th:name="'status_' + ${student.id}" th:id="'status_' + ${student.id}" value="present">
+                                </td>
+                            </tr>
+                            <tr th:if="${students == null or #lists.isEmpty(students)}">
+                                <td colspan="7">
+                                    <div class="teacher-empty">No students are linked to this teacher assignment yet.</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="teacher-actions-row">
+                        <div class="teacher-inline-tags">
+                            <span class="teacher-pill"><i class="fa-solid fa-layer-group"></i><span th:text="${teacherClassLabel}">Academic Scope</span></span>
+                            <span class="teacher-pill"><i class="fa-solid fa-calendar-days"></i><span th:text="${teacherAttendanceSlotCount + ' timetable slot(s)'}">Slots</span></span>
+                        </div>
+                        <div class="teacher-filter-row">
+                            <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-floppy-disk"></i> Save attendance</button>
+                            <button type="reset" class="teacher-btn teacher-btn--secondary" onclick="resetAll()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <section class="teacher-panel">
+                <div class="teacher-panel-head">
+                    <div>
+                        <h2 class="teacher-panel-title">Attendance History</h2>
+                        <p class="teacher-panel-subtitle">Filter by date, subject, or roll number, then correct present/absent rows when required.</p>
+                    </div>
+                </div>
+
+                <form method="get" action="/teacher-attendance" class="teacher-form-grid teacher-form-grid--three" style="margin-bottom:16px;">
+                    <div class="teacher-field">
+                        <label for="historyDate">Date</label>
+                        <input id="historyDate" name="historyDate" type="date" th:value="${historyDateFilter}">
+                    </div>
+                    <div class="teacher-field">
+                        <label for="historySubject">Subject / Slot</label>
+                        <input id="historySubject" name="historySubject" type="text" th:value="${historySubjectFilter}" placeholder="Software Engineering">
+                    </div>
+                    <div class="teacher-field">
+                        <label for="historyRollNo">Student Roll No.</label>
+                        <input id="historyRollNo" name="historyRollNo" type="text" th:value="${historyRollNoFilter}" placeholder="Roll no">
+                    </div>
+                    <div class="teacher-actions-row" style="grid-column:1 / -1; margin-top:0;">
+                        <div class="teacher-inline-tags">
+                            <span class="teacher-pill"><i class="fa-solid fa-clock-rotate-left"></i><span th:text="${teacherAttendanceHistoryCount + ' session(s) found'}">History</span></span>
+                        </div>
+                        <div class="teacher-filter-row">
+                            <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-filter"></i> Apply filters</button>
+                            <a href="/teacher-attendance" class="teacher-btn teacher-btn--secondary"><i class="fa-solid fa-rotate-right"></i> Clear</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="teacher-empty" th:if="${teacherAttendanceHistory == null or #lists.isEmpty(teacherAttendanceHistory)}">
+                    No attendance history found for the selected filters.
+                </div>
+
+                <div class="portal-stack" style="display:grid; gap:16px;" th:if="${teacherAttendanceHistory != null and !#lists.isEmpty(teacherAttendanceHistory)}">
+                    <article class="teacher-panel" th:each="history : ${teacherAttendanceHistory}">
+                        <div class="teacher-panel-head">
+                            <div>
+                                <h3 class="teacher-panel-title" th:text="${history.subject}">Subject</h3>
+                                <p class="teacher-panel-subtitle" th:text="${history.dateLabel + ' | ' + history.lectureNo + ' | ' + history.classLabel}">Date | Slot | Class</p>
+                            </div>
+                            <div class="teacher-stat-row">
+                                <span class="teacher-stat-chip"><i class="fa-solid fa-circle-check"></i> Present: <strong th:text="${history.presentCount}">0</strong></span>
+                                <span class="teacher-stat-chip"><i class="fa-solid fa-circle-xmark"></i> Absent: <strong th:text="${history.absentCount}">0</strong></span>
+                                <span class="teacher-stat-chip"><i class="fa-solid fa-clock"></i> Late: <strong th:text="${history.lateCount}">0</strong></span>
+                                <span class="teacher-stat-chip"><i class="fa-solid fa-users"></i> Total: <strong th:text="${history.totalCount}">0</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="teacher-table-wrap">
+                            <table class="teacher-table">
+                                <thead>
+                                <tr>
+                                    <th>Roll No.</th>
+                                    <th>Student</th>
+                                    <th>Status</th>
+                                    <th>Last Updated</th>
+                                    <th>Edit</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="entry : ${history.entries}">
+                                    <td><span class="teacher-id-chip" th:text="${entry.rollNo}">R01</span></td>
+                                    <td th:text="${entry.studentName}">Student</td>
+                                    <td>
+                                        <span class="teacher-status-chip"
+                                              th:classappend="${entry.status == 'absent'} ? ' teacher-status-chip--danger' : (${entry.status == 'late'} ? ' teacher-status-chip--warning' : ' teacher-status-chip--success')"
+                                              th:text="${#strings.capitalize(entry.status)}">Present</span>
+                                    </td>
+                                    <td th:text="${entry.markedAtLabel}">Time</td>
+                                    <td>
+                                        <div class="teacher-filter-row">
+                                            <form method="post" th:action="@{'/teacher-attendance-entry/' + ${entry.id} + '/status'}">
+                                                <input type="hidden" name="status" value="present">
+                                                <button type="submit" class="teacher-btn teacher-btn--secondary"><i class="fa-solid fa-check"></i> Present</button>
+                                            </form>
+                                            <form method="post" th:action="@{'/teacher-attendance-entry/' + ${entry.id} + '/status'}">
+                                                <input type="hidden" name="status" value="absent">
+                                                <button type="submit" class="teacher-btn teacher-btn--secondary"><i class="fa-solid fa-xmark"></i> Absent</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script src="/js/student/student-dashboard-layout.js"></script>
+<script>
+    document.getElementById('attDate').valueAsDate = new Date();
+
+    function setAtt(clickedBtn, status) {
+        const row = clickedBtn.closest('tr');
+        const studentId = clickedBtn.dataset.studentId;
+        row.querySelectorAll('.teacher-toggle-btn').forEach(function (button) {
+            button.classList.remove('active');
+        });
+        clickedBtn.classList.add('active');
+        document.getElementById('status_' + studentId).value = status;
+        updateCounters();
+    }
+
+    function markAll(status) {
+        document.querySelectorAll('#attTable tbody tr').forEach(function (row) {
+            if (!row.querySelector('.teacher-toggle-btn')) {
+                return;
+            }
+            row.querySelectorAll('.teacher-toggle-btn').forEach(function (button) {
+                button.classList.remove('active');
+            });
+            const target = row.querySelector('.teacher-toggle-btn.' + status);
+            if (target) {
+                target.classList.add('active');
+            }
+            const studentId = row.querySelector('.teacher-toggle-btn')?.dataset.studentId;
+            const hidden = studentId ? document.getElementById('status_' + studentId) : null;
+            if (hidden) {
+                hidden.value = status;
+            }
+        });
+        updateCounters();
+    }
+
+    function updateCounters() {
+        let present = 0;
+        let absent = 0;
+        let late = 0;
+        let total = 0;
+
+        document.querySelectorAll('#attTable tbody tr').forEach(function (row) {
+            if (!row.querySelector('.teacher-toggle-btn')) {
+                return;
+            }
+            total++;
+            const active = row.querySelector('.teacher-toggle-btn.active');
+            if (!active) {
+                return;
+            }
+            if (active.classList.contains('present')) present++;
+            if (active.classList.contains('absent')) absent++;
+            if (active.classList.contains('late')) late++;
+        });
+
+        document.getElementById('cnt-present').textContent = present;
+        document.getElementById('cnt-absent').textContent = absent;
+        document.getElementById('cnt-late').textContent = late;
+        document.getElementById('cnt-total').textContent = total;
+    }
+
+    function resetAll() {
+        markAll('present');
+    }
+
+    window.addEventListener('load', updateCounters);
+</script>
+</body>
+</html>

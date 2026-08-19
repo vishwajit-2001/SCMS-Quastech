@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Global configuration</div>
+                <div class="sa-title">Settings</div>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-grid-2">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>System defaults</h2>
+                            <p>Platform-wide ERP settings and branding.</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-grid-2">
+                            <div class="sa-card" th:each="setting : ${settingsCards}">
+                                <div class="sa-stat">
+                                    <div class="sa-stat-copy">
+                                        <div class="sa-stat-label" th:text="${setting.label}">Label</div>
+                                        <div class="sa-stat-sub" th:text="${setting.value}">Value</div>
+                                    </div>
+                                    <div class="sa-stat-icon primary"><i class="fa fa-sliders"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Branding and security</h2>
+                            <p>Use these controls to align the ERP to the organization.</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-notice" style="margin-bottom:14px">
+                            <i class="fa fa-lock"></i>
+                            Role-based access, tenant isolation, and BCrypt authentication are active.
+                        </div>
+                        <div class="sa-notice success">
+                            <i class="fa fa-circle-check"></i>
+                            Super admin can centrally manage college admin accounts from this console.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

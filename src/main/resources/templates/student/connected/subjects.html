@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Subjects - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        body.student-layout-page .portal-badge--project {
+            color: #7c3aed;
+            background: rgba(124, 58, 237, 0.14);
+            border: 1px solid rgba(124, 58, 237, 0.24);
+        }
+
+        body.student-layout-page .portal-badge--custom {
+            color: #c2410c;
+            background: rgba(249, 115, 22, 0.14);
+            border: 1px solid rgba(249, 115, 22, 0.26);
+        }
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='subjects')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Subjects')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Subjects</h2>
+                    <span class="portal-badge portal-badge--neutral" th:text="${studentYearTypeLabel + ' · ' + studentSemesterLabel}">FY · Sem 1</span>
+                </div>
+
+                <div class="portal-table-wrap" th:if="${!#lists.isEmpty(subjectCatalogRows)}">
+                    <table class="portal-table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Subject Name</th>
+                            <th>Subject Code</th>
+                            <th>Credits</th>
+                            <th>Category</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="subject : ${subjectCatalogRows}">
+                            <td th:text="${subject.rowNumber}">1</td>
+                            <td th:text="${subject.title}">Subject</td>
+                            <td th:text="${subject.code}">SUB01</td>
+                            <td th:text="${subject.credits}">4.00</td>
+                            <td>
+                                <span class="portal-badge"
+                                      th:classappend="${subject.categoryBadgeClass}"
+                                      th:text="${subject.category}">COMPULSORY CORE</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(subjectCatalogRows)}">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    <h3>No subjects assigned for your current semester yet.</h3>
+                    <p>Your subject list will appear here as soon as admin assigns active batch subjects for this semester.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

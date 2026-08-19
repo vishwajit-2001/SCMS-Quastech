@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(activePage)" class="portal-sidebar">
+    <div class="portal-sidebar-brand">
+        <div class="portal-brand-icon">
+            <img th:if="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}"
+                 th:src="${collegeLogoPath}"
+                 alt="College logo"
+                 style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+            <i th:unless="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}" class="fa-solid fa-chalkboard-user"></i>
+        </div>
+        <div class="portal-brand-copy">
+            <h2 th:text="${collegeName} ?: 'AI Campus'">AI Campus</h2>
+            <p>Teacher Portal</p>
+        </div>
+    </div>
+
+    <div class="portal-sidebar-frame">
+        <nav class="portal-sidebar-nav" aria-label="Teacher navigation">
+            <div class="portal-section-title">Main</div>
+            <a th:href="@{/teacher-dashboard}" class="portal-nav-item" th:classappend="${activePage == 'dashboard'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
+                <span class="portal-nav-label">Dashboard</span>
+            </a>
+            <div class="portal-section-title">Academic</div>
+            <a th:href="@{/teacher-timetable}" class="portal-nav-item" th:classappend="${activePage == 'timetable'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="portal-nav-label">Timetable</span>
+            </a>
+            <a th:href="@{/teacher-students}" class="portal-nav-item" th:classappend="${activePage == 'students'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                <span class="portal-nav-label">Students</span>
+            </a>
+            <a th:href="@{/teacher-subjects}" class="portal-nav-item" th:classappend="${activePage == 'subjects'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-book-open"></i></span>
+                <span class="portal-nav-label">Subjects</span>
+            </a>
+            <a th:href="@{/teacher-attendance}" class="portal-nav-item" th:classappend="${activePage == 'attendance'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>
+                <span class="portal-nav-label">Attendance</span>
+            </a>
+            <a th:href="@{/teacher-assignments}" class="portal-nav-item" th:classappend="${activePage == 'assignments'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-pen-ruler"></i></span>
+                <span class="portal-nav-label">Assignments</span>
+            </a>
+            <a th:href="@{/teacher-study-materials}" class="portal-nav-item" th:classappend="${activePage == 'study-materials'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-folder-open"></i></span>
+                <span class="portal-nav-label">Study Materials</span>
+            </a>
+            <a th:href="@{/teacher-exams}" class="portal-nav-item" th:classappend="${activePage == 'exams'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                <span class="portal-nav-label">Exams</span>
+            </a>
+            <a th:href="@{/teacher-events}" class="portal-nav-item" th:classappend="${activePage == 'events'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-calendar-check"></i></span>
+                <span class="portal-nav-label">Events &amp; Activities</span>
+            </a>
+            <a th:href="@{/teacher-marks}" class="portal-nav-item" th:classappend="${activePage == 'marks'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-square-poll-vertical"></i></span>
+                <span class="portal-nav-label">Marks / Grades</span>
+            </a>
+
+            <div class="portal-section-title">Account</div>
+            <a th:href="@{/teacher-profile}" class="portal-nav-item" th:classappend="${activePage == 'profile'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-user"></i></span>
+                <span class="portal-nav-label">Profile</span>
+            </a>
+            <a th:href="@{/teacher-notifications}" class="portal-nav-item" th:classappend="${activePage == 'notifications'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-bell"></i></span>
+                <span class="portal-nav-label">Notifications</span>
+            </a>
+        </nav>
+
+        <div class="portal-sidebar-footer">
+            <a th:href="@{/login-teacher}" class="portal-logout-btn" title="Logout">
+                <span class="portal-nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                <span class="portal-nav-label">Logout</span>
+            </a>
+        </div>
+    </div>
+</aside>
+</body>
+</html>

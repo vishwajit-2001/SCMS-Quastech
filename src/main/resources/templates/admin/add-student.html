@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: var(--offwhite, #faf8f5);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .sidebar {
+            width: 240px; min-width: 240px; max-width: 240px;
+            flex-shrink: 0; height: 100vh;
+            position: fixed; top: 0; left: 0;
+            overflow-y: auto; z-index: 100;
+        }
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+        .header {
+            width: 100%; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 32px; height: 64px; flex-shrink: 0;
+        }
+        .content { flex: 1; padding: 28px 32px 48px; width: 100%; }
+        .page-grid { display: grid; grid-template-columns: 1fr; gap: 22px; }
+        .box { width: 100% !important; max-width: 100% !important; }
+
+        .photo-upload-wrapper {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 12px; margin-bottom: 28px;
+        }
+        .photo-circle {
+            position: relative; width: 120px; height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 3px solid var(--gold, #c9a84c);
+            box-shadow: 0 0 0 6px rgba(201,168,76,0.12), 0 8px 32px rgba(0,0,0,0.35);
+            cursor: pointer; overflow: hidden;
+            transition: box-shadow 0.3s ease, transform 0.25s ease;
+        }
+        .photo-circle:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 0 8px rgba(201,168,76,0.22), 0 12px 40px rgba(0,0,0,0.4);
+        }
+        .photo-circle img { width:100%; height:100%; object-fit:cover; display:none; border-radius:50%; }
+        .photo-placeholder {
+            width:100%; height:100%;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:6px; color:var(--gold,#c9a84c);
+            pointer-events:none;
+        }
+        .photo-placeholder i { font-size:30px; opacity:0.85; }
+        .photo-placeholder span {
+            font-size:10px; font-weight:500; letter-spacing:0.08em;
+            text-transform:uppercase; opacity:0.7;
+        }
+        .photo-circle .hover-overlay {
+            position:absolute; inset:0; border-radius:50%;
+            background:rgba(0,0,0,0.45);
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:5px; opacity:0; transition:opacity 0.25s; color:#fff;
+            font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+        }
+        .photo-circle:hover .hover-overlay { opacity:1; }
+        .photo-circle .hover-overlay i { font-size:22px; }
+        #photoInput { display:none; }
+        .photo-hint { font-size:11.5px; color:#888; letter-spacing:0.03em; }
+        .photo-hint span { color:var(--gold,#c9a84c); font-weight:500; }
+        .btn-remove-photo {
+            display:none; align-items:center; gap:6px;
+            background:transparent; border:1px solid #cc3333; color:#cc3333;
+            font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+            padding:5px 14px; border-radius:20px; cursor:pointer;
+            transition:background 0.2s, color 0.2s;
+        }
+        .btn-remove-photo:hover { background:#cc3333; color:#fff; }
+        .btn-remove-photo.visible { display:flex; }
+        .file-badge {
+            display:none; align-items:center; gap:6px;
+            background:rgba(201,168,76,0.1);
+            border:1px solid rgba(201,168,76,0.3);
+            border-radius:20px; padding:4px 12px;
+            font-size:11px; color:var(--gold,#c9a84c);
+            max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        }
+        .file-badge.visible { display:flex; }
+
+        .section-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.05));
+            border: 1px solid rgba(201,168,76,0.25);
+            border-radius: 8px; padding: 8px 16px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--gold, #c9a84c);
+            margin-bottom: 18px; margin-top: 6px;
+        }
+        .section-badge i { font-size:12px; opacity:0.85; }
+
+        .optional-tag {
+            font-size:10px; font-weight:500; color:#aaa; letter-spacing:0.04em;
+            margin-left:5px; background:#f0ece6;
+            border-radius:4px; padding:1px 6px;
+        }
+
+        .form-divider {
+            border:none; border-top:1px solid rgba(201,168,76,0.15);
+            margin:28px 0 24px;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px; margin-bottom: 18px;
+        }
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px; margin-bottom: 18px;
+        }
+
+        .helper { font-size: 12px; color: #8b7f72; line-height: 1.5; }
+        .success-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .import-file-hint { font-size: 12px; color: #8b7f72; line-height: 1.5; margin-top: 8px; }
+        .import-file-list { margin-top: 8px; font-size: 12px; color: #5f6477; line-height: 1.6; word-break: break-word; }
+
+        @media (max-width: 1100px) { .form-row-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 900px) {
+            .sidebar { width: 200px; min-width: 200px; }
+            .main { margin-left: 200px; width: calc(100% - 200px); }
+        }
+        @media (max-width: 640px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; width: 100%; }
+            .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+            .content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('add-student')}"></div>
+
+<div class="main">
+        <div class="header">
+            <div class="header-title">Add Student</div>
+        <div class="header-right">
+            <a href="/admin-notifications" class="header-btn"><i class="fa fa-bell"></i><span class="dot"></span></a>
+            <a href="/admin-students" class="btn-dark"><i class="fa fa-users"></i> View All Students</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="alert alert-success" th:if="${success != null or param.success != null}">
+            <i class="fa fa-check-circle"></i>
+            <span th:text="${success != null ? success : param.success[0]}"></span>
+        </div>
+        <div class="alert alert-error" th:if="${error != null}">
+            <i class="fa fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="box" th:if="${param.success != null}" style="margin-bottom:18px">
+            <div class="box-title"><i class="fa fa-circle-check" style="color:var(--green)"></i> Student Saved</div>
+            <div class="helper" th:text="${param.success[0]}">Student added successfully</div>
+            <div class="success-actions">
+                <a href="/add-student" class="btn-outline">Add Another Student</a>
+                <a href="/admin-students" class="btn-gold">View Student</a>
+            </div>
+        </div>
+
+        <div class="page-grid">
+            <div class="box">
+                <div class="box-title"><i class="fa fa-user-plus" style="color:var(--gold)"></i> New Student Registration</div>
+                <form action="/add-student" method="post" enctype="multipart/form-data">
+                    <div class="section-badge"><i class="fa fa-camera"></i> Student Photo</div>
+                    <div class="photo-upload-wrapper">
+                        <div class="photo-circle" id="photoCircle" title="Click or drag to upload photo">
+                            <img id="photoPreview" alt="Student Photo">
+                            <div class="photo-placeholder" id="photoPlaceholder">
+                                <i class="fa fa-user-graduate"></i>
+                                <span>Upload Photo</span>
+                            </div>
+                            <div class="hover-overlay"><i class="fa fa-camera"></i> Change</div>
+                        </div>
+                        <input type="file" id="photoInput" name="photo" accept="image/jpeg,image/png,image/webp,image/gif">
+                        <div class="file-badge" id="fileBadge">
+                            <i class="fa fa-image"></i><span id="fileNameText"></span>
+                        </div>
+                        <button type="button" class="btn-remove-photo" id="removePhotoBtn">
+                            <i class="fa fa-trash"></i> Remove Photo
+                        </button>
+                        <p class="photo-hint">Click circle to browse &nbsp;&middot;&nbsp; <span>JPG / PNG / WEBP</span> &nbsp;&middot;&nbsp; Max <span>2 MB</span></p>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-user"></i> Personal Information</div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password *</label>
+                            <input type="password" name="password" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Gender *</label>
+                            <select name="gender" class="form-select" required>
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth *</label>
+                            <input type="date" name="dob" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Blood Group <span class="optional-tag">optional</span></label>
+                            <select name="bloodGroup" class="form-select">
+                                <option value="">Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-graduation-cap"></i> Academic Information</div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Batch *</label>
+                            <select name="batchId" id="batchSelect" class="form-select" required>
+                                <option value="">Select batch</option>
+                                <option th:each="batch : ${batches}"
+                                        th:value="${batch.id}"
+                                        th:text="${batch.displayName}"
+                                        th:attr="data-course=${batch.course != null ? batch.course.code : ''},data-start=${batch.startYear},data-end=${batch.endYear}">
+                                    Batch
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Course *</label>
+                            <select name="course" id="courseSelect" class="form-select" required>
+                                <option value="">Select course</option>
+                                <option th:each="course : ${courseDetails}"
+                                        th:value="${course.code}"
+                                        th:text="${course.code}"
+                                        th:attr="data-semesters=${course.totalSemesters},data-degree=${#strings.trim(course.courseType != null ? course.courseType : '')}">
+                                    Course
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Academic Year *</label>
+                            <select name="academicYear" id="academicYearInput" class="form-select" required>
+                                <option value="">Select academic year</option>
+                                <option th:each="year : ${academicYears}" th:value="${year}" th:text="${year}" th:selected="${year == academicYear}">2026-27</option>
+                            </select>
+                            <div style="margin-top:6px;font-size:11px;color:#7a6f62;line-height:1.4;">
+                                Batch 2026-2028 becomes FY 2026-27 and SY 2027-28.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Semester *</label>
+                            <select name="semester" id="semesterSelect" class="form-select" required>
+                                <option value="Sem1">Sem 1</option>
+                                <option value="Sem2">Sem 2</option>
+                                <option value="Sem3">Sem 3</option>
+                                <option value="Sem4">Sem 4</option>
+                                <option value="Sem5">Sem 5</option>
+                                <option value="Sem6">Sem 6</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Degree <span class="optional-tag">optional</span></label>
+                            <select name="degree" id="degreeSelect" class="form-select">
+                                <option value="">Select degree</option>
+                                <option value="UG">UG</option>
+                                <option value="PG">PG</option>
+                                <option value="Diploma">Diploma</option>
+                                <option value="Certificate">Certificate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Section Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="sectionName" class="form-input" placeholder="A, B, C">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Roll No</label>
+                            <input type="text" name="rollNo" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Enrollment No</label>
+                            <input type="text" name="enrollmentNo" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PRN Number</label>
+                            <input type="text" name="prnNumber" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Application No <span class="optional-tag">auto-generated if blank</span></label>
+                            <input type="text" name="registrationNo" class="form-input" placeholder="Leave blank to auto-generate">
+                            <div id="applicationPrefixPreview" style="margin-top:6px;font-size:11px;color:#7a6f62;line-height:1.4;">Preview will appear after batch and course selection.</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Medium</label>
+                            <select name="medium" class="form-select">
+                                <option value="">Select medium</option>
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Marathi">Marathi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-circle-info"></i> Additional Details</div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Religion <span class="optional-tag">optional</span></label>
+                            <input type="text" name="religion" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category <span class="optional-tag">optional</span></label>
+                            <input type="text" name="category" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Admission Date <span class="optional-tag">optional</span></label>
+                            <input type="date" name="admissionDate" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Father's Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="fatherName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mother's Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="motherName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Guardian Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="guardianName" class="form-input">
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-id-card"></i> Student Profile Match</div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Title <span class="optional-tag">optional</span></label>
+                            <select name="title" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Dr">Dr</option>
+                                <option value="Prof">Prof</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">First Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="firstName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Middle Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="middleName" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Last Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="lastName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Name As Per Aadhaar <span class="optional-tag">optional</span></label>
+                            <input type="text" name="nameAsPerAadhaar" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mobile No <span class="optional-tag">optional</span></label>
+                            <input type="text" name="mobileNumber" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Phone <span class="optional-tag">optional</span></label>
+                            <input type="text" name="phoneNumber" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Marital Status <span class="optional-tag">optional</span></label>
+                            <select name="maritalStatus" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Divorced">Divorced</option>
+                                <option value="Widowed">Widowed</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mother Tongue <span class="optional-tag">optional</span></label>
+                            <select name="motherTongue" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Marathi">Marathi</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Native Place <span class="optional-tag">optional</span></label>
+                            <input type="text" name="nativePlace" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Birth Place <span class="optional-tag">optional</span></label>
+                            <input type="text" name="birthPlace" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Birth Country <span class="optional-tag">optional</span></label>
+                            <input type="text" name="birthCountry" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Region <span class="optional-tag">optional</span></label>
+                            <select name="region" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Urban">Urban</option>
+                                <option value="Rural">Rural</option>
+                                <option value="Semi Urban">Semi Urban</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nationality <span class="optional-tag">optional</span></label>
+                            <select name="nationality" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Indian">Indian</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category <span class="optional-tag">optional</span></label>
+                            <select name="category" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="General">General</option>
+                                <option value="OBC">OBC</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="EWS">EWS</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Category Type <span class="optional-tag">optional</span></label>
+                            <select name="categoryType" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="General">General</option>
+                                <option value="Reserved">Reserved</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Caste Category <span class="optional-tag">optional</span></label>
+                            <select name="casteCategory" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Open">Open</option>
+                                <option value="OBC">OBC</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="NT">NT</option>
+                                <option value="VJ">VJ</option>
+                                <option value="SEBC">SEBC</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sub Caste <span class="optional-tag">optional</span></label>
+                            <select name="subCaste" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Not Applicable">Not Applicable</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Father Occupation <span class="optional-tag">optional</span></label>
+                            <input type="text" name="fatherOccupation" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Father Qualification <span class="optional-tag">optional</span></label>
+                            <input type="text" name="fatherQualification" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mother Qualification <span class="optional-tag">optional</span></label>
+                            <input type="text" name="motherQualification" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Total Family Member <span class="optional-tag">optional</span></label>
+                            <input type="number" name="totalFamilyMember" class="form-input" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Family Annual Income <span class="optional-tag">optional</span></label>
+                            <input type="number" name="familyAnnualIncome" class="form-input" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">University Pre Adm Reg No <span class="optional-tag">optional</span></label>
+                            <input type="text" name="universityPreAdmRegNo" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">No of Attempt <span class="optional-tag">optional</span></label>
+                            <input type="number" name="noOfAttempt" class="form-input" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Inhouse <span class="optional-tag">optional</span></label>
+                            <select name="inhouse" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Medium of Instruction <span class="optional-tag">optional</span></label>
+                            <select name="mediumOfInstruction" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="English">English</option>
+                                <option value="Hindi">Hindi</option>
+                                <option value="Marathi">Marathi</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Social Reservation <span class="optional-tag">optional</span></label>
+                            <select name="socialReservation" class="form-select">
+                                <option value="">Please Select</option>
+                                <option value="None">None</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="OBC">OBC</option>
+                                <option value="EWS">EWS</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Academic Bank of Credits <span class="optional-tag">optional</span></label>
+                            <input type="text" name="academicBankOfCredits" class="form-input">
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-address-card"></i> Address and Uploads</div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Current Address <span class="optional-tag">optional</span></label>
+                            <textarea name="currentAddress" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Permanent Address <span class="optional-tag">optional</span></label>
+                            <textarea name="permanentAddress" class="form-input" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Differently Abled</label>
+                            <select name="differentlyAbled" class="form-select">
+                                <option value="">Select</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sports Person</label>
+                            <select name="sportsPerson" class="form-select">
+                                <option value="">Select</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sports Achievement <span class="optional-tag">optional</span></label>
+                            <input type="text" name="sportsAchievement" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Hobbies <span class="optional-tag">optional</span></label>
+                            <input type="text" name="hobbies" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Signature <span class="optional-tag">optional</span></label>
+                            <input type="file" name="signature" class="form-input" accept="image/png,image/jpeg,image/webp">
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-fingerprint"></i> Government IDs</div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Aadhar Number <span class="optional-tag">optional</span></label>
+                            <input type="text" name="aadharNumber" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PAN Card Number <span class="optional-tag">optional</span></label>
+                            <input type="text" name="panCardNumber" class="form-input" style="text-transform:uppercase">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Voter ID <span class="optional-tag">optional</span></label>
+                            <input type="text" name="voterId" class="form-input">
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <div class="section-badge"><i class="fa fa-building-columns"></i> Bank Details</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Bank Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="bankName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">IFSC Code <span class="optional-tag">optional</span></label>
+                            <input type="text" name="ifscCode" class="form-input" style="text-transform:uppercase">
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+                        <button type="submit" class="btn-gold"><i class="fa fa-user-plus"></i> Add Student</button>
+                        <a href="/admin-students" class="btn-outline"><i class="fa fa-times"></i> Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const courseSelect = document.getElementById("courseSelect");
+    const batchSelect = document.getElementById("batchSelect");
+    const semesterSelect = document.getElementById("semesterSelect");
+    const degreeSelect = document.getElementById("degreeSelect");
+    const academicYearInput = document.getElementById("academicYearInput");
+    const applicationPrefixPreview = document.getElementById("applicationPrefixPreview");
+    const photoCircle = document.getElementById("photoCircle");
+    const photoInput = document.getElementById("photoInput");
+    const photoPreview = document.getElementById("photoPreview");
+    const photoPlaceholder = document.getElementById("photoPlaceholder");
+    const removePhotoBtn = document.getElementById("removePhotoBtn");
+    const fileBadge = document.getElementById("fileBadge");
+    const fileNameText = document.getElementById("fileNameText");
+
+    function normalize(value) {
+        return String(value || "").trim().toUpperCase();
+    }
+
+    function selectedCourseOption() {
+        return courseSelect.selectedOptions[0];
+    }
+
+    function totalSemestersForCourse() {
+        const option = selectedCourseOption();
+        const total = Number(option?.dataset?.semesters || 0);
+        return Number.isFinite(total) && total > 0 ? total : 6;
+    }
+
+    function inferDegree(courseType) {
+        const normalized = String(courseType || "").trim().toLowerCase();
+        if (!normalized) return "";
+        if (normalized.includes("post")) return "PG";
+        if (normalized.includes("under")) return "UG";
+        if (normalized.includes("diploma")) return "Diploma";
+        if (normalized.includes("certificate")) return "Certificate";
+        return "";
+    }
+
+    function getBatchYear(option) {
+        const start = option?.dataset?.start;
+        if (!start) return "";
+        const year = Number(start);
+        if (!Number.isFinite(year)) return "";
+        return `${year}-${String(year + 1).slice(-2)}`;
+    }
+
+    function academicStartFromValue(value) {
+        const match = String(value || "").trim().match(/^(\d{4})-/);
+        return match ? Number(match[1]) : null;
+    }
+
+    function academicPhaseLabel() {
+        const batchOption = batchSelect.selectedOptions[0];
+        const batchStart = Number(batchOption?.dataset?.start || "");
+        const academicStart = academicStartFromValue(academicYearInput.value);
+        if (!Number.isFinite(batchStart) || !Number.isFinite(academicStart)) {
+            return "FY";
+        }
+        const diff = Math.max(0, academicStart - batchStart);
+        if (diff >= 2) return "TY";
+        if (diff === 1) return "SY";
+        return "FY";
+    }
+
+    function updateApplicationPreview() {
+        const courseCode = normalize(courseSelect.value);
+        const academicYear = academicYearInput.value || "";
+        if (!courseCode || !academicYear) {
+            applicationPrefixPreview.textContent = "Preview will appear after batch and course selection.";
+            return;
+        }
+        applicationPrefixPreview.textContent = `${academicPhaseLabel()}${courseCode}/${academicYear}/...`;
+    }
+
+    function ensureAcademicYearOption(value) {
+        if (!value) return;
+        const exists = Array.from(academicYearInput.options).some(option => option.value === value);
+        if (!exists) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            academicYearInput.appendChild(option);
+        }
+    }
+
+    function updateSemesterOptions() {
+        const max = totalSemestersForCourse();
+        const currentValue = semesterSelect.value;
+        semesterSelect.innerHTML = "";
+        for (let semester = 1; semester <= max; semester += 1) {
+            const option = document.createElement("option");
+            option.value = `Sem${semester}`;
+            option.textContent = `Sem ${semester}`;
+            semesterSelect.appendChild(option);
+        }
+        semesterSelect.value = currentValue && semesterSelect.querySelector(`option[value="${currentValue}"]`)
+            ? currentValue
+            : "Sem1";
+    }
+
+    function filterBatchOptions() {
+        const selectedCourse = normalize(courseSelect.value);
+        Array.from(batchSelect.options).forEach((option, index) => {
+            if (index === 0) return;
+            const optionCourse = normalize(option.dataset.course);
+            const visible = !selectedCourse || !optionCourse || optionCourse === selectedCourse;
+            option.hidden = !visible;
+            option.disabled = !visible;
+        });
+
+        const selectedBatch = batchSelect.selectedOptions[0];
+        if (selectedBatch?.disabled) {
+            batchSelect.value = "";
+        }
+    }
+
+    function updateFeePreview() {
+        const course = courseSelect.value;
+        const batchId = batchSelect.value;
+        const academicYear = academicYearInput.value;
+        const semester = semesterSelect.value;
+        if (!course || !batchId || !academicYear) {
+            return;
+        }
+        const params = new URLSearchParams({ course, batchId, academicYear, semester });
+        fetch(`/student-fee-preview?${params.toString()}`, { credentials: "same-origin" }).catch(() => null);
+    }
+
+    function syncAcademicState() {
+        const batchOption = batchSelect.selectedOptions[0];
+        const academicYear = getBatchYear(batchOption);
+        ensureAcademicYearOption(academicYear);
+        if (academicYear) {
+            academicYearInput.value = academicYear;
+        } else if (!academicYearInput.value) {
+            academicYearInput.value = "";
+        }
+
+        if (batchOption?.dataset?.course) {
+            courseSelect.value = batchOption.dataset.course;
+        }
+
+        filterBatchOptions();
+
+        const degreeHint = inferDegree(selectedCourseOption()?.dataset?.degree);
+        if (degreeHint) {
+            degreeSelect.value = degreeHint;
+        }
+
+        updateSemesterOptions();
+        updateFeePreview();
+        updateApplicationPreview();
+    }
+
+    batchSelect.addEventListener("change", syncAcademicState);
+    courseSelect.addEventListener("change", () => {
+        filterBatchOptions();
+        updateSemesterOptions();
+        updateFeePreview();
+        updateApplicationPreview();
+    });
+    semesterSelect.addEventListener("change", updateFeePreview);
+    academicYearInput.addEventListener("change", () => {
+        updateFeePreview();
+        updateApplicationPreview();
+    });
+
+    function setPhotoPreview(file) {
+        if (!file) {
+            photoPreview.removeAttribute("src");
+            photoPreview.style.display = "none";
+            photoPlaceholder.style.display = "flex";
+            fileBadge.classList.remove("visible");
+            removePhotoBtn.classList.remove("visible");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = event => {
+            photoPreview.src = event.target.result;
+            photoPreview.style.display = "block";
+            photoPlaceholder.style.display = "none";
+            fileNameText.textContent = file.name.length > 28 ? file.name.slice(0, 27) + "..." : file.name;
+            fileBadge.classList.add("visible");
+            removePhotoBtn.classList.add("visible");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    photoCircle.addEventListener("click", () => photoInput.click());
+    photoInput.addEventListener("change", () => setPhotoPreview(photoInput.files?.[0]));
+    removePhotoBtn.addEventListener("click", () => {
+        photoInput.value = "";
+        setPhotoPreview(null);
+    });
+
+    filterBatchOptions();
+    syncAcademicState();
+
+</script>
+</body>
+</html>

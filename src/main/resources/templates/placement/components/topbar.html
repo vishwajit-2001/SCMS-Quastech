@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="topbar(title, subtitle)" class="portal-header">
+    <div class="portal-header-copy">
+        <span class="portal-header-kicker">Placement Workspace</span>
+        <div class="portal-header-title-row">
+            <h1 class="portal-header-title" th:text="${title}">Dashboard</h1>
+        </div>
+        <p class="portal-header-subtitle" th:text="${subtitle}">
+            Manage drives, applications, companies, interviews, analytics, and reports in one connected placement space.
+        </p>
+    </div>
+
+    <div class="portal-header-actions">
+        <a th:href="@{/placement-company-drives}" class="portal-header-btn" aria-label="Open company drives">
+            <i class="fa-solid fa-building"></i>
+        </a>
+        <a th:href="@{/placement-announcements}" class="portal-header-btn" aria-label="Open announcements">
+            <i class="fa-solid fa-bullhorn"></i>
+        </a>
+        <a th:href="@{/placement-profile}" class="portal-user-pill">
+            <div class="portal-avatar" th:text="${placementTpoInitials} ?: 'TP'">TP</div>
+            <div class="portal-user-meta">
+                <span class="portal-user-name" th:text="${placementTpoName} ?: 'Placement TPO'">Placement TPO</span>
+                <span class="portal-user-role" th:text="${placementTpoCollege} ?: 'College'">College</span>
+            </div>
+        </a>
+    </div>
+</header>
+</body>
+</html>

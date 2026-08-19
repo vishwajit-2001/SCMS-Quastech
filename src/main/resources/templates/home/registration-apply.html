@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Apply</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/home/registration-apply.css">
+</head>
+<body th:attr="data-auth-mode=${registrationViewMode != null ? registrationViewMode : 'register'}">
+<div class="portal-page">
+    <header class="portal-topbar">
+        <div class="portal-topbar__brand" aria-label="College branding">
+            <span class="portal-logo">
+                <img th:if="${registrationCollegeLogoUrl != null and !#strings.isEmpty(registrationCollegeLogoUrl)}"
+                     th:src="${registrationCollegeLogoUrl}"
+                     alt="College logo"
+                     onerror="this.remove(); this.parentElement.classList.add('is-fallback');">
+                <i class="fa-solid fa-building-columns"></i>
+            </span>
+            <div class="portal-topbar__copy">
+                <div class="portal-topbar__name" th:text="${registrationCollegeName != null ? registrationCollegeName : 'Admissions Portal'}">Admissions Portal</div>
+                <div class="portal-topbar__address" th:text="${registrationCollegeAddress != null and !#strings.isEmpty(registrationCollegeAddress) ? registrationCollegeAddress : 'College-specific registration'}">College-specific registration</div>
+            </div>
+        </div>
+
+        <div class="portal-topbar__help" aria-label="Help desk contact">
+            <span class="portal-topbar__help-icon"><i class="fa-solid fa-headset"></i></span>
+            <span class="portal-topbar__help-copy">
+                <span>Need Help?</span>
+                <strong>+91 98765 43210</strong>
+            </span>
+        </div>
+    </header>
+
+    <main class="portal-main">
+        <section class="portal-hero">
+            <div class="portal-hero__overlay"></div>
+            <div class="portal-hero__glow portal-hero__glow--one"></div>
+            <div class="portal-hero__glow portal-hero__glow--two"></div>
+
+            <div class="portal-hero__copy">
+                <div class="portal-hero__eyebrow">2026 Admissions Open</div>
+                <h1>Student Admission<br><span>Starts Here</span></h1>
+                <p>Begin your academic journey with us. Apply online and shape your future with quality education.</p>
+            </div>
+
+            <div class="portal-notice">
+                <div class="portal-notice__head">
+                    <div class="portal-notice__topline">
+                        <div class="portal-notice__label">
+                            <span class="portal-notice__label-icon"><i class="fa-solid fa-bullhorn"></i></span>
+                            <div class="portal-notice__title">Important Notices</div>
+                        </div>
+                        <a class="portal-notice__view" href="#">View All <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                    <div class="portal-notice__sub">Important dates for online registration / application</div>
+                </div>
+                <div class="portal-notice__body">
+                    <div class="portal-notice__row portal-notice__row--new">
+                        <span class="portal-notice__dot portal-notice__dot--new"><i class="fa-solid fa-calendar-days"></i></span>
+                        <div>
+                            <strong>TYBMS Semester V Online Registration</strong>
+                            <span>09 Jun 2025 - 10 Jun 2025</span>
+                        </div>
+                        <span class="portal-notice__tag">New</span>
+                    </div>
+                    <div class="portal-notice__row">
+                        <span class="portal-notice__dot portal-notice__dot--blue"><i class="fa-solid fa-calendar-check"></i></span>
+                        <div>
+                            <strong>SYBCom Semester III Registration</strong>
+                            <span>24 Jun 2024 - 28 Jun 2024</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right portal-notice__chev"></i>
+                    </div>
+                    <div class="portal-notice__row">
+                        <span class="portal-notice__dot portal-notice__dot--green"><i class="fa-solid fa-calendar-check"></i></span>
+                        <div>
+                            <strong>M.Com Semester I Registration</strong>
+                            <span>17 Jul 2025 - 31 Mar 2026</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right portal-notice__chev"></i>
+                    </div>
+                    <div class="portal-notice__row">
+                        <span class="portal-notice__dot portal-notice__dot--violet"><i class="fa-solid fa-calendar-check"></i></span>
+                        <div>
+                            <strong>Bachelor of Commerce FY Registration</strong>
+                            <span>02 May 2026 - 21 May 2026</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right portal-notice__chev"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portal-stats">
+                <div class="portal-stat">
+                    <span class="portal-stat__icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <div>
+                        <strong>10+</strong>
+                        <span>Programs</span>
+                    </div>
+                </div>
+                <div class="portal-stat">
+                    <span class="portal-stat__icon"><i class="fa-solid fa-users"></i></span>
+                    <div>
+                        <strong>5000+</strong>
+                        <span>Students</span>
+                    </div>
+                </div>
+                <div class="portal-stat">
+                    <span class="portal-stat__icon"><i class="fa-solid fa-user-tie"></i></span>
+                    <div>
+                        <strong>25+</strong>
+                        <span>Faculty</span>
+                    </div>
+                </div>
+                <div class="portal-stat">
+                    <span class="portal-stat__icon"><i class="fa-solid fa-trophy"></i></span>
+                    <div>
+                        <strong>15+</strong>
+                        <span>Awards</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="portal-auth">
+            <div th:if="${errorLogin}" class="portal-alert portal-alert--error" th:text="${errorLogin}"></div>
+            <div th:if="${error}" class="portal-alert portal-alert--error" th:text="${error}"></div>
+            <div th:if="${success}" class="portal-alert portal-alert--success" th:text="${success}"></div>
+
+            <div class="portal-mode portal-mode--register" data-auth-mode="register">
+                <div class="portal-mode__eyebrow">Create Account</div>
+                <div class="portal-mode__headline">Start your journey</div>
+                <div class="portal-mode__subhead">Register once and continue into the student onboarding flow.</div>
+
+                <form th:if="${registrationCollegeName != null}"
+                      th:action="@{/register/{collegeCode}(collegeCode=${registrationCollegeCode})}"
+                      method="post"
+                      class="portal-form">
+                    <input type="hidden" name="collegeCode" th:value="${registrationCollegeCode}">
+
+                    <div class="portal-grid">
+                        <div class="portal-field">
+                            <label for="regName">Full Name</label>
+                            <input type="text" name="name" id="regName" autocomplete="name" placeholder="Full Name*" required>
+                        </div>
+                        <div class="portal-field">
+                            <label for="regMobile">Mobile Number</label>
+                            <input type="tel" name="mobileNumber" id="regMobile" autocomplete="tel" placeholder="Mobile Number*" required>
+                        </div>
+                        <div class="portal-field portal-field--span">
+                            <label for="regEmail">Email Address</label>
+                            <input type="email" name="email" id="regEmail" autocomplete="email" placeholder="Email Id" required>
+                        </div>
+                        <div class="portal-field portal-field--password">
+                            <label for="regPassword">Password</label>
+                            <input type="password" name="password" id="regPassword" autocomplete="new-password" placeholder="Password*" required>
+                            <button class="portal-password-toggle" type="button" data-toggle-password="regPassword" aria-label="Toggle password visibility">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="portal-field portal-field--password">
+                            <label for="regConfirmPassword">Confirm Password</label>
+                            <input type="password" name="confirmPassword" id="regConfirmPassword" autocomplete="new-password" placeholder="Confirm Password*" required>
+                            <button class="portal-password-toggle" type="button" data-toggle-password="regConfirmPassword" aria-label="Toggle confirm password visibility">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portal-actions">
+                        <button class="portal-button portal-button--primary" type="submit">Register</button>
+                        <button class="portal-button portal-button--secondary" type="button" data-switch-mode="login">Go To Login</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="portal-mode portal-mode--login" data-auth-mode="login">
+                <div class="portal-login-card">
+                    <div class="portal-mode__intro">
+                        <div>
+                            <div class="portal-mode__eyebrow">Welcome Back!</div>
+                            <div class="portal-mode__headline">Login to your account</div>
+                            <div class="portal-mode__subhead">Access your student or institute dashboard</div>
+                        </div>
+                        <div class="portal-illustration" aria-hidden="true">
+                            <div class="portal-illustration__halo"></div>
+                            <div class="portal-illustration__building">
+                                <i class="fa-solid fa-school"></i>
+                            </div>
+                            <span class="portal-illustration__spark portal-illustration__spark--one"></span>
+                            <span class="portal-illustration__spark portal-illustration__spark--two"></span>
+                            <span class="portal-illustration__spark portal-illustration__spark--three"></span>
+                        </div>
+                    </div>
+
+                    <div class="portal-tabs" role="tablist" aria-label="Portal access tabs">
+                        <button class="portal-tab is-active" type="button" data-auth-tab="student" aria-selected="true"><i class="fa-solid fa-user-graduate"></i> Student Login</button>
+                        <button class="portal-tab" type="button" data-auth-tab="institution" aria-selected="false"><i class="fa-solid fa-building-columns"></i> Institute Login</button>
+                    </div>
+
+                    <div class="portal-pane is-active" data-auth-pane="student" role="tabpanel">
+                        <form class="portal-login-form" action="/login" method="post">
+                            <input type="hidden" name="loginType" value="student">
+                            <input type="hidden" name="collegeCode" th:value="${registrationCollegeCode}">
+                            <div class="portal-login-form__fields">
+                                <div class="portal-field portal-field--login">
+                                    <label for="studentLoginEmail">Email</label>
+                                    <div class="portal-input">
+                                        <i class="fa-regular fa-user"></i>
+                                        <input type="email" name="email" id="studentLoginEmail" placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+                                <div class="portal-field portal-field--login">
+                                    <label for="studentLoginPassword">Password</label>
+                                    <div class="portal-input">
+                                        <i class="fa-solid fa-lock"></i>
+                                        <input type="password" name="password" id="studentLoginPassword" placeholder="Enter your password" required>
+                                        <button class="portal-password-toggle portal-password-toggle--inline" type="button" data-toggle-password="studentLoginPassword" aria-label="Toggle password visibility">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="portal-login-meta">
+                                <label class="portal-check">
+                                    <input type="checkbox">
+                                    <span>Remember me</span>
+                                </label>
+                                <a class="portal-forgot" href="#">Forgot Password?</a>
+                            </div>
+                            <button class="portal-button portal-button--primary portal-button--login portal-button--full" type="submit">Login <i class="fa-solid fa-arrow-right"></i></button>
+                            <div class="portal-login-form__divider"><span>Don't have an account?</span></div>
+                            <div class="portal-actions portal-actions--login">
+                                <button class="portal-button portal-button--ghost portal-button--full" type="button" data-switch-mode="register"><i class="fa-solid fa-user-plus"></i> Go to Sign Up</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="portal-pane" data-auth-pane="institution" role="tabpanel" hidden>
+                        <form class="portal-login-form" action="/login" method="post">
+                            <input type="hidden" name="loginType" value="institute">
+                            <input type="hidden" name="collegeCode" th:value="${registrationCollegeCode}">
+                            <div class="portal-login-form__fields">
+                                <div class="portal-field portal-field--login">
+                                    <label for="institutionLoginEmail">Email</label>
+                                    <div class="portal-input">
+                                        <i class="fa-regular fa-user"></i>
+                                        <input type="email" name="email" id="institutionLoginEmail" placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+                                <div class="portal-field portal-field--login">
+                                    <label for="institutionLoginPassword">Password</label>
+                                    <div class="portal-input">
+                                        <i class="fa-solid fa-lock"></i>
+                                        <input type="password" name="password" id="institutionLoginPassword" placeholder="Enter your password" required>
+                                        <button class="portal-password-toggle portal-password-toggle--inline" type="button" data-toggle-password="institutionLoginPassword" aria-label="Toggle password visibility">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="portal-login-meta">
+                                <label class="portal-check">
+                                    <input type="checkbox">
+                                    <span>Remember me</span>
+                                </label>
+                                <a class="portal-forgot" href="#">Forgot Password?</a>
+                            </div>
+                            <button class="portal-button portal-button--primary portal-button--login portal-button--full" type="submit">Login <i class="fa-solid fa-arrow-right"></i></button>
+                            <div class="portal-login-form__divider"><span>Use the institute credentials assigned by your college admin.</span></div>
+                            <div class="portal-actions portal-actions--login">
+                                <button class="portal-button portal-button--ghost portal-button--full" type="button" data-switch-mode="register"><i class="fa-solid fa-user-plus"></i> Go to Sign Up</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    (function () {
+        function setAuthMode(mode, updateHistory) {
+            var cleanMode = mode === "login" ? "login" : "register";
+            document.body.dataset.authMode = cleanMode;
+
+            document.querySelectorAll("[data-auth-mode]").forEach(function (panel) {
+                var isActive = panel.getAttribute("data-auth-mode") === cleanMode;
+                panel.classList.toggle("is-active", isActive);
+                panel.hidden = !isActive;
+            });
+
+            if (updateHistory) {
+                var url = new URL(window.location.href);
+                url.searchParams.set("mode", cleanMode);
+                window.history.replaceState({}, "", url.toString());
+            }
+        }
+
+        function setTab(tabName) {
+            var cleanTab = tabName === "institution" ? "institution" : "student";
+
+            document.querySelectorAll("[data-auth-tab]").forEach(function (button) {
+                var isActive = button.getAttribute("data-auth-tab") === cleanTab;
+                button.classList.toggle("is-active", isActive);
+                button.setAttribute("aria-selected", isActive ? "true" : "false");
+            });
+
+            document.querySelectorAll("[data-auth-pane]").forEach(function (pane) {
+                var isActive = pane.getAttribute("data-auth-pane") === cleanTab;
+                pane.classList.toggle("is-active", isActive);
+                pane.hidden = !isActive;
+            });
+        }
+
+        document.querySelectorAll("[data-switch-mode]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                setAuthMode(button.getAttribute("data-switch-mode"), true);
+            });
+        });
+
+        document.querySelectorAll("[data-auth-tab]").forEach(function (tabButton) {
+            tabButton.addEventListener("click", function () {
+                setTab(tabButton.getAttribute("data-auth-tab"));
+            });
+        });
+
+        document.querySelectorAll("[data-toggle-password]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                var targetId = button.getAttribute("data-toggle-password");
+                var input = document.getElementById(targetId);
+                if (!input) {
+                    return;
+                }
+
+                var icon = button.querySelector("i");
+                input.type = input.type === "password" ? "text" : "password";
+                if (icon) {
+                    icon.classList.toggle("fa-eye");
+                    icon.classList.toggle("fa-eye-slash");
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var urlMode = new URL(window.location.href).searchParams.get("mode");
+            var initialMode = urlMode || document.body.dataset.authMode || "register";
+            setAuthMode(initialMode, false);
+            setTab("student");
+        });
+    })();
+</script>
+</body>
+</html>

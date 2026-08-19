@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="panel" id="panel-confirm" data-step-panel="confirm" th:fragment="confirmPanel">
+    <div class="panel-head">
+        <div>
+            <p class="panel-kicker">Step 9 of 9</p>
+            <h2 class="panel-title">Confirm Registration</h2>
+        </div>
+        <div class="panel-badge">Final review</div>
+    </div>
+
+    <div class="confirm-grid" style="grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);">
+        <div class="confirm-hero" style="background:#fff;">
+            <div style="font-size:12px;color:#2ea3e6;font-weight:800;letter-spacing:.16em;text-transform:uppercase;">Preview / Review</div>
+            <h3 style="margin:8px 0 6px;font-size:24px;">Review your registration details before final confirmation</h3>
+            <p style="margin:0;color:#5f6f83;font-size:13px;line-height:1.6;">Check your personal details, course selection, uploaded documents, and payment summary. Once confirmed, you will be logged out and asked to log in again.</p>
+            <div class="confirm-steps" style="margin-top:12px;">
+                <div class="confirm-step"><span>Personal Details</span><b>Completed</b></div>
+                <div class="confirm-step"><span>Academic Details</span><b>Completed</b></div>
+                <div class="confirm-step"><span>Documents</span><b>Uploaded</b></div>
+                <div class="confirm-step"><span>Payment</span><b>Ready</b></div>
+            </div>
+        </div>
+        <div class="confirm-panel" style="background:#fff;">
+            <strong style="display:block;margin-bottom:10px;">Application Preview</strong>
+            <div class="summary-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+                <div class="summary-item"><span>Student</span><b th:text="${studentName}">Student</b></div>
+                <div class="summary-item"><span>College</span><b th:text="${collegeName}">College</b></div>
+                <div class="summary-item"><span>Course</span><b data-summary="course" th:text="${selectedCourseLabel != null ? selectedCourseLabel : 'Select course'}">Select course</b></div>
+                <div class="summary-item"><span>Application No</span><b th:text="${student.registrationNo != null ? student.registrationNo : 'N/A'}">N/A</b></div>
+                <div class="summary-item"><span>Payment</span><b>₹ 200</b></div>
+                <div class="summary-item"><span>Status</span><b th:text="${student.onboardingCompleted ? 'Completed' : 'Pending'}">Pending</b></div>
+            </div>
+            <div class="field" style="margin-top:14px;">
+                <label><input class="inline-check" type="checkbox" required> I confirm that the details entered above are correct.</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button type="button" class="btn btn-prev" data-step-prev>Back</button>
+        <button type="submit" class="btn btn-submit">Confirm Registration</button>
+    </div>
+</section>
+</body>
+</html>

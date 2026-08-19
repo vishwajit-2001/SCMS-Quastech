@@ -1,0 +1,694 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Teacher - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: var(--offwhite, #faf8f5);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .sidebar {
+            width: 240px; min-width: 240px; max-width: 240px;
+            flex-shrink: 0; height: 100vh;
+            position: fixed; top: 0; left: 0;
+            overflow-y: auto; z-index: 100;
+        }
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+        .header {
+            width: 100%; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 32px; height: 64px; flex-shrink: 0;
+        }
+        .content { flex: 1; padding: 28px 32px 48px; width: 100%; }
+        .box { width: 100% !important; max-width: 100% !important; }
+
+        /* PHOTO UPLOAD */
+        .photo-upload-wrapper {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 12px; margin-bottom: 28px;
+        }
+        .photo-circle {
+            position: relative; width: 120px; height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border: 3px solid var(--gold, #c9a84c);
+            box-shadow: 0 0 0 6px rgba(201,168,76,0.12), 0 8px 32px rgba(0,0,0,0.35);
+            cursor: pointer; overflow: hidden;
+            transition: box-shadow 0.3s ease, transform 0.25s ease;
+        }
+        .photo-circle:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 0 8px rgba(201,168,76,0.22), 0 12px 40px rgba(0,0,0,0.4);
+        }
+        .photo-circle img { width:100%; height:100%; object-fit:cover; display:none; border-radius:50%; }
+        .photo-placeholder {
+            width:100%; height:100%;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:6px; color:var(--gold,#c9a84c);
+            pointer-events:none;
+        }
+        .photo-placeholder i { font-size:30px; opacity:0.85; }
+        .photo-placeholder span {
+            font-size:10px; font-weight:500; letter-spacing:0.08em;
+            text-transform:uppercase; opacity:0.7;
+        }
+        .photo-circle .hover-overlay {
+            position:absolute; inset:0; border-radius:50%;
+            background:rgba(0,0,0,0.45);
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:5px; opacity:0; transition:opacity 0.25s; color:#fff;
+            font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+        }
+        .photo-circle:hover .hover-overlay { opacity:1; }
+        .photo-circle .hover-overlay i { font-size:22px; }
+        #photoInput { display:none; }
+        .photo-hint { font-size:11.5px; color:#888; letter-spacing:0.03em; }
+        .photo-hint span { color:var(--gold,#c9a84c); font-weight:500; }
+        .btn-remove-photo {
+            display:none; align-items:center; gap:6px;
+            background:transparent; border:1px solid #cc3333; color:#cc3333;
+            font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+            padding:5px 14px; border-radius:20px; cursor:pointer;
+            transition:background 0.2s, color 0.2s;
+        }
+        .btn-remove-photo:hover { background:#cc3333; color:#fff; }
+        .btn-remove-photo.visible { display:flex; }
+        .file-badge {
+            display:none; align-items:center; gap:6px;
+            background:rgba(201,168,76,0.1);
+            border:1px solid rgba(201,168,76,0.3);
+            border-radius:20px; padding:4px 12px;
+            font-size:11px; color:var(--gold,#c9a84c);
+            max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        }
+        .file-badge.visible { display:flex; }
+
+        /* SECTION BADGE */
+        .section-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.05));
+            border: 1px solid rgba(201,168,76,0.25);
+            border-radius: 8px; padding: 8px 16px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--gold, #c9a84c);
+            margin-bottom: 18px; margin-top: 6px;
+        }
+        .section-badge i { font-size:12px; opacity:0.85; }
+
+        /* OPTIONAL TAG */
+        .optional-tag {
+            font-size:10px; font-weight:500; color:#aaa; letter-spacing:0.04em;
+            margin-left:5px; background:#f0ece6;
+            border-radius:4px; padding:1px 6px;
+        }
+
+        /* DIVIDER */
+        .form-divider {
+            border:none; border-top:1px solid rgba(201,168,76,0.15);
+            margin:28px 0 24px;
+        }
+
+        /* GRIDS */
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px; margin-bottom: 18px;
+        }
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px; margin-bottom: 18px;
+        }
+
+        /* SUBJECT PILLS */
+        .subject-picker { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+        .subject-picker input[type="radio"] { display:none; }
+        .subject-picker label {
+            display:inline-flex; align-items:center;
+            padding:7px 16px; border-radius:50px;
+            border:1.5px solid var(--light,#e8dfd0);
+            background:var(--offwhite,#faf8f5); color:#7a6a5a;
+            font-size:12px; font-weight:600; cursor:pointer;
+            transition:all 0.18s; user-select:none;
+        }
+        .subject-picker label:hover { border-color:var(--gold,#c9a84c); color:var(--gold,#c9a84c); }
+        .subject-picker input[type="radio"]:checked + label {
+            background:var(--gold,#c9a84c); color:#fff;
+            border-color:var(--gold,#c9a84c);
+            box-shadow:0 2px 10px rgba(201,168,76,0.35);
+        }
+
+        /* EXPERIENCE PILLS */
+        .exp-picker { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+        .exp-picker input[type="radio"] { display:none; }
+        .exp-picker label {
+            display:inline-flex; align-items:center;
+            padding:7px 18px; border-radius:50px;
+            border:1.5px solid var(--light,#e8dfd0);
+            background:var(--offwhite,#faf8f5); color:#7a6a5a;
+            font-size:12px; font-weight:600; cursor:pointer;
+            transition:all 0.18s; user-select:none;
+        }
+        .exp-picker label:hover { border-color:var(--gold,#c9a84c); color:var(--gold,#c9a84c); }
+        .exp-picker input[type="radio"]:checked + label {
+            background:var(--gold,#c9a84c); color:#fff;
+            border-color:var(--gold,#c9a84c);
+            box-shadow:0 2px 10px rgba(201,168,76,0.35);
+        }
+
+        /* STATUS TOGGLE */
+        .status-toggle { display:flex; gap:10px; margin-top:6px; }
+        .status-toggle input[type="radio"] { display:none; }
+        .status-toggle label {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:8px 20px; border-radius:50px;
+            border:1.5px solid #e8dfd0; font-size:12px;
+            font-weight:600; cursor:pointer; transition:all 0.18s;
+        }
+        .status-toggle label.active-lbl { color:#2d8a5b; }
+        .status-toggle label.inactive-lbl { color:#cc3333; }
+        .status-toggle input[type="radio"]:checked + label.active-lbl {
+            background:#2d8a5b; color:#fff; border-color:#2d8a5b;
+        }
+        .status-toggle input[type="radio"]:checked + label.inactive-lbl {
+            background:#cc3333; color:#fff; border-color:#cc3333;
+        }
+        .import-file-hint{font-size:12px;color:#8b7f72;line-height:1.5;margin-top:8px}
+        .import-file-list{margin-top:8px;font-size:12px;color:#5f6477;line-height:1.6;word-break:break-word}
+
+        @media (max-width: 1100px) { .form-row-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 900px) {
+            .sidebar { width: 200px; min-width: 200px; }
+            .main { margin-left: 200px; width: calc(100% - 200px); }
+        }
+        @media (max-width: 640px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; width: 100%; }
+            .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+            .content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('add-teacher')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Add Teacher</div>
+        <div class="header-right">
+            <a href="/admin-notifications" class="header-btn"><i class="fa fa-bell"></i><span class="dot"></span></a>
+            <a href="/admin-teachers" class="btn-dark"><i class="fa fa-user-tie"></i> View All Teachers</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ALERTS -->
+        <div class="alert alert-success" th:if="${success}">
+            <i class="fa fa-check-circle"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div class="alert alert-error" th:if="${error}">
+            <i class="fa fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="box">
+            <div class="box-title">
+                <i class="fa fa-chalkboard-teacher" style="color:var(--gold)"></i> New Teacher Registration
+            </div>
+
+            <form action="/add-teacher" method="post" enctype="multipart/form-data">
+
+                <!-- â•â• PHOTO â•â• -->
+                <div class="section-badge"><i class="fa fa-camera"></i> Teacher Photo</div>
+                <div class="photo-upload-wrapper">
+                    <div class="photo-circle" id="photoCircle" title="Click or drag to upload photo">
+                        <img id="photoPreview" alt="Teacher Photo">
+                        <div class="photo-placeholder" id="photoPlaceholder">
+                            <i class="fa fa-chalkboard-teacher"></i>
+                            <span>Upload Photo</span>
+                        </div>
+                        <div class="hover-overlay"><i class="fa fa-camera"></i> Change</div>
+                    </div>
+                    <input type="file" id="photoInput" name="photo" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <div class="file-badge" id="fileBadge">
+                        <i class="fa fa-image"></i><span id="fileNameText"></span>
+                    </div>
+                    <button type="button" class="btn-remove-photo" id="removePhotoBtn">
+                        <i class="fa fa-trash"></i> Remove Photo
+                    </button>
+                    <p class="photo-hint">Click circle to browse &nbsp;&middot;&nbsp; <span>JPG / PNG / WEBP</span> &nbsp;&middot;&nbsp; Max <span>2 MB</span></p>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• PERSONAL INFORMATION â•â• -->
+                <div class="section-badge"><i class="fa fa-user"></i> Personal Information</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="name" class="form-input" placeholder="e.g. Prof. Kulkarni" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="email" class="form-input" placeholder="teacher@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" name="password" class="form-input" placeholder="Min 6 characters" required>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Gender <span class="optional-tag">optional</span></label>
+                        <select name="gender" class="form-select">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth <span class="optional-tag">optional</span></label>
+                        <input type="date" name="dob" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Blood Group <span class="optional-tag">optional</span></label>
+                        <select name="bloodGroup" class="form-select">
+                            <option value="">Select</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number <span class="optional-tag">optional</span></label>
+                        <input type="text" name="phone" class="form-input" placeholder="e.g. 9876543210" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Alternate Phone <span class="optional-tag">optional</span></label>
+                        <!-- âœ… FIXED: was "alternatePhone" â€” now matches controller @RequestParam("altPhone") -->
+                        <input type="text" name="altPhone" class="form-input" placeholder="Alternate number" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Marital Status <span class="optional-tag">optional</span></label>
+                        <select name="maritalStatus" class="form-select">
+                            <option value="">Select</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Religion <span class="optional-tag">optional</span></label>
+                        <select name="religion" class="form-select">
+                            <option value="">Select</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Muslim">Muslim</option>
+                            <option value="Christian">Christian</option>
+                            <option value="Sikh">Sikh</option>
+                            <option value="Jain">Jain</option>
+                            <option value="Buddhist">Buddhist</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Caste / Sub-caste <span class="optional-tag">optional</span></label>
+                        <input type="text" name="casteName" class="form-input" placeholder="e.g. Brahmin">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category <span class="optional-tag">optional</span></label>
+                        <select name="category" class="form-select">
+                            <option value="">Select</option>
+                            <option value="General">General</option>
+                            <option value="OBC">OBC</option>
+                            <option value="SC">SC</option>
+                            <option value="ST">ST</option>
+                            <option value="NT">NT</option>
+                            <option value="EWS">EWS</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Address <span class="optional-tag">optional</span></label>
+                        <input type="text" name="address" class="form-input" placeholder="Street / Area">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City <span class="optional-tag">optional</span></label>
+                        <input type="text" name="city" class="form-input" placeholder="e.g. Pune">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State <span class="optional-tag">optional</span></label>
+                        <input type="text" name="state" class="form-input" placeholder="e.g. Maharashtra">
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• PROFESSIONAL INFORMATION â•â• -->
+                <div class="section-badge"><i class="fa fa-briefcase"></i> Professional Information</div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Department <span class="optional-tag">optional</span></label>
+                        <select name="department" class="form-select">
+                            <option value="">Select</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Management">Management</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Designation <span class="optional-tag">optional</span></label>
+                        <select name="designation" class="form-select">
+                            <option value=""> Select </option>
+                            <option value="Professor">Professor</option>
+                            <option value="Associate Professor">Associate Professor</option>
+                            <option value="Assistant Professor">Assistant Professor</option>
+                            <option value="Lecturer">Lecturer</option>
+                            <option value="HOD">HOD</option>
+                            <option value="Principal">Principal</option>
+                            <option value="Lab Assistant">Lab Assistant</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Employment Type <span class="optional-tag">optional</span></label>
+                        <select name="employmentType" class="form-select">
+                            <option value=""> Select </option>
+                            <option value="Full-Time">Full-Time</option>
+                            <option value="Part-Time">Part-Time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Guest Faculty">Guest Faculty</option>
+                            <option value="Visiting Faculty">Visiting Faculty</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Joining Date <span class="optional-tag">optional</span></label>
+                        <input type="date" name="joiningDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-input" id="employeeId" name="employeeId"
+                               th:value="${nextTeacherEmployeeId}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Salary (â‚¹) <span class="optional-tag">optional</span></label>
+                        <input type="number" name="salary" class="form-input" placeholder="e.g. 45000" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:22px">
+                    <label class="form-label">Specialization <span class="optional-tag">optional</span></label>
+                    <input type="text" name="specialization" class="form-input" placeholder="e.g. Machine Learning">
+                </div>
+
+                <!-- Experience Pills -->
+                <div class="form-group" style="margin-bottom:22px">
+                    <label class="form-label">
+                        <i class="fa fa-star" style="color:var(--gold);margin-right:6px;font-size:12px"></i>
+                        Experience <span class="optional-tag">optional</span>
+                    </label>
+                    <div class="exp-picker">
+                        <input type="radio" name="experience" id="exp0" value="0-1 Years">
+                        <label for="exp0">1 Yrs</label>
+                        <input type="radio" name="experience" id="exp1" value="1-3 Years">
+                        <label for="exp1">3 Yrs</label>
+                        <input type="radio" name="experience" id="exp2" value="3-5 Years">
+                        <label for="exp2">5 Yrs</label>
+                        <input type="radio" name="experience" id="exp3" value="5-10 Years">
+                        <label for="exp3">10 Yrs</label>
+                        <input type="radio" name="experience" id="exp4" value="10+ Years">
+                        <label for="exp4">10+ Yrs</label>
+                    </div>
+                </div>
+
+                <!-- Status Toggle -->
+                <div class="form-group" style="margin-bottom:22px">
+                    <label class="form-label">
+                        <i class="fa fa-toggle-on" style="color:var(--gold);margin-right:6px;font-size:12px"></i>
+                        Status
+                    </label>
+                    <div class="status-toggle">
+                        <input type="radio" name="status" id="statusActive" value="Active" checked>
+                        <label for="statusActive" class="active-lbl"><i class="fa fa-circle-check"></i> Active</label>
+                        <input type="radio" name="status" id="statusInactive" value="Inactive">
+                        <label for="statusInactive" class="inactive-lbl"><i class="fa fa-circle-xmark"></i> Inactive</label>
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• EDUCATION DETAILS â•â• -->
+                <div class="section-badge"><i class="fa fa-graduation-cap"></i> Education Details</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Highest Qualification <span class="optional-tag">optional</span></label>
+                        <select name="qualification" class="form-select">
+                            <option value="">Select</option>
+                            <option value="B.E / B.Tech">B.E / B.Tech</option>
+                            <option value="M.E / M.Tech">M.E / M.Tech</option>
+                            <option value="">Select course</option>
+                            <option value="MSc CS">MSc CS</option>
+                            <option value="MBA">MBA</option>
+                            <option value="Ph.D">Ph.D</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Degree Specialization <span class="optional-tag">optional</span></label>
+                        <input type="text" name="degreeSpecialization" class="form-input" placeholder="e.g. Software Engineering">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">University / College <span class="optional-tag">optional</span></label>
+                        <input type="text" name="university" class="form-input" placeholder="Name of university">
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Year of Passing <span class="optional-tag">optional</span></label>
+                        <input type="number" name="yearOfPassing" class="form-input" placeholder="e.g. 2018" min="1980" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Publications / Research Papers <span class="optional-tag">optional</span></label>
+                        <input type="number" name="publications" class="form-input" placeholder="e.g. 5" min="0">
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• GOVERNMENT IDs â•â• -->
+                <div class="section-badge"><i class="fa fa-fingerprint"></i> Government IDs</div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Aadhar Number <span class="optional-tag">optional</span></label>
+                        <input type="text" name="aadharNumber" class="form-input" placeholder="12-digit Aadhar" maxlength="12">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PAN Card Number <span class="optional-tag">optional</span></label>
+                        <input type="text" name="panCardNumber" class="form-input" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase">
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Voter ID <span class="optional-tag">optional</span></label>
+                        <input type="text" name="voterId" class="form-input" placeholder="Voter ID number">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Passport Number <span class="optional-tag">optional</span></label>
+                        <input type="text" name="passportNumber" class="form-input" placeholder="e.g. A1234567" style="text-transform:uppercase">
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• BANK DETAILS â•â• -->
+                <div class="section-badge"><i class="fa fa-building-columns"></i> Bank Details</div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Bank Name <span class="optional-tag">optional</span></label>
+                        <input type="text" name="bankName" class="form-input" placeholder="e.g. State Bank of India">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bank Account No <span class="optional-tag">optional</span></label>
+                        <input type="text" name="bankAccNo" class="form-input" placeholder="Account number">
+                    </div>
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">IFSC Code <span class="optional-tag">optional</span></label>
+                        <input type="text" name="ifscCode" class="form-input" placeholder="e.g. SBIN0001234" style="text-transform:uppercase">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PF / UAN Number <span class="optional-tag">optional</span></label>
+                        <input type="text" name="pfNumber" class="form-input" placeholder="UAN / PF number">
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• EMERGENCY CONTACT â•â• -->
+                <div class="section-badge"><i class="fa fa-phone-volume"></i> Emergency Contact</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Contact Name <span class="optional-tag">optional</span></label>
+                        <input type="text" name="emergencyContactName" class="form-input" placeholder="e.g. Rajesh Kumar">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone <span class="optional-tag">optional</span></label>
+                        <input type="text" name="emergencyPhone" class="form-input" placeholder="e.g. 9876543210" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Relation <span class="optional-tag">optional</span></label>
+                        <select name="emergencyRelation" class="form-select">
+                            <option value="">    Select </option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="form-divider">
+
+                <!-- â•â• ACTIONS â•â• -->
+                <div style="display:flex; gap:12px; margin-top:10px;">
+                    <button type="submit" class="btn-gold">
+                        <i class="fa fa-chalkboard-teacher"></i> Add Teacher
+                    </button>
+                    <a href="/admin-teachers" class="btn-outline">
+                        <i class="fa fa-times"></i> Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* Subject "Other" â†’ show custom input */
+    const teacherForm = document.querySelector("form");
+    const employeeIdInput = document.getElementById("employeeId");
+    let employeeIdSubmitReady = false;
+
+    async function refreshTeacherEmployeeId() {
+        if (!employeeIdInput) return;
+        try {
+            const response = await fetch("/admin/employee-ids/next?type=teacher", {
+                headers: { "Accept": "application/json" }
+            });
+            if (!response.ok) return;
+            const data = await response.json();
+            if (data.employeeId) {
+                employeeIdInput.value = data.employeeId;
+            }
+        } catch (error) {
+            console.warn("Unable to refresh teacher employee ID", error);
+        }
+    }
+
+    refreshTeacherEmployeeId();
+    teacherForm?.addEventListener("submit", async event => {
+        if (employeeIdSubmitReady) return;
+        event.preventDefault();
+        await refreshTeacherEmployeeId();
+        employeeIdSubmitReady = true;
+        teacherForm.submit();
+    });
+
+    /* PAN & IFSC uppercase */
+    document.querySelector("input[name='panCardNumber']")?.addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+    });
+    document.querySelector("input[name='ifscCode']")?.addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+    });
+    document.querySelector("input[name='passportNumber']")?.addEventListener("input", function () {
+        this.value = this.value.toUpperCase();
+    });
+
+    /* Photo upload */
+    const photoCircle  = document.getElementById("photoCircle");
+    const photoInput   = document.getElementById("photoInput");
+    const photoPreview = document.getElementById("photoPreview");
+    const placeholder  = document.getElementById("photoPlaceholder");
+    const removeBtn    = document.getElementById("removePhotoBtn");
+    const fileBadge    = document.getElementById("fileBadge");
+    const fileNameText = document.getElementById("fileNameText");
+
+    photoCircle.addEventListener("click", () => photoInput.click());
+    photoInput.addEventListener("change", function () { if (this.files?.[0]) processFile(this.files[0]); });
+    photoCircle.addEventListener("dragover",  e => { e.preventDefault(); photoCircle.classList.add("drag-over"); });
+    photoCircle.addEventListener("dragleave", () => photoCircle.classList.remove("drag-over"));
+    photoCircle.addEventListener("drop", e => {
+        e.preventDefault(); photoCircle.classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (file) { const dt = new DataTransfer(); dt.items.add(file); photoInput.files = dt.files; processFile(file); }
+    });
+
+    function processFile(file) {
+        if (!file.type.startsWith("image/")) { alert("Please upload a valid image file."); return; }
+        if (file.size > 2 * 1024 * 1024)     { alert("Max 2 MB allowed."); return; }
+        const reader = new FileReader();
+        reader.onload = e => {
+            photoPreview.src = e.target.result;
+            photoPreview.style.display = "block";
+            placeholder.style.display  = "none";
+            fileNameText.textContent    = file.name.length > 28 ? file.name.substring(0,27)+"..." : file.name;
+            fileBadge.classList.add("visible");
+            removeBtn.classList.add("visible");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeBtn.addEventListener("click", () => {
+        photoPreview.src = ""; photoPreview.style.display = "none";
+        placeholder.style.display = "flex";
+        fileBadge.classList.remove("visible");
+        removeBtn.classList.remove("visible");
+        photoInput.value = "";
+    });
+
+</script>
+</body>
+</html>

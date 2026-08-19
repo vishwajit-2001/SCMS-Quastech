@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events &amp; Activities - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&amp;family=Jost:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='events')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Events and Activities', subtitle='Publish campus activities and review registrations inside the same upgraded teacher portal system.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-calendar-check"></i> Academic Component</span>
+                    <h2 class="portal-hero-title">Event Publishing</h2>
+                    <p class="portal-hero-subtitle">Create student-facing events, keep registrations visible, and download applicant lists when needed.</p>
+                </div>
+                <div class="portal-hero-side">
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Published Events</p>
+                        <p class="portal-side-value" th:text="${campusEventCount}">0</p>
+                        <div class="portal-side-meta" th:text="${campusEventOpenCount} + ' open for registration'">0 open</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-kpi-grid">
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Events</p><h3 class="teacher-kpi-value" th:text="${campusEventCount}">0</h3><p class="teacher-kpi-meta">Published by this teacher</p></article>
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Open</p><h3 class="teacher-kpi-value" th:text="${campusEventOpenCount}">0</h3><p class="teacher-kpi-meta">Accepting registrations</p></article>
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Applications</p><h3 class="teacher-kpi-value" th:text="${campusEventApplicationCount}">0</h3><p class="teacher-kpi-meta">Student submissions</p></article>
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Teacher</p><h3 class="teacher-kpi-value" th:text="${teacherInitials}">TE</h3><p class="teacher-kpi-meta" th:text="${teacherName}">Teacher</p></article>
+            </section>
+
+            <section class="teacher-grid-two">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Publish Event</h2>
+                            <p class="teacher-panel-subtitle">Students can register directly from the portal as soon as you publish.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${eventSuccess != null}" class="teacher-alert teacher-alert--success" th:text="${eventSuccess}">Saved</div>
+                    <div th:if="${eventError != null}" class="teacher-alert teacher-alert--error" th:text="${eventError}">Error</div>
+
+                    <form method="post" th:action="@{/teacher-events}">
+                        <div class="teacher-form-grid">
+                            <div class="teacher-field teacher-field--full">
+                                <label for="eventTitle">Event Title</label>
+                                <input id="eventTitle" type="text" name="title" placeholder="National Hackathon 2026" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="organizationName">Organizer / Company</label>
+                                <input id="organizationName" type="text" name="organizationName" placeholder="Department / company / club">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="category">Category</label>
+                                <input id="category" type="text" name="category" placeholder="Workshop / Hackathon / Seminar">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="venue">Venue</label>
+                                <input id="venue" type="text" name="venue" placeholder="Seminar Hall / Online">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="eventDate">Event Date</label>
+                                <input id="eventDate" type="date" name="eventDate">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="eventTime">Event Time</label>
+                                <input id="eventTime" type="time" name="eventTime">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="registrationDeadlineDate">Registration Deadline Date</label>
+                                <input id="registrationDeadlineDate" type="date" name="registrationDeadlineDate" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="registrationDeadlineTime">Registration Deadline Time</label>
+                                <input id="registrationDeadlineTime" type="time" name="registrationDeadlineTime" required>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="targetAudience">Target Audience</label>
+                                <input id="targetAudience" type="text" name="targetAudience" placeholder="All students / MCA / CS students">
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="description" placeholder="Short event description, prizes, instructions, etc."></textarea>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label><input type="checkbox" name="published" checked> Publish immediately</label>
+                            </div>
+                        </div>
+                        <div class="teacher-actions-row">
+                            <span class="teacher-pill"><i class="fa-solid fa-chalkboard-user"></i><span th:text="${teacherName}">Teacher</span></span>
+                            <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-paper-plane"></i> Publish event</button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Published Events</h2>
+                            <p class="teacher-panel-subtitle">Review your event list and download registrations per event.</p>
+                        </div>
+                    </div>
+
+                    <div class="teacher-list" th:if="${!#lists.isEmpty(campusEvents)}">
+                        <div class="teacher-list-item" th:each="event : ${campusEvents}">
+                            <div class="teacher-list-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                            <div class="teacher-list-copy">
+                                <h3 class="teacher-list-title" th:text="${event.title}">Event</h3>
+                                <p class="teacher-list-text" th:text="${(event.category != null ? event.category : 'Activity') + ' | ' + (event.organizationName != null ? event.organizationName : event.organizerName)}">Meta</p>
+                                <div class="teacher-inline-tags" style="margin-top:10px;">
+                                    <span class="teacher-pill" th:text="${event.eventLabel}">Date</span>
+                                    <span class="teacher-pill" th:text="${event.deadlineLabel}">Deadline</span>
+                                </div>
+                            </div>
+                            <div class="teacher-filter-row">
+                                <span class="teacher-status-chip" th:classappend="${event.registrationOpen} ? ' teacher-status-chip--success' : ' teacher-status-chip--warning'" th:text="${event.registrationOpen ? 'Open' : 'Closed'}">Open</span>
+                                <a class="teacher-btn teacher-btn--secondary" th:href="@{/teacher-events/download/{eventId}(eventId=${event.id})}"><i class="fa-solid fa-download"></i> Download</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="teacher-empty" th:if="${#lists.isEmpty(campusEvents)}">No events published yet. Use the form to create your first event.</div>
+                </article>
+            </section>
+
+            <section class="teacher-panel">
+                <div class="teacher-panel-head">
+                    <div>
+                        <h2 class="teacher-panel-title">Recent Registrations</h2>
+                        <p class="teacher-panel-subtitle">Latest student applications across your published events.</p>
+                    </div>
+                </div>
+
+                <div class="teacher-table-wrap" th:if="${!#lists.isEmpty(recentCampusEventApplications)}">
+                    <table class="teacher-table">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Event</th>
+                            <th>Course</th>
+                            <th>Contact</th>
+                            <th>Notes</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="eventApplication : ${recentCampusEventApplications}">
+                            <td th:text="${eventApplication.fullName}">Student</td>
+                            <td th:text="${eventApplication.campusEvent != null ? eventApplication.campusEvent.title : 'Event'}">Event</td>
+                            <td th:text="${eventApplication.course + ' | ' + eventApplication.semester}">Course</td>
+                            <td th:text="${eventApplication.email + ' | ' + eventApplication.phone}">Contact</td>
+                            <td th:text="${eventApplication.notes != null ? eventApplication.notes : 'No notes'}">Notes</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="teacher-empty" th:if="${#lists.isEmpty(recentCampusEventApplications)}">No registrations yet. Student applications will appear here after they register.</div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

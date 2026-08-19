@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Notifications - AI Campus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .notification-shell { display:grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr); gap:18px; }
+        .notification-panel { background:var(--offwhite); border:1px solid var(--light); border-radius:16px; overflow:hidden; }
+        .notification-panel-head { padding:18px 20px; border-bottom:1px solid var(--light); display:flex; justify-content:space-between; gap:12px; align-items:center; }
+        .notification-panel-title { font-size:18px; font-weight:800; color:var(--black); }
+        .notification-panel-sub { font-size:13px; color:#988a76; margin-top:4px; }
+        .notification-list { display:flex; flex-direction:column; }
+        .notification-card {
+            display:flex;
+            gap:14px;
+            padding:16px 20px;
+            border-bottom:1px solid #efe7da;
+            text-decoration:none;
+            color:inherit;
+            transition:background .2s ease, transform .2s ease;
+        }
+        .notification-card:hover { background:#fcf8f1; }
+        .notification-card.active { background:#f6efe1; }
+        .notification-dot { width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+        .notification-card.unread .notification-dot { box-shadow:0 0 0 4px rgba(224, 170, 60, 0.12); }
+        .notification-copy { flex:1; min-width:0; }
+        .notification-title { font-size:15px; font-weight:700; color:var(--black); }
+        .notification-meta { font-size:12px; color:#9d907d; margin-top:4px; }
+        .notification-text { font-size:13px; color:#75695a; margin-top:8px; line-height:1.5; }
+        .notification-badge { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; background:#f7f2e8; color:#7a6440; font-size:12px; font-weight:700; }
+        .notification-detail { padding:22px; }
+        .notification-detail-empty {
+            display:grid;
+            place-items:center;
+            min-height:320px;
+            text-align:center;
+            color:#9a8d7d;
+            border:1px dashed #e6d9c5;
+            border-radius:14px;
+            background:#fffdf8;
+        }
+        .detail-title { font-size:22px; font-weight:800; color:var(--black); margin-bottom:8px; }
+        .detail-meta { color:#9a8d7d; font-size:13px; margin-bottom:18px; }
+        .detail-message { white-space:pre-wrap; line-height:1.7; color:#5f5445; }
+        .detail-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+        .notification-counts { display:flex; gap:10px; flex-wrap:wrap; }
+        .count-pill { padding:8px 12px; border-radius:999px; font-size:12px; font-weight:700; background:#f5eee3; color:#6a563b; }
+        @media (max-width: 980px) {
+            .notification-shell { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('notifications')}"></div>
+<div class="main">
+    <div class="header">
+        <div class="header-title">Notifications</div>
+        <div class="header-right">
+            <div class="notification-counts">
+                <div class="count-pill" th:text="${notificationCount} + ' total'">0 total</div>
+                <div class="count-pill" th:text="${unreadCount} + ' unread'">0 unread</div>
+            </div>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content" style="padding-top:28px">
+        <div class="notification-shell">
+            <div class="notification-panel">
+                <div class="notification-panel-head">
+                    <div>
+                        <div class="notification-panel-title">Inbox</div>
+                        <div class="notification-panel-sub">Messages sent by the super admin and ERP system alerts for your college.</div>
+                    </div>
+                    <span class="notification-badge"><i class="fa fa-envelope"></i> ERP mail</span>
+                </div>
+
+                <div class="notification-list">
+                    <a th:if="${#lists.isEmpty(notifications)}" class="notification-card" href="javascript:void(0)" style="cursor:default">
+                        <div class="notification-dot" style="background:#d2c4b1"></div>
+                        <div class="notification-copy">
+                            <div class="notification-title">No notifications</div>
+                            <div class="notification-meta">You will see super-admin messages here once they are sent.</div>
+                        </div>
+                    </a>
+
+                    <a class="notification-card"
+                       th:each="notification : ${notifications}"
+                       th:href="@{/admin-notifications(notificationId=${notification.id})}"
+                       th:classappend="${(selectedNotification != null and selectedNotification.id == notification.id) ? ' active' : ''} + (${notification.unread} ? ' unread' : '')">
+                        <div class="notification-dot" th:style="${notification.unread} ? 'background:var(--gold)' : 'background:#9db28a'"></div>
+                        <div class="notification-copy">
+                            <div class="notification-title" th:text="${notification.title}">Message title</div>
+                            <div class="notification-meta">
+                                From Super Admin · <span th:text="${notification.createdAtLabel}">Today</span>
+                            </div>
+                            <div class="notification-text" th:text="${#strings.abbreviate(notification.message, 120)}">Message preview</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="notification-panel">
+                <div class="notification-panel-head">
+                    <div>
+                        <div class="notification-panel-title">Message detail</div>
+                        <div class="notification-panel-sub">Open a message to read the full content.</div>
+                    </div>
+                </div>
+
+                <div class="notification-detail" th:if="${selectedNotification != null}">
+                    <div class="detail-title" th:text="${selectedNotification.title}">Title</div>
+                    <div class="detail-meta">
+                        From Super Admin · <span th:text="${selectedNotification.createdAtLabel}">Date</span>
+                        <span th:if="${selectedNotification.unread}" style="margin-left:10px;color:#b07a18;font-weight:700">Unread</span>
+                    </div>
+                    <div class="detail-message" th:text="${selectedNotification.message}">Message body</div>
+                    <div class="detail-actions">
+                        <a class="btn-outline" th:if="${selectedNotification.linkUrl != null and !#strings.isEmpty(selectedNotification.linkUrl)}" th:href="${selectedNotification.linkUrl}"><i class="fa fa-arrow-up-right-from-square"></i> Open Link</a>
+                        <a class="btn-outline" href="/admin-notifications"><i class="fa fa-list"></i> Back to inbox</a>
+                    </div>
+                </div>
+
+                <div class="notification-detail-empty" th:if="${selectedNotification == null}">
+                    <div>
+                        <i class="fa fa-envelope-open-text" style="font-size:34px;color:#d0c0a7;margin-bottom:12px"></i>
+                        <div style="font-size:18px;font-weight:800;color:var(--black);margin-bottom:8px">Select a message</div>
+                        <div>Open any notification from the inbox to view the full detail here.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

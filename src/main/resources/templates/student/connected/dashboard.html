@@ -1,0 +1,561 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Dashboard - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
+    <script defer src="/js/chatbot.js"></script>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='dashboard')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Student Dashboard')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-hero-banner portal-hero-banner--college">
+                <div class="portal-hero-copy portal-hero-college-copy">
+                    <div class="portal-hero-college-head">
+                        <div class="portal-hero-college-avatar">
+                            <img th:if="${studentPhoto != null and !#strings.isEmpty(studentPhoto)}" th:src="${studentPhoto}" alt="Student photo">
+                            <span th:if="${studentPhoto == null or #strings.isEmpty(studentPhoto)}" th:text="${studentInitials}">ST</span>
+                        </div>
+                        <div class="portal-hero-college-text">
+                            <h2 class="portal-hero-student-name" th:text="${studentName}">Vishwajit</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-hero-side portal-hero-college-side">
+                    <div th:if="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}" style="width:58px;height:58px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);margin-bottom:10px">
+                        <img th:src="${collegeLogoPath}" alt="College logo" style="width:100%;height:100%;object-fit:cover">
+                    </div>
+                    <h2 class="portal-hero-college-name portal-hero-college-name--side" th:text="${collegeName}">College Name</h2>
+                    <p class="portal-hero-college-year portal-hero-college-year--side" th:text="${dashboardAcademicYear}">2025-2026</p>
+                    <div class="portal-chip-row portal-chip-row--hero portal-chip-row--hero-right">
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-id-card"></i><strong th:text="${studentId}">98765432</strong></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-hashtag"></i><strong th:text="'#' + ${studentRollNo}">#15</strong></span>
+                        <span class="portal-chip portal-chip--hero"><i class="fa-solid fa-envelope"></i><span th:text="${studentEmail}">vishwajit@gmail.com</span></span>
+                    </div>
+                </div>
+            </section>
+
+            <section th:if="${hasDocumentReuploadRequest}"
+                     style="margin-top:16px;padding:14px 16px;border-radius:18px;border:1px solid #efb4b4;background:#fff3f3;color:#9f1d1d;">
+                <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;">Document review</div>
+                        <h3 style="margin:4px 0 0;font-size:18px;">Reupload requested by admin</h3>
+                        <p style="margin:6px 0 0;font-size:13px;">Open onboarding and replace the flagged documents before final verification.</p>
+                        <div th:if="${studentDocumentReviewRequests != null and !#lists.isEmpty(studentDocumentReviewRequests)}" style="margin-top:8px;font-size:13px;">
+                            <div th:each="doc : ${studentDocumentReviewRequests}" style="margin-top:4px;">
+                                <strong th:text="${doc.documentName}">AADHAAR CARD</strong>
+                                <span th:if="${doc.remarks != null and !#strings.isEmpty(doc.remarks)}" th:text="${' - ' + doc.remarks}"> - Upload clear image</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a th:href="@{'/student-onboarding/' + ${collegeCode}}"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:#1d4ed8;color:#fff;text-decoration:none;font-weight:700;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        Open onboarding
+                    </a>
+                </div>
+            </section>
+
+            <section class="portal-summary-grid">
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/subjects}">
+                    <p class="portal-summary-label">Subjects Assigned</p>
+                    <h2 class="portal-summary-value" th:text="${subjectCount}">0</h2>
+                    <div class="portal-summary-meta" th:text="${studentYearTypeLabel + ' · ' + studentSemesterLabel}">FY · Sem 1</div>
+                    <div class="portal-summary-action">View All <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/timetable}">
+                    <p class="portal-summary-label">Weekly Classes</p>
+                    <h2 class="portal-summary-value" th:text="${weeklyClassCount}">0</h2>
+                    <div class="portal-summary-meta" th:text="${studentProgressBatchLabel + ' · ' + studentAcademicYear}">Batch · Academic year</div>
+                    <div class="portal-summary-action">Open weekly timetable <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/timetable}">
+                    <p class="portal-summary-label">Today's Class</p>
+                    <h2 class="portal-summary-value" th:text="${todayScheduleCount}">0</h2>
+                    <div class="portal-summary-meta" th:text="${todayLabel} + ' timetable with live slot highlight'">Today</div>
+                    <div class="portal-summary-action">View today's slots <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+                <a class="portal-summary-card portal-summary-card--link" th:href="@{/fees}">
+                    <p class="portal-summary-label">Pending Fees</p>
+                    <h2 class="portal-summary-value" th:text="${feesPendingFormatted}">Rs 0</h2>
+                    <div class="portal-summary-meta" th:text="${feesDueStatus} + ' balance'">Status</div>
+                    <div class="portal-summary-action">Fees <i class="fa-solid fa-arrow-right"></i></div>
+                </a>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Upcoming Exams</h2>
+                    <a class="portal-link" th:href="@{/exams}">Open exam center</a>
+                </div>
+                <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(studentUpcomingExams)}">
+                    <a class="portal-alert portal-alert--interactive" th:each="exam : ${studentUpcomingExams}" th:href="@{'/student-exams/' + ${exam.id}}">
+                        <div class="portal-alert-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div class="portal-alert-copy">
+                            <div class="portal-alert-head">
+                                <h3 class="portal-alert-title" th:text="${exam.title}">Exam title</h3>
+                                <span class="portal-badge portal-badge--info" th:text="${exam.statusLabel}">Scheduled</span>
+                            </div>
+                            <p>
+                                <span th:text="${exam.subject}">Subject</span>
+                                <span> | </span>
+                                <span th:text="${exam.examDateLabel}">Date</span>
+                                <span> | </span>
+                                <span th:text="${exam.durationLabel}">Duration</span>
+                            </p>
+                        </div>
+                        <div class="portal-alert-trail"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    </a>
+                </div>
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(studentUpcomingExams)}">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <h3>No exams scheduled yet</h3>
+                    <p>When your teacher publishes a test, the details will appear here with reminders and the syllabus file.</p>
+                </div>
+            </section>
+
+            <section class="portal-section-grid portal-section-grid--dashboard-top">
+                <article class="portal-surface portal-surface--overview">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Student Overview</h2>
+                        <a class="portal-link" th:href="@{/student-profile}">Open profile</a>
+                    </div>
+
+                    <div class="portal-overview-layout">
+                        <div class="portal-overview-profile">
+                            <div class="portal-avatar-card">
+                                <div class="portal-avatar">
+                                    <img th:if="${studentPhoto != null and !#strings.isEmpty(studentPhoto)}" th:src="${studentPhoto}" alt="Student photo">
+                                    <span th:if="${studentPhoto == null or #strings.isEmpty(studentPhoto)}" th:text="${studentInitials}">ST</span>
+                                </div>
+                                <div class="portal-avatar-copy">
+                                    <h2 th:text="${studentName}">Student Name</h2>
+                                    <p>
+                                        <span th:text="${studentCourse}">Course</span>
+                                        <span> | </span>
+                                        <span th:text="${studentBatchLabel}">Batch</span>
+                                        <span> | </span>
+                                        <span th:text="${studentSemesterLabel}">Semester</span>
+                                        <span> | </span>
+                                        <span th:text="${studentSectionLabel}">Section</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="portal-chip-row portal-chip-row--light">
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-id-card"></i><strong th:text="${studentId}">Student ID</strong></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-user-tie"></i><span th:text="${studentClassMentor}">Mentor</span></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-building"></i><span th:text="${studentPrimaryRoom}">Room</span></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-arrows-split-up-and-left"></i><span th:text="${studentYearTypeLabel}">FY</span></span>
+                                <span class="portal-chip portal-chip--light"><i class="fa-solid fa-circle-check"></i><span th:text="${studentStatus}">Active</span></span>
+                            </div>
+
+                            <div class="portal-focus-panel" th:if="${todayCurrentSlot != null}">
+                                <span class="portal-focus-kicker"><i class="fa-solid fa-bolt"></i> Live right now</span>
+                                <h3 th:text="${todayCurrentSlot.subject}">Current subject</h3>
+                                <p th:text="${todayCurrentSlot.startTime} + ' - ' + ${todayCurrentSlot.endTime} + ' | ' + ${todayCurrentSlot.teacher} + ' | ' + ${todayCurrentSlot.room}">Current class detail</p>
+                            </div>
+                            <div class="portal-focus-panel" th:if="${todayCurrentSlot == null and todayNextSlot != null}">
+                                <span class="portal-focus-kicker"><i class="fa-regular fa-clock"></i> Next class</span>
+                                <h3 th:text="${todayNextSlot.subject}">Next subject</h3>
+                                <p th:text="${todayNextSlot.startTime} + ' - ' + ${todayNextSlot.endTime} + ' | ' + ${todayNextSlot.teacher} + ' | ' + ${todayNextSlot.room}">Next class detail</p>
+                            </div>
+                            <div class="portal-focus-panel" th:if="${todayCurrentSlot == null and todayNextSlot == null}">
+                                <span class="portal-focus-kicker"><i class="fa-regular fa-sun"></i> Today's class</span>
+                                <h3 th:text="${todayScheduleCount > 0 ? 'All classes for today are complete' : 'No classes scheduled today'}">Today's class</h3>
+                                <p th:text="${todayScheduleCount > 0 ? todayCompletedCount + ' class(es) are already completed for today.' : 'Enjoy your free academic window and check the weekly timetable for the next session.'}">Plan detail</p>
+                            </div>
+
+                            <div class="portal-task-panel">
+                                <div class="portal-task-panel-head">
+                                    <span class="portal-task-panel-kicker"><i class="fa-solid fa-bullseye"></i> Today's Tasks</span>
+                                    <span class="portal-badge portal-badge--neutral" th:text="${todayLabel}">Today</span>
+                                </div>
+                                <div class="portal-task-list" th:if="${todayCurrentSlot != null or todayNextSlot != null or !#lists.isEmpty(dashboardNotifications)}">
+                                    <div class="portal-task-item" th:if="${todayCurrentSlot != null}">
+                                        <strong>Live class</strong>
+                                        <span th:text="${todayCurrentSlot.subject} + ' Â· ' + ${todayCurrentSlot.room}">Current class</span>
+                                    </div>
+                                    <div class="portal-task-item" th:if="${todayCurrentSlot == null and todayNextSlot != null}">
+                                        <strong>Next class</strong>
+                                        <span th:text="${todayNextSlot.subject} + ' Â· ' + ${todayNextSlot.startTime}">Next class</span>
+                                    </div>
+                                    <div class="portal-task-item" th:if="${!#lists.isEmpty(dashboardNotifications)}">
+                                        <strong th:text="${dashboardNotifications[0].title}">Important update</strong>
+                                        <span th:text="${dashboardNotifications[0].source} + ' Â· ' + ${dashboardNotifications[0].description}">Notification text</span>
+                                    </div>
+                                </div>
+                                <div class="portal-task-empty" th:if="${todayCurrentSlot == null and todayNextSlot == null and #lists.isEmpty(dashboardNotifications)}">
+                                    No urgent academic task right now.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="portal-overview-meta">
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Enrollment</p>
+                                <p class="portal-meta-value" th:text="${studentEnrollmentNo}">Enrollment</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Application No</p>
+                                <p class="portal-meta-value" th:text="${studentRegistrationNo}">Application No</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">PRN Number</p>
+                                <p class="portal-meta-value" th:text="${studentPrnNumber}">PRN</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Academic Year</p>
+                                <p class="portal-meta-value" th:text="${studentAcademicYear}">Academic Year</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Year Type</p>
+                                <p class="portal-meta-value" th:text="${studentYearTypeLabel}">FY</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Admission Date</p>
+                                <p class="portal-meta-value" th:text="${studentAdmissionDate}">Admission Date</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Notifications</p>
+                                <p class="portal-meta-value" th:text="${notificationCount} + ' active alert(s)'">0 active alert(s)</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Today's Progress</p>
+                                <p class="portal-meta-value" th:text="${todayCompletedCount} + ' completed | ' + ${todayUpcomingCount} + ' upcoming'">0 completed | 0 upcoming</p>
+                            </div>
+                            <div class="portal-meta-item">
+                                <p class="portal-meta-label">Fee Status</p>
+                                <p class="portal-meta-value" th:text="${feesDueStatus} + ' | ' + ${feesPendingFormatted}">Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="portal-surface portal-surface--timetable">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Today's Timetable</h2>
+                        <a class="portal-link" th:href="@{/timetable}">View full timetable</a>
+                    </div>
+
+                    <div class="portal-timetable-status-row">
+                        <span class="portal-status-pill"><i class="fa-solid fa-check"></i><span th:text="${todayCompletedCount} + ' completed'">0 completed</span></span>
+                        <span class="portal-status-pill portal-status-pill--accent"><i class="fa-solid fa-bolt"></i><span th:text="${todayCurrentSlot != null ? 'Current class live' : 'No live class right now'}">No live class right now</span></span>
+                        <span class="portal-status-pill"><i class="fa-regular fa-clock"></i><span th:text="${todayUpcomingCount} + ' upcoming'">0 upcoming</span></span>
+                        <span class="portal-live-clock"><i class="fa-regular fa-clock"></i><span class="js-live-clock">--:--</span></span>
+                    </div>
+
+                    <div class="portal-list portal-list--timetable" th:if="${!#lists.isEmpty(todaySchedule)}">
+                        <article class="portal-list-item portal-list-item--slot"
+                                 th:each="slot : ${todaySchedule}"
+                                 th:attr="data-start=${slot.startTime},data-end=${slot.endTime}">
+                            <div class="portal-list-icon portal-list-icon--slot" th:classappend="| portal-list-icon--${slot.subjectClass}|">
+                                <i class="fa-regular fa-clock"></i>
+                            </div>
+                            <div class="portal-slot-body">
+                                <div class="portal-slot-head">
+                                    <h3 class="portal-list-title" th:text="${slot.subject}">Subject</h3>
+                                    <span class="portal-slot-state">Upcoming</span>
+                                </div>
+                                <div class="portal-list-meta" th:text="${slot.teacher} + ' | ' + ${slot.room}">Teacher | Room</div>
+                                <div class="portal-slot-progress"><span class="portal-slot-progress-bar"></span></div>
+                            </div>
+                            <div class="portal-list-trail portal-list-trail--time">
+                                <strong th:text="${slot.startTime}">09:00</strong>
+                                <span th:text="${slot.endTime}">10:00</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="portal-empty-state" th:if="${#lists.isEmpty(todaySchedule)}">
+                        <i class="fa-regular fa-calendar-xmark"></i>
+                        <h3>No classes scheduled today</h3>
+                        <p>Your admin timetable does not contain any slot for today yet.</p>
+                    </div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid portal-section-grid--subject-fee">
+                <article class="portal-surface portal-surface--subjects-overview">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Subjects Assigned</h2>
+                        <a class="portal-link" th:href="@{/subjects}">Open subjects</a>
+                    </div>
+
+                    <div class="portal-section-intro" th:if="${!#lists.isEmpty(subjectSummaries)}">
+                        <p th:text="${subjectCount} + ' subject(s) assigned across ' + ${weeklyClassCount} + ' weekly class slot(s).'">Subjects assigned summary</p>
+                    </div>
+
+                    <div class="portal-subject-grid" th:if="${!#lists.isEmpty(subjectSummaries)}">
+                        <article class="portal-subject-card" th:each="subject : ${subjectSummaries}">
+                            <div class="portal-subject-card-head">
+                                <div class="portal-list-icon" th:classappend="| portal-list-icon--${subject.subjectClass}|">
+                                    <i class="fa-solid fa-book-open-reader"></i>
+                                </div>
+                                <div class="portal-subject-card-copy">
+                                    <h3 class="portal-list-title" th:text="${subject.subjectName}">Subject</h3>
+                                    <div class="portal-list-meta" th:text="${subject.teacherName} + ' | ' + ${subject.room}">Teacher | Room</div>
+                                </div>
+                                <div class="portal-subject-card-count" th:text="${subject.classCount} + ' slots'">0 slots</div>
+                            </div>
+                            <div class="portal-subject-card-meta">
+                                <span class="portal-badge portal-badge--neutral" th:text="${subject.daySummary}">Days</span>
+                                <span class="portal-badge portal-badge--info" th:text="${subject.primaryTimeRange}">Time range</span>
+                            </div>
+                            <div class="portal-schedule-chip-row">
+                                <span class="portal-schedule-chip" th:each="moment : ${subject.scheduleMoments}" th:text="${moment}">Mon 09:00 - 10:00</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="portal-empty-state" th:if="${#lists.isEmpty(subjectSummaries)}">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                        <h3>No subjects published yet</h3>
+                        <p>Once the admin publishes timetable entries for your class, the assigned subjects will appear here.</p>
+                    </div>
+                </article>
+
+                <article class="portal-surface portal-surface--fees-overview">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Fees Overview</h2>
+                        <a class="portal-link" th:href="@{/fees}">Open fees</a>
+                    </div>
+
+                    <div class="portal-fee-hero">
+                        <div class="portal-fee-hero-copy">
+                            <p class="portal-meta-label">Fee Completion</p>
+                            <h3 class="portal-fee-percentage" th:text="${feesPaidPercentage} + '%'">0%</h3>
+                            <p class="portal-list-meta" th:text="${feesPaidFormatted} + ' paid out of ' + ${feesTotalFormatted}">Rs 0 paid out of Rs 0</p>
+                        </div>
+                        <span class="portal-badge"
+                              th:classappend="${feesPending > 0} ? ' portal-badge--warning' : ' portal-badge--success'"
+                              th:text="${feesDueStatus}">Pending</span>
+                    </div>
+
+                    <div class="portal-progress">
+                        <div class="portal-progress-bar" th:style="'width:' + ${feesPaidPercentage} + '%'"></div>
+                    </div>
+
+                    <div class="portal-fee-grid">
+                        <div class="portal-mini-stat">
+                            <span>Total</span>
+                            <strong th:text="${feesTotalFormatted}">Rs 0</strong>
+                        </div>
+                        <div class="portal-mini-stat">
+                            <span>Paid</span>
+                            <strong th:text="${feesPaidFormatted}">Rs 0</strong>
+                        </div>
+                        <div class="portal-mini-stat">
+                            <span>Pending</span>
+                            <strong th:text="${feesPendingFormatted}">Rs 0</strong>
+                        </div>
+                    </div>
+
+                    <div class="portal-mini-grid">
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Student ID</span>
+                            <strong th:text="${studentId}">Student ID</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Academic Year</span>
+                            <strong th:text="${studentAcademicYear}">Academic Year</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Academic Mentor</span>
+                            <strong th:text="${studentClassMentor}">Mentor</strong>
+                        </div>
+                        <div class="portal-mini-note">
+                            <span class="portal-mini-note-label">Bank</span>
+                            <strong th:text="${studentBankName}">Bank</strong>
+                        </div>
+                    </div>
+
+                    <div class="portal-note" th:text="${feesPending > 0 ? feesPendingFormatted + ' is still pending. Use the fees page to review the record.' : 'Your fee record is clear and fully updated right now.'}">Fee note</div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid portal-section-grid--bottom">
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Latest Notifications</h2>
+                        <a class="portal-link" th:href="@{/notifications}">All notifications</a>
+                    </div>
+
+                    <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(dashboardNotifications)}">
+                        <a class="portal-alert portal-alert--interactive"
+                           th:each="notification : ${dashboardNotifications}"
+                           th:href="${notification.targetUrl}"
+                           th:classappend="${notification.tone == 'warning'} ? ' portal-alert--warning' : (${notification.tone == 'success'} ? ' portal-alert--success' : ' portal-alert--info')">
+                            <div class="portal-alert-icon">
+                                <i th:class="${notification.iconClass}"></i>
+                            </div>
+                            <div class="portal-alert-copy">
+                                <div class="portal-alert-head">
+                                    <h3 class="portal-alert-title" th:text="${notification.title}">Notification title</h3>
+                                    <span class="portal-badge"
+                                          th:classappend="${notification.tone == 'warning'} ? ' portal-badge--warning' : (${notification.tone == 'success'} ? ' portal-badge--success' : ' portal-badge--info')"
+                                          th:text="${notification.source}">Source</span>
+                                </div>
+                                <p th:text="${notification.description}">Notification description</p>
+                            </div>
+                            <div class="portal-alert-trail"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                        </a>
+                    </div>
+
+                    <div class="portal-empty-state" th:if="${#lists.isEmpty(dashboardNotifications)}">
+                        <i class="fa-regular fa-bell-slash"></i>
+                        <h3>No notifications yet</h3>
+                        <p>Account, fees, timetable, and exam updates will appear here automatically.</p>
+                    </div>
+                </article>
+
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Student Workspace</h2>
+                        <span class="portal-badge portal-badge--neutral">Quick links</span>
+                    </div>
+
+                    <div class="portal-quick-link-grid">
+                        <a class="portal-quick-link" th:href="@{/student-profile}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-user"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Profile</strong>
+                                <small>Identity and personal details</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/exam-results}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-file-lines"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Exam &amp; Results</strong>
+                                <small>Published schedules and results</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/timetable}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Timetable</strong>
+                                <small>Daily and weekly class slots</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/subjects}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-book-open"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Subjects</strong>
+                                <small>Assigned subjects with timings</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/study-materials}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-folder-open"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Study Materials</strong>
+                                <small>Faculty uploads for your class</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/attendance}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-chart-column"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Attendance</strong>
+                                <small>Track attendance updates</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/assignments}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-pen-ruler"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Assignments</strong>
+                                <small>Check submissions and tasks</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/placements}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-briefcase"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Placements</strong>
+                                <small>Company drives and applications</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/fees}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-indian-rupee-sign"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Fees</strong>
+                                <small>Payment summary and balance</small>
+                            </span>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/notifications}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-bell"></i></span>
+                            <span class="portal-quick-link-copy">
+                                <strong>Notifications</strong>
+                                <small>Latest exam, fees, and class alerts</small>
+                            </span>
+                        </a>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<div class="scms-chatbot"
+     th:attr="data-role='STUDENT',
+              data-display-name=${studentName},
+              data-college-name=${collegeName},
+              data-message-endpoint='/api/chatbot/message',
+              data-context-endpoint='/api/chatbot/context'">
+    <button class="scms-chatbot-launcher" type="button" aria-expanded="false" aria-label="Open CHATBOT">
+        <span class="scms-chatbot-launcher-mark" aria-hidden="true">
+            <span class="scms-chatbot-launcher-dot scms-chatbot-launcher-dot--blue"></span>
+            <span class="scms-chatbot-launcher-dot scms-chatbot-launcher-dot--orange"></span>
+        </span>
+        <span class="scms-chatbot-launcher-copy">
+            <strong>CHATBOT</strong>
+        </span>
+    </button>
+    <div class="scms-chatbot-shell" hidden>
+        <button class="scms-chatbot-backdrop" type="button" aria-label="Close assistant"></button>
+        <section class="scms-chatbot-panel" role="dialog" aria-modal="true" aria-label="Campus Assistant">
+            <header class="scms-chatbot-header">
+                <div class="scms-chatbot-header-copy">
+                    <span class="scms-chatbot-kicker">Student console</span>
+                    <h2 class="scms-chatbot-title">Campus Assistant</h2>
+                    <p class="scms-chatbot-subtitle" th:text="${collegeName}">College</p>
+                </div>
+                <div class="scms-chatbot-header-actions">
+                    <div class="scms-chatbot-status">
+                        <span class="scms-chatbot-status-dot"></span>
+                        <span>Live</span>
+                    </div>
+                    <button class="scms-chatbot-close" type="button" aria-label="Close assistant">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </header>
+            <div class="scms-chatbot-body">
+                <div class="scms-chatbot-intro">
+                    <span class="scms-chatbot-intro-label">Quick help</span>
+                    <p>Ask about timetable, fees, subjects, assignments, or profile details.</p>
+                </div>
+                <div class="scms-chatbot-messages" aria-live="polite" aria-relevant="additions"></div>
+                <div class="scms-chatbot-suggestions" aria-label="Quick prompts"></div>
+            </div>
+            <form class="scms-chatbot-form" autocomplete="off">
+                <label class="sr-only" for="scmsChatInput">Ask the assistant</label>
+                <textarea id="scmsChatInput" class="scms-chatbot-input" rows="1" placeholder="Ask about timetable, fees, students..." maxlength="1000"></textarea>
+                <button type="submit" class="scms-chatbot-send">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Send
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>
+

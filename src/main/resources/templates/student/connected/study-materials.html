@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${'Study Materials - ' + (collegeName ?: 'AI Campus Institute')}">Study Materials - AI Campus Institute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/student/student-study-materials.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='study-materials')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Study Materials')}"></div>
+
+        <main class="portal-page-body">
+            <section class="study-materials-hero">
+                <div class="study-materials-hero-copy">
+                    <span class="study-materials-kicker"><i class="fa-solid fa-folder-open"></i> Semester resources</span>
+                    <h1>Study Materials</h1>
+                    <p class="study-materials-subtitle">
+                        Faculty uploads for <strong th:text="${studentClassLabel}">your semester scope</strong>.
+                        Browse notes, slides, PDFs, and references directly inside the portal.
+                    </p>
+
+                    <div class="portal-chip-row portal-chip-row--light" style="margin-top:16px;">
+                        <span class="portal-chip portal-chip--light"><i class="fa-solid fa-book"></i><strong th:text="${studyMaterialCount}">0</strong><span>resources</span></span>
+                        <span class="portal-chip portal-chip--light"><i class="fa-solid fa-layer-group"></i><span th:text="${studyMaterialSubjectCount} + ' subjects'">0 subjects</span></span>
+                        <span class="portal-chip portal-chip--light"><i class="fa-solid fa-user-tie"></i><span th:text="${studentClassMentor}">Faculty</span></span>
+                        <span class="portal-chip portal-chip--light"><i class="fa-solid fa-calendar-days"></i><span th:text="${studentSemesterLabel}">Semester</span></span>
+                    </div>
+                </div>
+
+                <div class="study-metrics">
+                    <div class="study-metric">
+                        <span>Materials</span>
+                        <strong th:text="${studyMaterialCount}">0</strong>
+                    </div>
+                    <div class="study-metric">
+                        <span>Teachers</span>
+                        <strong th:text="${studyMaterialTeachers}">0</strong>
+                    </div>
+                    <div class="study-metric">
+                        <span>Academic Scope</span>
+                        <strong th:text="${studentClassLabel}">Academic Scope</strong>
+                    </div>
+                    <div class="study-metric">
+                        <span>Semester</span>
+                        <strong th:text="${studentSemesterLabel}">Semester</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Filter Resources</h2>
+                    <a class="portal-link" th:href="@{/study-materials}">Clear filters</a>
+                </div>
+
+                <div class="study-filter-bar">
+                    <form class="study-filter-form" method="get" th:action="@{/study-materials}">
+                        <div class="study-filter-group">
+                            <label for="subjectFilter">Subject</label>
+                            <select id="subjectFilter" name="subject">
+                                <option value="" th:selected="${selectedStudyMaterialSubject == ''}">All subjects</option>
+                                <option th:each="subject : ${availableStudyMaterialSubjects}"
+                                        th:value="${subject}"
+                                        th:text="${subject}"
+                                        th:selected="${selectedStudyMaterialSubject == #strings.toLowerCase(subject)}">Subject</option>
+                            </select>
+                        </div>
+                        <div class="study-filter-group">
+                            <label for="semesterFilter">Semester</label>
+                            <select id="semesterFilter" name="semester">
+                                <option value="" th:selected="${selectedStudyMaterialSemester == ''}">All semesters</option>
+                                <option th:each="semester : ${availableStudyMaterialSemesters}"
+                                        th:value="${semester}"
+                                        th:text="${semester}"
+                                        th:selected="${selectedStudyMaterialSemester == #strings.toLowerCase(semester)}">Semester</option>
+                            </select>
+                        </div>
+                        <div class="study-filter-actions">
+                            <button class="study-button" type="submit">
+                                <i class="fa-solid fa-filter"></i>
+                                Apply
+                            </button>
+                            <a class="study-button-link" th:href="@{/study-materials}">
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Subject-wise Resources</h2>
+                    <span class="portal-badge portal-badge--neutral" th:text="${studyMaterialCount} + ' total file(s)'">0 total file(s)</span>
+                </div>
+
+                <div class="study-group-grid" th:if="${!#lists.isEmpty(studyMaterialsBySubject)}">
+                    <article class="study-group-card" th:each="entry : ${studyMaterialsBySubject}">
+                        <div class="study-group-head">
+                            <div>
+                                <h3 th:text="${entry.key}">Subject</h3>
+                                <p th:text="${studentClassLabel} + ' resources shared by faculty'">Semester resources</p>
+                            </div>
+                            <span class="study-count" th:text="${#lists.size(entry.value)} + ' file(s)'">0 file(s)</span>
+                        </div>
+
+                        <div class="study-file-list">
+                            <article class="study-file-item" th:each="material : ${entry.value}">
+                                <div class="study-file-icon" th:text="${material.displayFileType}">PDF</div>
+                                <div class="study-file-copy">
+                                    <h4 th:text="${material.title}">Resource title</h4>
+                                    <p th:if="${material.description != null and !#strings.isEmpty(material.description)}" th:text="${material.description}">Description</p>
+                                    <p th:if="${material.description == null or #strings.isEmpty(material.description)}">
+                                        Shared by <span th:text="${material.teacher != null ? material.teacher.name : 'Faculty'}">Faculty</span>
+                                        for <span th:text="${material.course != null ? material.course : studentClassLabel}">academic scope</span>.
+                                    </p>
+                                    <div class="study-file-meta">
+                                        <span th:text="${material.teacher != null ? material.teacher.name : 'Faculty'}">Faculty</span>
+                                        <span th:text="${material.semester != null and !#strings.isEmpty(material.semester) ? 'Sem ' + material.semester : 'Semester not tagged'}">Semester</span>
+                                        <span th:text="${material.readableFileSize}">0 KB</span>
+                                        <span th:text="${material.uploadedAtLabel}">Uploaded</span>
+                                    </div>
+                                </div>
+                                <div class="study-file-actions">
+                                    <a th:href="@{'/study-materials/view/' + ${material.id}}" target="_blank" rel="noopener">
+                                        View
+                                    </a>
+                                    <a th:href="@{'/study-materials/download/' + ${material.id}}">
+                                        Download
+                                    </a>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="study-empty-state" th:if="${#lists.isEmpty(studyMaterialsBySubject)}">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <h3>Nothing uploaded yet</h3>
+                    <p th:text="${studyMaterialEmptyMessage}">No uploaded materials match the current filters.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit College - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">College administration</div>
+                <div class="sa-title">Edit College</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" th:href="@{'/super-admin/colleges/' + ${college.id}}"><i class="fa fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Update college profile</h2>
+                        <p>Change the college identity, logo, address, and status.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div th:if="${superAdminError}" class="sa-notice warning" style="margin-bottom:16px" th:text="${superAdminError}"></div>
+                    <form th:action="@{'/super-admin/colleges/' + ${college.id} + '/edit'}" method="post" enctype="multipart/form-data" class="sa-form-grid">
+                        <div class="field">
+                            <label>College Name</label>
+                            <input type="text" name="name" th:value="${college.name}" required>
+                        </div>
+                        <div class="field">
+                            <label>College Code</label>
+                            <input type="text" name="code" th:value="${college.code}" required>
+                        </div>
+                        <div class="field">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="ACTIVE" th:selected="${college.status == 'ACTIVE'}">Active</option>
+                                <option value="INACTIVE" th:selected="${college.status == 'INACTIVE'}">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>College Logo</label>
+                            <input type="file" name="logo" accept="image/*">
+                        </div>
+                        <div class="field full">
+                            <label>College Address</label>
+                            <textarea name="address" rows="4" th:text="${college.address}"></textarea>
+                        </div>
+                        <div class="field full">
+                            <button class="sa-btn primary" type="submit"><i class="fa fa-check"></i> Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

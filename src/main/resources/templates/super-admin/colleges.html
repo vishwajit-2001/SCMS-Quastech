@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colleges - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Central registry</div>
+                <div class="sa-title">Colleges</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-arrow-left"></i> Dashboard</a>
+                <a class="sa-btn primary" href="/super-admin/reports"><i class="fa fa-chart-line"></i> Reports</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-panel" style="margin-bottom:18px">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Create college</h2>
+                        <p>College records are created only from the super-admin console.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div th:if="${superAdminError}" class="sa-notice warning" style="margin-bottom:14px" th:text="${superAdminError}"></div>
+                    <div th:if="${superAdminSuccess}" class="sa-notice success" style="margin-bottom:14px" th:text="${superAdminSuccess}"></div>
+                    <form action="/super-admin/colleges/create" method="post" enctype="multipart/form-data" class="sa-form-grid">
+                        <div class="field">
+                            <label>College Name</label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="field">
+                            <label>College Code</label>
+                            <input type="text" name="code" required>
+                        </div>
+                        <div class="field">
+                            <label>Status</label>
+                            <select name="status">
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>College Logo</label>
+                            <input type="file" name="logo" accept="image/*">
+                        </div>
+                        <div class="field full">
+                            <label>College Address</label>
+                            <textarea name="address" rows="3" placeholder="Enter college address"></textarea>
+                        </div>
+                        <div class="field full">
+                            <button class="sa-btn primary" type="submit"><i class="fa fa-school"></i> Create College</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Search and filter colleges</h2>
+                        <p>Search by college name, college code, or admin.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <form class="sa-toolbar" method="get" action="/super-admin/colleges">
+                        <div class="sa-toolbar-left">
+                            <div class="sa-search">
+                                <i class="fa fa-search"></i>
+                                <input type="text" name="q" placeholder="Search colleges..." th:value="${query}">
+                            </div>
+                            <div class="field" style="min-width:180px">
+                                <select name="status">
+                                    <option value="All">All Statuses</option>
+                                    <option th:each="opt : ${statusOptions}" th:value="${opt}" th:text="${opt}" th:selected="${statusFilter == opt}"></option>
+                                </select>
+                            </div>
+                            <div class="field" style="min-width:180px">
+                                <select name="sort">
+                                    <option th:each="opt : ${sortOptions}" th:value="${opt}" th:text="${'Sort by ' + opt}" th:selected="${sort == opt}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="sa-toolbar-right">
+                            <button class="sa-btn primary" type="submit"><i class="fa fa-filter"></i> Apply</button>
+                            <a class="sa-btn ghost" href="/super-admin/colleges"><i class="fa fa-rotate-right"></i> Reset</a>
+                        </div>
+                    </form>
+
+                    <div class="sa-table-wrap" style="margin-top:18px">
+                        <table class="sa-table">
+                            <thead>
+                            <tr>
+                                <th>College</th>
+                                <th>Status</th>
+                                <th>Admin</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(colleges)}">
+                                <td colspan="4" class="sa-empty">No colleges match the current filters.</td>
+                            </tr>
+                            <tr th:each="college : ${colleges}">
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:12px">
+                                        <img th:if="${college.logoPath != null and !#strings.isEmpty(college.logoPath)}" th:src="${college.logoPath}" alt="logo" style="width:44px;height:44px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08)">
+                                        <div>
+                                            <div style="font-weight:800" th:text="${college.collegeName}">College</div>
+                                            <div style="font-size:12px;color:var(--sa-muted);margin-top:4px" th:text="${college.collegeCode}">Code</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:8px" th:text="${college.address}">Address</div>
+                                </td>
+                                <td><span class="sa-badge" th:classappend="' ' + ${college.statusTone}" th:text="${college.status}">Active</span></td>
+                                <td th:text="${college.adminName}">Admin</td>
+                                <td>
+                                    <div class="sa-quick-actions">
+                                        <a class="sa-action view" th:href="@{'/super-admin/colleges/' + ${college.collegeId}}"><i class="fa fa-eye"></i> View</a>
+                                        <a class="sa-action edit" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/edit'}"><i class="fa fa-pen"></i> Edit</a>
+                                        <a class="sa-action manage" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/manage'}"><i class="fa fa-sitemap"></i> Manage</a>
+                                        <form th:action="@{'/super-admin/colleges/' + ${college.collegeId} + '/delete'}" method="post" style="display:inline" onsubmit="return confirm('Delete this college?');">
+                                            <button class="sa-action delete" type="submit"><i class="fa fa-trash"></i> Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sa-pagination" th:if="${pageSlice.totalPages > 1}">
+                        <div style="color:var(--sa-muted);font-size:13px">
+                            Showing <strong th:text="${pageSlice.items.size()}">0</strong>
+                            of <strong th:text="${pageSlice.totalItems}">0</strong> colleges
+                        </div>
+                        <div class="sa-pages">
+                            <a class="sa-page" th:if="${pageSlice.hasPrev}" th:href="@{/super-admin/colleges(page=${pageSlice.currentPage - 1}, size=${pageSlice.size}, q=${query}, status=${statusFilter}, sort=${sort})}">Prev</a>
+                            <a class="sa-page" th:each="pageNo : ${pageSlice.pageNumbers}" th:href="@{/super-admin/colleges(page=${pageNo}, size=${pageSlice.size}, q=${query}, status=${statusFilter}, sort=${sort})}" th:classappend="${pageNo == pageSlice.currentPage} ? ' active' : ''" th:text="${pageNo}">1</a>
+                            <a class="sa-page" th:if="${pageSlice.hasNext}" th:href="@{/super-admin/colleges(page=${pageSlice.currentPage + 1}, size=${pageSlice.size}, q=${query}, status=${statusFilter}, sort=${sort})}">Next</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

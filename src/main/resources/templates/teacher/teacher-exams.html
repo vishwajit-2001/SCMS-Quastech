@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exams - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='exams')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='Exams', subtitle='Create one exam, notify the semester scope, share the syllabus, and keep reminders and attendance tied to the same teacher workspace.')}"></div>
+
+        <main class="portal-page-body teacher-page-grid">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-graduation-cap"></i> Exam Automation</span>
+                    <h2 class="portal-hero-title">Smart Test &amp; Exam Automation</h2>
+                    <p class="portal-hero-subtitle">Publish the exam once. Students, reminders, seating, and attendance stay in sync from the same record.</p>
+                    <div class="portal-hero-actions">
+                        <a class="portal-hero-action portal-hero-action--primary" href="#examForm"><i class="fa-solid fa-plus"></i> Create exam</a>
+                        <a class="portal-hero-action" href="#examRisk"><i class="fa-solid fa-triangle-exclamation"></i> Risk view</a>
+                    </div>
+                </div>
+                <div class="portal-hero-side">
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Upcoming exams</p>
+                        <p class="portal-side-value" th:text="${teacherUpcomingExams.size()}">0</p>
+                        <div class="portal-side-meta">Scheduled for your academic scope</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="teacher-grid-two">
+                <article class="teacher-panel" id="examForm">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Create Exam</h2>
+                            <p class="teacher-panel-subtitle">Add the exam details once and let the portal handle reminders and notifications.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${examSuccess}" class="teacher-alert teacher-alert--success" th:text="${examSuccess}">Exam scheduled successfully.</div>
+                    <div th:if="${examError}" class="teacher-alert teacher-alert--error" th:text="${examError}">Exam error</div>
+
+                    <form method="post" th:action="@{/teacher-exams/create}" enctype="multipart/form-data">
+                        <div class="teacher-form-grid teacher-form-grid--three">
+                            <div class="teacher-field teacher-field--full">
+                                <label for="examTitle">Exam Title</label>
+                                <input id="examTitle" name="title" type="text" placeholder="Internal Assessment 1" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="examSubject">Subject</label>
+                                <input id="examSubject" name="subject" type="text" th:value="${teacherSubject}" placeholder="Java Programming">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="examDateTime">Exam Date &amp; Time</label>
+                                <input id="examDateTime" name="examDateTime" type="datetime-local" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="examDuration">Duration (minutes)</label>
+                                <input id="examDuration" name="durationMinutes" type="number" value="60" min="15" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="examRoom">Room</label>
+                                <input id="examRoom" name="room" type="text" th:value="${teacherClassLabel}" placeholder="Semester scope / Room 101">
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="examTopics">Syllabus / Topic List</label>
+                                <textarea id="examTopics" name="syllabusTopics" rows="3" placeholder="Unit 1, Unit 2, revision topics..."></textarea>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="examInstructions">Instructions</label>
+                                <textarea id="examInstructions" name="instructions" rows="3" placeholder="Bring ID card, arrive 15 minutes early..."></textarea>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="examSeating">Seating Info</label>
+                                <textarea id="examSeating" name="seatingInfo" rows="3" placeholder="Auto-generated seating will also be shown in the exam view."></textarea>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="examFile">Syllabus PDF / File</label>
+                                <input id="examFile" name="syllabusFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx">
+                            </div>
+                        </div>
+
+                        <div class="teacher-actions-row">
+                            <span class="teacher-pill"><i class="fa-solid fa-layer-group"></i><span th:text="${teacherClassLabel}">Academic Scope</span></span>
+                            <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-paper-plane"></i> Publish exam</button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Exam Summary</h2>
+                            <p class="teacher-panel-subtitle">Current exam activity for your academic scope.</p>
+                        </div>
+                    </div>
+
+                    <div class="teacher-kpi-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                        <article class="teacher-kpi-card"><p class="teacher-kpi-label">Total Exams</p><h3 class="teacher-kpi-value" th:text="${teacherExamCount}">0</h3><p class="teacher-kpi-meta">Created by you</p></article>
+                        <article class="teacher-kpi-card"><p class="teacher-kpi-label">Unread Alerts</p><h3 class="teacher-kpi-value" th:text="${teacherUnreadNotifications}">0</h3><p class="teacher-kpi-meta">Exam reminders included</p></article>
+                        <article class="teacher-kpi-card"><p class="teacher-kpi-label">Online Quizzes</p><h3 class="teacher-kpi-value" th:text="${teacherQuizCount}">0</h3><p class="teacher-kpi-meta">Auto-generated MCQ tests</p></article>
+                    </div>
+
+                    <div class="portal-list portal-list--alerts" style="margin-top:18px;">
+                        <article class="portal-alert portal-alert--info" th:each="exam : ${teacherUpcomingExams}">
+                            <div class="portal-alert-icon">
+                                <i class="fa-solid fa-file-pen"></i>
+                            </div>
+                            <div class="portal-alert-copy">
+                                <div class="portal-alert-head">
+                                    <h3 class="portal-alert-title" th:text="${exam.title}">Exam title</h3>
+                                    <span class="portal-badge portal-badge--info" th:text="${exam.statusLabel}">Scheduled</span>
+                                </div>
+                                <p>
+                                    <span th:text="${exam.subject}">Subject</span>
+                                    <span> | </span>
+                                    <span th:text="${exam.examDateLabel}">Date</span>
+                                    <span> | </span>
+                                    <span th:text="${exam.durationLabel}">Duration</span>
+                                </p>
+                            </div>
+                            <div class="portal-alert-trail">
+                                <a class="portal-link" th:href="@{'/teacher-exams/' + ${exam.id} + '/attendance'}">Attendance</a>
+                            </div>
+                        </article>
+                        <div class="portal-empty-state" th:if="${#lists.isEmpty(teacherUpcomingExams)}">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                            <h3>No exams yet</h3>
+                            <p>Schedule the first test to activate reminders and student notifications.</p>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="teacher-grid-two" style="margin-top:18px;">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Create Online Quiz</h2>
+                            <p class="teacher-panel-subtitle">Upload a PDF note set and the system will generate timed MCQs for students automatically.</p>
+                        </div>
+                    </div>
+
+                    <form method="post" th:action="@{/teacher-exams/create-quiz}" enctype="multipart/form-data">
+                        <div class="teacher-form-grid teacher-form-grid--three">
+                            <div class="teacher-field teacher-field--full">
+                                <label for="quizTitle">Quiz Title</label>
+                                <input id="quizTitle" name="title" type="text" placeholder="Java Programming MCQ Quiz" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="quizSubject">Subject</label>
+                                <input id="quizSubject" name="subject" type="text" th:value="${teacherSubject}" placeholder="Java Programming">
+                            </div>
+                            <div class="teacher-field">
+                                <label for="quizDateTime">Start Date &amp; Time</label>
+                                <input id="quizDateTime" name="examDateTime" type="datetime-local" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="quizDuration">Timer (minutes)</label>
+                                <input id="quizDuration" name="durationMinutes" type="number" value="20" min="5" required>
+                            </div>
+                            <div class="teacher-field">
+                                <label for="quizQuestionCount">Question Count</label>
+                                <input id="quizQuestionCount" name="questionCount" type="number" value="10" min="3" max="25" required>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="quizInstructions">Student Instructions</label>
+                                <textarea id="quizInstructions" name="instructions" rows="3" placeholder="The quiz will auto-submit when the timer ends."></textarea>
+                            </div>
+                            <div class="teacher-field teacher-field--full">
+                                <label for="quizPdfFile">Source PDF</label>
+                                <input id="quizPdfFile" name="quizPdfFile" type="file" accept=".pdf" required>
+                            </div>
+                        </div>
+
+                        <div class="teacher-actions-row">
+                            <span class="teacher-pill"><i class="fa-solid fa-wand-magic-sparkles"></i><span>PDF to MCQ automation</span></span>
+                            <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-bolt"></i> Generate quiz</button>
+                        </div>
+                    </form>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Online Quiz Center</h2>
+                            <p class="teacher-panel-subtitle">Track generated quizzes, timing, and student auto-checked results.</p>
+                        </div>
+                    </div>
+
+                    <div class="portal-list portal-list--alerts">
+                        <article class="portal-alert portal-alert--info" th:each="quiz : ${teacherQuizExams}">
+                            <div class="portal-alert-icon">
+                                <i class="fa-solid fa-list-check"></i>
+                            </div>
+                            <div class="portal-alert-copy">
+                                <div class="portal-alert-head">
+                                    <h3 class="portal-alert-title" th:text="${quiz.title}">Quiz title</h3>
+                                    <span class="portal-badge portal-badge--warning" th:text="${quiz.examModeLabel}">Online Quiz</span>
+                                </div>
+                                <p>
+                                    <span th:text="${quiz.subject}">Subject</span>
+                                    <span> | </span>
+                                    <span th:text="${quiz.examDateLabel}">Date</span>
+                                    <span> | </span>
+                                    <span th:text="${quiz.durationLabel}">Duration</span>
+                                    <span> | </span>
+                                    <span th:text="${quiz.quizQuestionCount + ' MCQs'}">10 MCQs</span>
+                                </p>
+                            </div>
+                            <div class="portal-alert-trail">
+                                <a class="portal-link" th:href="@{'/teacher-exams/' + ${quiz.id} + '/quiz-results'}">Results</a>
+                            </div>
+                        </article>
+                        <div class="portal-empty-state" th:if="${#lists.isEmpty(teacherQuizExams)}">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <h3>No online quiz yet</h3>
+                            <p>Upload a PDF and the system will build timed MCQs for your class.</p>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="teacher-grid-two" id="examRisk">
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">At-Risk Students</h2>
+                            <p class="teacher-panel-subtitle">Explainable risk score based on attendance, exam presence, and academic workload.</p>
+                        </div>
+                    </div>
+                    <div class="portal-list portal-list--alerts">
+                        <article class="portal-alert" th:each="risk : ${teacherExamRiskViews}">
+                            <div class="portal-alert-icon">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div class="portal-alert-copy">
+                                <div class="portal-alert-head">
+                                    <h3 class="portal-alert-title" th:text="${risk.student.name}">Student</h3>
+                                    <span class="portal-badge portal-badge--warning" th:text="${risk.band}">Medium</span>
+                                </div>
+                                <p th:text="${risk.reason}">Risk reason</p>
+                            </div>
+                            <div class="portal-alert-trail" th:text="${risk.score} + '%'">70%</div>
+                        </article>
+                    </div>
+                </article>
+
+                <article class="teacher-panel">
+                    <div class="teacher-panel-head">
+                        <div>
+                            <h2 class="teacher-panel-title">Quick Links</h2>
+                            <p class="teacher-panel-subtitle">Open the exam workflow without leaving this screen.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-grid-three">
+                        <a class="portal-quick-link" th:href="@{/teacher-exams}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                            <strong>Exams</strong>
+                            <small>Manage test schedules</small>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-notifications}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-bell"></i></span>
+                            <strong>Notifications</strong>
+                            <small>See reminder history</small>
+                        </a>
+                        <a class="portal-quick-link" th:href="@{/teacher-students}">
+                            <span class="portal-quick-link-icon"><i class="fa-solid fa-users"></i></span>
+                            <strong>Students</strong>
+                            <small>Check class roster</small>
+                        </a>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+<script>
+    const examDateField = document.getElementById('examDateTime');
+    if (examDateField) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        examDateField.value = now.toISOString().slice(0, 16);
+    }
+</script>
+</body>
+</html>

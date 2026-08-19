@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Platform Overview</title>
+    <link rel="stylesheet" href="/css/home/home.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+
+        body{
+        font-family:Poppins;
+        background:#f7f7f7;
+        margin:0;
+        }
+
+        /* HERO */
+
+        .hero{
+        text-align:center;
+        padding:120px 20px 80px;
+        }
+
+        .hero h1{
+        font-size:70px;
+        margin-bottom:20px;
+        }
+
+        .h-white{
+        color:#000;
+        }
+
+        .h-gold{
+        color:#c89b3c;
+        }
+
+        .hero p{
+        max-width:700px;
+        margin:auto;
+        color:#555;
+        font-size:18px;
+        }
+
+        /* FEATURES */
+
+        .features{
+        padding:80px 10%;
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+        gap:40px;
+        }
+
+        .feature-card{
+        background:white;
+        padding:35px;
+        border-radius:12px;
+        box-shadow:0 10px 30px rgba(0,0,0,0.08);
+        text-align:center;
+        transition:0.3s;
+        }
+
+        .feature-card:hover{
+        transform:translateY(-10px);
+        box-shadow:0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-card i{
+        font-size:40px;
+        color:#c89b3c;
+        margin-bottom:20px;
+        }
+
+        .feature-card h3{
+        margin-bottom:10px;
+        }
+
+        /* AI SECTION */
+
+        .ai-section{
+        padding:100px 10%;
+        background:#111;
+        color:white;
+        text-align:center;
+        }
+
+        .ai-section h2{
+        font-size:42px;
+        margin-bottom:50px;
+        }
+
+        .ai-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+        gap:30px;
+        }
+
+        .ai-card{
+        background:#1b1b1b;
+        padding:30px;
+        border-radius:10px;
+        transition:0.3s;
+        }
+
+        .ai-card:hover{
+        background:#c89b3c;
+        color:black;
+        transform:scale(1.05);
+        }
+
+        .ai-card i{
+        font-size:35px;
+        margin-bottom:15px;
+        }
+
+        /* HOW IT WORKS */
+
+        .workflow{
+        padding:100px 10%;
+        text-align:center;
+        }
+
+        .workflow h2{
+        font-size:42px;
+        margin-bottom:60px;
+        }
+
+        .steps{
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+        gap:30px;
+        }
+
+        .step{
+        background:white;
+        padding:30px;
+        width:250px;
+        border-radius:10px;
+        box-shadow:0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .step span{
+        font-size:35px;
+        font-weight:700;
+        color:#c89b3c;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- =========================
+NAVBAR (GLOBAL)
+========================= -->
+
+<div th:replace="~{home/fragments/navbar :: homeNavbar}"></div>
+
+<div th:replace="~{home/fragments/navbar :: loginModal}"></div>
+
+<div th:replace="~{home/fragments/navbar :: loginScript}"></div>
+
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <h1>
+        <span class="h-white">Platform</span>
+        <span class="h-gold">Overview</span>
+    </h1>
+
+    <p>
+        Our AI-Powered Smart Campus Management System simplifies campus operations
+        while improving learning experiences for students, faculty, and administrators.
+        The platform uses Artificial Intelligence to automate tasks, analyze data,
+        and provide smart insights.
+    </p>
+
+</section>
+
+
+<!-- FEATURES -->
+
+<section class="features">
+
+    <div class="feature-card">
+        <i class="fa-solid fa-user-graduate"></i>
+        <h3>For Students</h3>
+        <p>
+            AI recommends courses, tracks academic progress,
+            and provides smart reminders for assignments,
+            exams and deadlines.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <h3>For Faculty</h3>
+        <p>
+            Faculty can manage classes, attendance,
+            assignments and grading through a centralized
+            AI-assisted dashboard.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <i class="fa-solid fa-building-columns"></i>
+        <h3>For Administration</h3>
+        <p>
+            Admins get real-time analytics on student
+            performance, course demand, and institutional
+            efficiency.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <i class="fa-solid fa-chart-line"></i>
+        <h3>Smart Analytics</h3>
+        <p>
+            AI analyzes academic data to predict performance,
+            identify risks, and suggest improvements.
+        </p>
+    </div>
+
+</section>
+
+
+<!-- AI INNOVATIONS -->
+
+<section class="ai-section">
+
+    <h2>AI Innovations in Smart Campus</h2>
+
+    <div class="ai-grid">
+
+        <div class="ai-card">
+            <i class="fa-solid fa-robot"></i>
+            <h3>AI Academic Assistant</h3>
+            <p>
+                Students get AI powered guidance for subjects,
+                courses and learning paths.
+            </p>
+        </div>
+
+        <div class="ai-card">
+            <i class="fa-solid fa-brain"></i>
+            <h3>Performance Prediction</h3>
+            <p>
+                AI predicts student success and warns faculty
+                about at-risk students early.
+            </p>
+        </div>
+
+        <div class="ai-card">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3>Smart Scheduling</h3>
+            <p>
+                AI automatically generates optimized class
+                timetables and exam schedules.
+            </p>
+        </div>
+
+        <div class="ai-card">
+            <i class="fa-solid fa-comments"></i>
+            <h3>Campus Chatbot</h3>
+            <p>
+                24/7 AI chatbot answers questions related
+                to courses, exams, and campus services.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- HOW SYSTEM WORKS -->
+
+<section class="workflow">
+
+    <h2>How the System Works</h2>
+
+    <div class="steps">
+
+        <div class="step">
+            <span>1</span>
+            <h3>Register</h3>
+            <p>Students, faculty and admin create their accounts.</p>
+        </div>
+
+        <div class="step">
+            <span>2</span>
+            <h3>Manage Data</h3>
+            <p>Courses, students and faculty information are managed in the system.</p>
+        </div>
+
+        <div class="step">
+            <span>3</span>
+            <h3>AI Analysis</h3>
+            <p>The system analyzes academic data using AI algorithms.</p>
+        </div>
+
+        <div class="step">
+            <span>4</span>
+            <h3>Smart Insights</h3>
+            <p>Users receive dashboards, alerts and predictions.</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+</body>
+</html>

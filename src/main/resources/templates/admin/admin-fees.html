@@ -1,0 +1,695 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Fee Management - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+
+    <style>
+        .welcome-banner {
+            margin: 28px 36px 0;
+            background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+            border: 1px solid rgba(75,73,172,0.12);
+            border-radius: 22px;
+            padding: 28px 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease both;
+            box-shadow: 0 18px 40px rgba(31,41,55,0.06);
+        }
+        .welcome-banner::before {
+            content:'';
+            position:absolute;
+            top:-50px;
+            right:-50px;
+            width:180px;
+            height:180px;
+            border-radius:50%;
+            background:radial-gradient(circle,rgba(120,128,255,0.18),transparent);
+        }
+        .wb-text { position: relative; z-index: 1; }
+        .wb-greeting { font-size:12px; text-transform:uppercase; letter-spacing:2px; color:#94a3b8; margin-bottom:6px; }
+        .wb-name { font-family:var(--serif); font-size:30px; font-weight:700; color:#111827; line-height:1.1; }
+        .wb-name span { color: var(--gold); }
+        .wb-sub { font-size:13px; color:#6b7280; margin-top:6px; }
+        .wb-badges { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+        .wb-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; font-size:11.5px; font-weight:600; }
+        .wbb-green { background:rgba(34,201,122,0.12); color:var(--green); border:1px solid rgba(34,201,122,0.25); }
+        .wb-actions { position:relative; z-index:1; display:flex; gap:10px; flex-wrap:wrap; }
+
+        /* â”€â”€ Dashboard-style stat cards â”€â”€ */
+        .fee-cards { padding-top: 28px; }
+        .fee-card { text-decoration:none;color:inherit;display:block; }
+        .fee-card p { font-size:34px; line-height:1; font-style:normal; font-variant-numeric:tabular-nums; }
+        .fee-card .card-trend { color: rgba(255,255,255,0.80); }
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+        .fees-section-box { padding: 20px 22px; }
+
+        /* â”€â”€ Filter bar â”€â”€ */
+        .filter-bar{
+            display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+            background: transparent; padding: 0;
+            border: 0; border-radius: 0; box-shadow: none;
+            margin-bottom:0;
+        }
+        .filter-bar label{font-size:12px;color:#7b86aa;font-weight:600;}
+        .filter-bar select,.filter-bar input[type=text]{
+            min-height: 42px;
+            padding:9px 14px;border:1px solid var(--light);
+            border-radius:12px;font-size:13px;background:var(--offwhite);color:#1f2937;outline:none;
+        }
+        .filter-bar select:focus,.filter-bar input:focus{border-color:var(--gold-br2);background:var(--cream);}
+        .btn-filter{
+            padding:9px 18px;background:linear-gradient(135deg, var(--black), var(--black2));color:#fff;
+            border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;
+        }
+        .btn-filter:hover{box-shadow:0 12px 24px rgba(75,73,172,0.18);}
+
+        /* â”€â”€ Set-fees quick action â”€â”€ */
+        .set-fees-bar{
+            display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+            background:transparent;
+            padding:0;
+            border-radius:0;border:0;
+            margin-bottom:16px;
+        }
+        .set-fees-bar label{font-size:12px;font-weight:600;color:#7b86aa;}
+        .set-fees-bar select,
+        .set-fees-bar input{
+            min-height: 42px;
+            padding:9px 14px;border:1px solid var(--light);
+            border-radius:12px;font-size:13px;background:var(--offwhite);color:#1f2937;outline:none;
+        }
+        .set-fees-bar select:focus,
+        .set-fees-bar input:focus{
+            border-color: var(--gold-br2);
+            background: var(--cream);
+        }
+        .btn-setfee{
+            padding:10px 18px;background:linear-gradient(135deg, var(--gold), var(--gold2));color:#fff;
+            border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;
+            box-shadow: 0 10px 24px rgba(75,73,172,0.16);
+        }
+        .btn-setfee:hover{transform:translateY(-1px)}
+
+        .fees-inline-head {
+            display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;
+        }
+        .rec-count{font-size:12px;color:#8a94b8;}
+
+        /* â”€â”€ Alerts â”€â”€ */
+        .alert{
+            padding:12px 16px;border-radius:10px;
+            margin-bottom:16px;display:flex;align-items:center;gap:10px;
+            font-size:13.5px;font-weight:500;
+        }
+        .alert-success{background:rgba(34,201,122,0.10);color:var(--green);border:1px solid rgba(34,201,122,0.22);}
+        .alert-error  {background:rgba(232,64,64,0.08);  color:var(--red);  border:1px solid rgba(232,64,64,0.18);}
+
+        /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           STUDENT FEE CARD
+           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+        .sfc-list{display:flex;flex-direction:column;gap:20px;}
+
+        .sfc{
+            background:var(--white);border-radius:18px;
+            border:1px solid var(--light);
+            box-shadow:0 8px 22px rgba(31,41,55,0.04);
+            overflow:hidden;animation:fadeUp .4s ease both;
+        }
+
+        /* Header */
+        .sfc-hdr{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:14px 20px;background:linear-gradient(135deg, var(--black), var(--black2));color:#fff;
+        }
+        .sfc-info{display:flex;align-items:center;gap:12px;}
+        .sfc-avatar{
+            width:38px;height:38px;border-radius:50%;
+            background:linear-gradient(135deg, var(--gold), var(--gold2));color:#fff;
+            display:flex;align-items:center;justify-content:center;
+            font-weight:700;font-size:15px;flex-shrink:0;
+        }
+        .sfc-name{font-size:14.5px;font-weight:600;}
+        .sfc-meta{font-size:11px;color:#aaa;margin-top:2px;}
+        .badge-course{
+            background:rgba(75,73,172,.16);color:#eef2ff;
+            border:1px solid rgba(75,73,172,.28);
+            border-radius:20px;padding:3px 12px;font-size:11.5px;font-weight:600;
+        }
+
+        /* Tab bar */
+        .sfc-tabs{
+            display:flex;background:var(--offwhite);
+            border-bottom:1px solid var(--border);
+        }
+        .sfc-tab{
+            flex:1;padding:10px 0;text-align:center;
+            font-size:12.5px;font-weight:600;color:var(--grey);
+            cursor:pointer;border:none;background:transparent;
+            border-bottom:3px solid transparent;transition:all .2s;
+        }
+        .sfc-tab.active{color:var(--gold);background:#fff;border-bottom-color:var(--gold);}
+        .sfc-tab:hover:not(.active){color:var(--black);}
+
+        /* Panels */
+        .sfc-panel{display:none;padding:20px;}
+        .sfc-panel.active{display:block;}
+
+        /* â”€â”€ Gauge â”€â”€ */
+        .gauge-wrap{
+            display:flex;flex-direction:column;align-items:center;
+            margin-bottom:16px;
+        }
+        .gauge-svg-wrap{position:relative;width:200px;height:112px;}
+        .gauge-svg-wrap svg{overflow:visible;}
+        .gauge-center-label{
+            position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+            text-align:center;pointer-events:none;
+        }
+        .gauge-center-label .gcl-title{font-size:11.5px;color:var(--grey);}
+        .gauge-center-label .gcl-amt{
+            font-size:20px;font-weight:700;color:var(--green);white-space:nowrap;
+        }
+
+        /* Gauge stats row */
+        .gauge-stats{
+            display:flex;gap:0;width:100%;
+            background:var(--offwhite);border-radius:12px;overflow:hidden;
+            margin-bottom:14px;
+        }
+        .gs-item{
+            flex:1;padding:12px 8px;text-align:center;
+            border-right:1px solid var(--border);
+        }
+        .gs-item:last-child{border-right:none;}
+        .gs-label{font-size:10.5px;color:var(--grey);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+        .gs-value{font-size:16px;font-weight:700;color:var(--black);margin-top:3px;}
+        .gs-value.red{color:var(--red);}
+        .gs-value.green{color:var(--green);}
+
+        /* Pay form */
+        .pay-form{display:flex;gap:8px;align-items:center;width:100%;margin-top:4px;}
+        .pay-form input[type=number]{
+            flex:1;padding:9px 12px;
+            border:1.5px solid var(--border);border-radius:9px;
+            font-size:13px;outline:none;transition:border .2s;
+        }
+        .pay-form input[type=number]:focus{border-color:var(--gold-br2);background:var(--cream);}
+        .btn-pay{
+            padding:9px 20px;background:linear-gradient(135deg, var(--black), var(--black2));color:#fff;
+            border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;
+            white-space:nowrap;transition:background .2s;
+        }
+        .btn-pay:hover{box-shadow:0 12px 24px rgba(75,73,172,0.18);}
+        .badge-paid{
+            display:inline-flex;align-items:center;gap:6px;
+            padding:8px 18px;background:rgba(34,201,122,0.10);color:var(--green);
+            border:1.5px solid rgba(34,201,122,0.28);border-radius:9px;font-size:13px;font-weight:600;
+        }
+
+        /* â”€â”€ Info grid (Scholarship / Other tab) â”€â”€ */
+        .info-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+            gap:10px;
+        }
+        .info-row{
+            display:flex;flex-direction:column;
+            background:var(--offwhite);border:1px solid var(--light);border-radius:12px;padding:10px 14px;
+        }
+        .info-row .ir-label{font-size:10.5px;color:#8a94b8;font-weight:600;text-transform:uppercase;}
+        .info-row .ir-value{font-size:14px;font-weight:600;color:#1f2937;margin-top:3px;}
+        .ir-value.green{color:var(--green);}
+
+        /* Empty */
+        .empty-state{
+            text-align:center;padding:40px 20px;color:#8a94b8;
+        }
+        .empty-state i{font-size:32px;opacity:.25;display:block;margin-bottom:10px;}
+    </style>
+</head>
+<body>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIDEBAR â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('fees')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Fee Management</div>
+        <div class="header-right">
+            <a href="/admin-notifications" class="header-btn">
+                <i class="fa fa-bell"></i><span class="dot"></span>
+            </a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="welcome-banner">
+        <div class="wb-text">
+            <div class="wb-greeting">Welcome back, <span th:text="${adminName}">Admin</span></div>
+            <div class="wb-name">Manage <span>Fee Collection</span></div>
+            <div class="wb-sub">Track configured fees, student balances, and payment progress from one place.</div>
+            <div class="wb-badges">
+                <span class="wb-badge wbb-green"><i class="fa fa-circle-check"></i> Fee Desk Active</span>
+            </div>
+        </div>
+        <div class="wb-actions">
+            <a href="/add-student" class="btn-gold"><i class="fa fa-user-plus"></i> Add Student</a>
+            <a href="/admin-students" class="btn-dark"><i class="fa fa-users"></i> View Students</a>
+            <a href="/admin-reports" class="btn-gold"><i class="fa fa-chart-line"></i> Reports</a>
+            <a href="/admin-notifications" class="btn-dark"><i class="fa fa-bell"></i> Notifications</a>
+        </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="cards fee-cards">
+        <div class="card fee-card" style="background:linear-gradient(135deg, #4b49ac, #6f76f4);border:none;">
+            <div class="card-icon"><i class="fa fa-users"></i></div>
+            <h3>Total Students</h3>
+            <p th:text="${totalStudents}">0</p>
+            <div class="card-trend"><i class="fa fa-arrow-right"></i> Fee records</div>
+        </div>
+        <div class="card fee-card" style="background:linear-gradient(135deg, #98bdff, #7da0fa);border:none;">
+            <div class="card-icon"><i class="fa fa-wallet"></i></div>
+            <h3>Fees Collected</h3>
+            <p th:text="${totalCollected}">0</p>
+            <div class="card-trend"><i class="fa fa-arrow-right"></i> Paid so far</div>
+        </div>
+        <div class="card fee-card" style="background:linear-gradient(135deg, #7978e9, #4b49ac);border:none;">
+            <div class="card-icon"><i class="fa fa-file-invoice-dollar"></i></div>
+            <h3>Pending</h3>
+            <p th:text="${totalPending}">0</p>
+            <div class="card-trend"><i class="fa fa-arrow-right"></i> Awaiting payment</div>
+        </div>
+        <div class="card fee-card" style="background:linear-gradient(135deg, #f3797e, #ef8da5);border:none;">
+            <div class="card-icon"><i class="fa fa-chart-pie"></i></div>
+            <h3>Collection Rate</h3>
+            <p th:text="${collectionRate + '%'}">0%</p>
+            <div class="card-trend"><i class="fa fa-arrow-right"></i> Overall</div>
+        </div>
+    </div>
+
+    <div class="content" style="padding-top:6px">
+
+        <!-- ALERTS from redirect params -->
+        <div class="alert alert-success"
+             th:if="${param.success != null}"
+             th:text="${param.success[0]}"></div>
+        <div class="alert alert-error"
+             th:if="${param.error != null}"
+             th:text="${param.error[0]}"></div>
+
+        <!-- Also support model attributes -->
+        <div class="alert alert-success" th:if="${success}">
+            <i class="fa fa-check-circle"></i><span th:text="${success}"></span>
+        </div>
+        <div class="alert alert-error" th:if="${error}">
+            <i class="fa fa-exclamation-circle"></i><span th:text="${error}"></span>
+        </div>
+
+        <!-- FEE RULE EDITOR -->
+        <div class="box fees-section-box">
+            <div class="box-title" style="margin-bottom:14px"><i class="fa fa-sliders" style="color:var(--gold)"></i> Configure Course Fees</div>
+            <form class="set-fees-bar" method="post" action="/save-fee-rule">
+                <label>Course</label>
+                <select name="courseName" id="feeCourseSelect" required>
+                    <option value="">Select course</option>
+                    <option th:each="c : ${courses}" th:value="${c}" th:text="${c}">Course</option>
+                </select>
+                <label>Batch</label>
+                <select name="batchId" id="feeBatchSelect">
+                    <option value="">Select batch</option>
+                    <option th:each="batch : ${batches}"
+                            th:value="${batch.id}"
+                            th:text="${batch.displayName}"
+                            th:attr="data-course=${batch.course != null ? batch.course.code : ''}">
+                        Batch
+                    </option>
+                </select>
+                <label>Year</label>
+                <select name="academicYear">
+                    <option value="">Select year</option>
+                    <option th:each="year : ${academicYears}" th:value="${year}" th:text="${year}">2025-26</option>
+                </select>
+                <label>Scope</label>
+                <select name="feeScope">
+                    <option value="">Select scope</option>
+                    <option value="Year-wise">Year-wise</option>
+                    <option value="Semester-wise">Semester-wise</option>
+                </select>
+                <label>Semester</label>
+                <select name="semester">
+                    <option value="">Optional</option>
+                    <option value="Sem1">Sem 1</option>
+                    <option value="Sem2">Sem 2</option>
+                    <option value="Sem3">Sem 3</option>
+                    <option value="Sem4">Sem 4</option>
+                    <option value="Sem5">Sem 5</option>
+                    <option value="Sem6">Sem 6</option>
+                </select>
+                <label>Amount</label>
+                <input type="number" name="totalAmount" min="0" step="1" placeholder="Enter fee amount" required>
+                <button type="submit" class="btn-setfee">
+                    <i class="fa fa-save"></i> Save Fee Rule
+                </button>
+            </form>
+            <div style="margin-top:14px;overflow-x:auto">
+                <table class="tt-table" style="min-width:520px">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Batch</th>
+                            <th>Year</th>
+                            <th>Scope</th>
+                            <th>Sem</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="fee : ${feeRules}">
+                            <td th:text="${fee.course}">Course</td>
+                            <td th:text="${fee.batch != null ? fee.batch.displayName : (fee.batchName ?: '-')}">-</td>
+                            <td th:text="${fee.academicYear ?: '-'}">-</td>
+                            <td th:text="${fee.feeScope ?: '-'}">-</td>
+                            <td th:text="${fee.semester ?: '-'}">-</td>
+                            <td th:text="${fee.totalAmount}">0</td>
+                        </tr>
+                        <tr th:if="${feeRules == null or #lists.isEmpty(feeRules)}">
+                            <td colspan="6" style="padding:16px;color:#7a7a7a">No fee rules saved yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="box fees-section-box">
+            <div class="fees-inline-head">
+                <div class="box-title" style="margin-bottom:0"><i class="fa fa-credit-card" style="color:var(--gold)"></i> Student Fees</div>
+                <span class="rec-count" th:text="${students != null ? #lists.size(students) : 0} + ' students'">0 students</span>
+            </div>
+            <form class="filter-bar" method="get" action="/admin-fees">
+                <label>Course</label>
+                <select name="course">
+                    <option value="">All Courses</option>
+                    <option th:each="c : ${courses}" th:value="${c}" th:text="${c}"
+                            th:selected="${selectedCourse != null and #strings.equals(selectedCourse, c)}">Course</option>
+                </select>
+                <label>Semester</label>
+                <select name="semester">
+                    <option value="">All Sems</option>
+                    <option th:each="s : ${semesters}" th:value="${s}" th:text="${s}"
+                            th:selected="${selectedSemester != null and #strings.equals(selectedSemester, s)}">Sem1</option>
+                </select>
+                <label>Search</label>
+                <input type="text" name="search" th:value="${search}" placeholder="Name or ID...">
+                <button type="submit" class="btn-filter">
+                    <i class="fa fa-search"></i> Filter
+                </button>
+            </form>
+        </div>
+
+        <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• STUDENT FEE CARDS â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+        <div class="sfc-list">
+
+            <div class="sfc"
+                 th:each="s, iSt : ${students}"
+                 th:id="'sfc-' + ${s.id}"
+                 th:style="'animation-delay:' + ${iSt.index * 0.06} + 's'">
+
+                <!-- HEADER -->
+                <div class="sfc-hdr">
+                    <div class="sfc-info">
+                        <div class="sfc-avatar"
+                             th:text="${s.name != null and #strings.length(s.name) > 0
+                                        ? #strings.toUpperCase(#strings.substring(s.name,0,1))
+                                        : '?'}">A</div>
+                        <div>
+                            <div class="sfc-name" th:text="${s.name}">Student</div>
+                            <div class="sfc-meta">
+                                ID:&nbsp;<span th:text="${s.id}">-</span>
+                                &nbsp;|&nbsp;
+                                <span th:text="${s.semester ?: '-'}">Sem1</span>
+                                &nbsp;|&nbsp;
+                                Roll:&nbsp;<span th:text="${s.rollNo ?: '-'}">-</span>
+                                &nbsp;|&nbsp;
+                                PRN:&nbsp;<span th:text="${s.prnNumber ?: '-'}">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge-course" th:text="${s.course ?: '-'}">Course</span>
+                </div>
+
+                <!-- TABS -->
+                <div class="sfc-tabs">
+                    <button class="sfc-tab active"
+                            th:attr="data-panel='academic-' + ${s.id}"
+                            onclick="switchTab(this)">
+                        <i class="fa fa-graduation-cap"></i> Academic Fees
+                    </button>
+                    <button class="sfc-tab"
+                            th:attr="data-panel='scholar-' + ${s.id}"
+                            onclick="switchTab(this)">
+                        <i class="fa fa-award"></i> Scholarship
+                    </button>
+                    <button class="sfc-tab"
+                            th:attr="data-panel='other-' + ${s.id}"
+                            onclick="switchTab(this)">
+                        <i class="fa fa-id-card"></i> Student Info
+                    </button>
+                </div>
+
+                <!-- â•â•â• PANEL: Academic Fees â•â•â• -->
+                <div class="sfc-panel active" th:id="'academic-' + ${s.id}">
+
+                    <!-- Gauge -->
+                    <div class="gauge-wrap">
+                        <div class="gauge-svg-wrap">
+                            <svg viewBox="0 0 200 110" width="200" height="110">
+                                <!-- track (grey) -->
+                                <path d="M20,100 A80,80 0 0,1 180,100"
+                                      fill="none" stroke="#e5e7eb" stroke-width="13"
+                                      stroke-linecap="round"/>
+                                <!-- progress arc: dashoffset = 251*(1 - paid/total) -->
+                                <path th:id="'gauge-arc-' + ${s.id}"
+                                      d="M20,100 A80,80 0 0,1 180,100"
+                                      fill="none" stroke="#1e7e5e" stroke-width="13"
+                                      stroke-linecap="round"
+                                      stroke-dasharray="251"
+                                      th:stroke-dashoffset="${s.totalFees != null and s.totalFees > 0
+                                            ? 251 * (1 - (s.paidFees != null ? s.paidFees : 0) / s.totalFees)
+                                            : 251}"/>
+                            </svg>
+                            <div class="gauge-center-label">
+                                <div class="gcl-title">Fees Paid</div>
+                                <div class="gcl-amt"
+                                th:text="${s.paidFees != null ? s.paidFees.longValue() : 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats row -->
+                    <div class="gauge-stats">
+                        <div class="gs-item">
+                            <div class="gs-label">Total Fees</div>
+                            <div class="gs-value"
+                                 th:text="${s.totalFees != null ? s.totalFees.longValue() : 0}">0</div>
+                        </div>
+                        <div class="gs-item">
+                            <div class="gs-label">Paid</div>
+                            <div class="gs-value green"
+                                 th:text="${s.paidFees != null ? s.paidFees.longValue() : 0}">0</div>
+                        </div>
+                        <div class="gs-item">
+                            <div class="gs-label">Balance</div>
+                            <div class="gs-value"
+                                 th:classappend="${(s.pendingFees != null and s.pendingFees > 0) ? ' red' : ' green'}"
+                                 th:text="${s.pendingFees != null ? s.pendingFees.longValue() : 0}">0</div>
+                        </div>
+                        <div class="gs-item">
+                            <div class="gs-label">Course Fee</div>
+                            <div class="gs-value"
+                                 th:text="${s.totalFees != null and s.totalFees > 0 ? s.totalFees.longValue() : '-'}">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Pay form or Paid badge -->
+                    <form action="/pay-fees" method="post" class="pay-form"
+                          th:if="${s.pendingFees != null and s.pendingFees > 0}">
+                        <input type="hidden" name="studentId" th:value="${s.id}">
+                        <input type="number" name="amount" step="1" min="1"
+                               th:max="${s.pendingFees.longValue()}"
+                               th:placeholder="'Max ' + ${s.pendingFees.longValue()}"
+                               required>
+                        <button type="submit" class="btn-pay">
+                            <i class="fa fa-credit-card"></i> Pay Now
+                        </button>
+                    </form>
+
+                    <div th:if="${s.totalFees != null and s.totalFees > 0 and s.pendingFees != null and s.pendingFees == 0}"
+                           style="margin-top:4px">
+                        <span class="badge-paid"><i class="fa fa-circle-check"></i> Fully Paid</span>
+                      </div>
+                    <div th:if="${s.totalFees == null or s.totalFees <= 0}"
+                         style="margin-top:4px">
+                        <span class="badge-paid" style="background:#fff7db;color:#8a6500;border-color:#f1df96"><i class="fa fa-triangle-exclamation"></i> Fee not assigned</span>
+                    </div>
+                </div>
+
+                <!-- â•â•â• PANEL: Scholarship â•â•â• -->
+                <div class="sfc-panel" th:id="'scholar-' + ${s.id}">
+                    <p style="font-size:13px;color:var(--grey);margin-bottom:14px">
+                        <i class="fa fa-info-circle"></i>
+                        Scholarship data will appear here once your scholarship table is integrated.
+                        Below are the student's academic identifiers that may be needed for scholarship forms.
+                    </p>
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="ir-label">Enrollment No</span>
+                            <span class="ir-value" th:text="${s.enrollmentNo ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">PRN Number</span>
+                            <span class="ir-value" th:text="${s.prnNumber ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">ABC Number</span>
+                            <span class="ir-value" th:text="${s.abcNumber ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Registration No</span>
+                            <span class="ir-value" th:text="${s.registrationNo ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Category</span>
+                            <span class="ir-value" th:text="${s.category ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Caste</span>
+                            <span class="ir-value" th:text="${s.casteName ?: '-'}">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- â•â•â• PANEL: Student Info â•â•â• -->
+                <div class="sfc-panel" th:id="'other-' + ${s.id}">
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="ir-label">Father's Name</span>
+                            <span class="ir-value" th:text="${s.fatherName ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Mother's Name</span>
+                            <span class="ir-value" th:text="${s.motherName ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">DOB</span>
+                            <span class="ir-value" th:text="${s.dob ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Gender</span>
+                            <span class="ir-value" th:text="${s.gender ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Blood Group</span>
+                            <span class="ir-value" th:text="${s.bloodGroup ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Aadhar</span>
+                            <span class="ir-value" th:text="${s.aadharNumber ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Bank</span>
+                            <span class="ir-value" th:text="${s.bankName ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Acc No</span>
+                            <span class="ir-value" th:text="${s.bankAccNo ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">IFSC</span>
+                            <span class="ir-value" th:text="${s.ifscCode ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Degree</span>
+                            <span class="ir-value" th:text="${s.degree ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Medium</span>
+                            <span class="ir-value" th:text="${s.medium ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Admission Date</span>
+                            <span class="ir-value" th:text="${s.admissionDate ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Academic Year</span>
+                            <span class="ir-value" th:text="${s.academicYear ?: '-'}">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="ir-label">Section</span>
+                            <span class="ir-value" th:text="${s.sectionName ?: '-'}">-</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /sfc -->
+
+            <!-- EMPTY STATE -->
+            <div class="empty-state"
+                 th:if="${students == null or #lists.isEmpty(students)}"
+                 style="background:var(--white);border-radius:14px;padding:56px">
+                <i class="fa fa-credit-card"></i>
+                No student fee records found
+            </div>
+
+        </div><!-- /sfc-list -->
+    </div>
+</div>
+
+<script>
+    function normalizeFeeValue(value) {
+        return String(value || '').trim().toUpperCase();
+    }
+
+    function filterFeeBatchOptions() {
+        const courseSelect = document.getElementById('feeCourseSelect');
+        const batchSelect = document.getElementById('feeBatchSelect');
+        if (!courseSelect || !batchSelect) return;
+
+        const selectedCourse = normalizeFeeValue(courseSelect.value);
+        Array.from(batchSelect.options).forEach((option, index) => {
+            if (index === 0) return;
+            const optionCourse = normalizeFeeValue(option.dataset.course);
+            const visible = !selectedCourse || !optionCourse || optionCourse === selectedCourse;
+            option.hidden = !visible;
+            option.disabled = !visible;
+        });
+
+        if (batchSelect.selectedOptions[0]?.disabled) {
+            batchSelect.value = '';
+        }
+    }
+
+    function switchTab(btn) {
+        const card = btn.closest('.sfc');
+        card.querySelectorAll('.sfc-tab').forEach(t => t.classList.remove('active'));
+        card.querySelectorAll('.sfc-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const panelId = btn.getAttribute('data-panel');
+        const panel = document.getElementById(panelId);
+        if (panel) panel.classList.add('active');
+    }
+
+    document.getElementById('feeCourseSelect')?.addEventListener('change', filterFeeBatchOptions);
+    filterFeeBatchOptions();
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reports - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            padding: 28px 36px 0;
+        }
+        .mini-stat {
+            background: var(--white);
+            border: 1px solid var(--light);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 20px rgba(31,41,55,0.04);
+        }
+        .mini-stat.dark {
+            background: var(--black);
+            border-color: var(--gold-br);
+            color: var(--white);
+        }
+        .mini-num {
+            font-family: var(--serif);
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: 6px;
+        }
+        .mini-label {
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #a09080;
+            font-weight: 700;
+        }
+        .mini-stat.dark .mini-label {
+            color: rgba(255,255,255,0.35);
+        }
+        .report-meta {
+            font-size: 12px;
+            color: #8a7a6a;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+        .chart-box {
+            min-height: 360px;
+        }
+        .chart-wrap {
+            position: relative;
+            height: 280px;
+        }
+        .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #8a7a6a;
+            font-size: 14px;
+            padding: 18px;
+        }
+        .report-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .report-item {
+            border: 1px solid var(--light);
+            border-radius: 14px;
+            background: var(--offwhite);
+            padding: 14px 16px;
+        }
+        .report-item .label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .report-item .value {
+            font-family: var(--serif);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--black);
+        }
+        .report-item .sub {
+            font-size: 12px;
+            color: #8a7a6a;
+            margin-top: 4px;
+        }
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--light);
+            background: var(--offwhite);
+            font-size: 12px;
+            font-weight: 600;
+            color: #6a6050;
+        }
+        .pill strong { color: var(--gold); }
+        @media (max-width: 1100px) {
+            .report-grid, .chart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 700px) {
+            .report-grid, .chart-grid, .report-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/sidebar :: sidebar('reports')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Reports</div>
+        <div class="header-right">
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="report-grid">
+        <div class="mini-stat">
+            <div class="mini-label">Total Students</div>
+            <div class="mini-num" th:text="${totalStudents ?: 0}">0</div>
+            <div class="report-meta">All registered student records</div>
+        </div>
+        <div class="mini-stat dark">
+            <div class="mini-label">Fees Collected</div>
+            <div class="mini-num" th:text="${totalCollectedFees ?: 0}">0</div>
+            <div class="report-meta">Based on paid fees from students</div>
+        </div>
+        <div class="mini-stat">
+            <div class="mini-label">Pending Fees</div>
+            <div class="mini-num" th:text="${totalPendingFees ?: 0}">0</div>
+            <div class="report-meta">Outstanding fee amount</div>
+        </div>
+        <div class="mini-stat dark">
+            <div class="mini-label">Collection Rate</div>
+            <div class="mini-num" th:text="${feeCollectionRate ?: 0} + '%'">0%</div>
+            <div class="report-meta">Collection vs total demand</div>
+        </div>
+    </div>
+
+    <div class="content" style="padding-top:22px">
+        <div class="report-grid" style="padding-top:0">
+            <div class="mini-stat">
+                <div class="mini-label">Teachers</div>
+                <div class="mini-num" th:text="${totalTeachers ?: 0}">0</div>
+                <div class="report-meta">Faculty on record</div>
+            </div>
+            <div class="mini-stat dark">
+                <div class="mini-label">Classes</div>
+                <div class="mini-num" th:text="${totalClasses ?: 0}">0</div>
+                <div class="report-meta">Mapped classrooms / sections</div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-label">TPOs</div>
+                <div class="mini-num" th:text="${totalTpos ?: 0}">0</div>
+                <div class="report-meta">Training and placement officers</div>
+            </div>
+            <div class="mini-stat dark">
+                <div class="mini-label">Placement Drives</div>
+                <div class="mini-num" th:text="${totalDrives ?: 0}">0</div>
+                <div class="report-meta">Published and draft drives</div>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="box chart-box" style="animation-delay:0.05s">
+                <div class="box-title"><i class="fa fa-chart-pie" style="color:var(--gold)"></i> Student Distribution</div>
+                <div class="chart-wrap"><canvas id="studentCourseChart"></canvas></div>
+            </div>
+            <div class="box chart-box" style="animation-delay:0.08s">
+                <div class="box-title"><i class="fa fa-chart-column" style="color:var(--gold)"></i> Fee Rules by Course</div>
+                <div class="chart-wrap"><canvas id="feeCourseChart"></canvas></div>
+            </div>
+            <div class="box chart-box" style="animation-delay:0.11s">
+                <div class="box-title"><i class="fa fa-graduation-cap" style="color:var(--gold)"></i> Academic Mix</div>
+                <div class="chart-wrap"><canvas id="degreeChart"></canvas></div>
+            </div>
+            <div class="box chart-box" style="animation-delay:0.14s">
+                <div class="box-title"><i class="fa fa-briefcase" style="color:var(--gold)"></i> Placement Overview</div>
+                <div class="chart-wrap"><canvas id="placementChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="report-grid" style="padding:22px 0 0">
+            <div class="box" style="grid-column:1 / -1;animation-delay:0.17s">
+                <div class="box-title"><i class="fa fa-chart-line" style="color:var(--gold)"></i> Detailed Analytics</div>
+                <div class="report-list">
+                    <div class="report-item">
+                        <div class="label">Fee Rules</div>
+                        <div class="value" th:text="${totalFeeRules ?: 0}">0</div>
+                        <div class="sub">Configured course / batch / year rules</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="label">Applications</div>
+                        <div class="value" th:text="${totalApplications ?: 0}">0</div>
+                        <div class="sub">Placement applications received</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="label">Published Drives</div>
+                        <div class="value" th:text="${publishedDrives ?: 0}">0</div>
+                        <div class="sub">Drives visible to students</div>
+                    </div>
+                    <div class="report-item">
+                        <div class="label">Active TPOs</div>
+                        <div class="value" th:text="${activeTpos ?: 0}">0</div>
+                        <div class="sub">Placement officers marked active</div>
+                    </div>
+                </div>
+
+                <div class="pill-row">
+                    <span class="pill">Students: <strong th:text="${totalStudents ?: 0}">0</strong></span>
+                    <span class="pill">Teachers: <strong th:text="${totalTeachers ?: 0}">0</strong></span>
+                    <span class="pill">Fees Demand: <strong th:text="${totalFeesDemand ?: 0}">0</strong></span>
+                    <span class="pill">Pending: <strong th:text="${totalPendingFees ?: 0}">0</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const studentCourseLabels = /*[[${studentCourseLabels}]]*/ [];
+    const studentCourseCounts = /*[[${studentCourseCounts}]]*/ [];
+    const academicMixLabels = /*[[${academicMixLabels}]]*/ [];
+    const academicMixCounts = /*[[${academicMixCounts}]]*/ [];
+    const feeCourseLabels = /*[[${feeCourseLabels}]]*/ [];
+    const feeCourseTotals = /*[[${feeCourseTotals}]]*/ [];
+    const tpoStatusLabels = /*[[${tpoStatusLabels}]]*/ [];
+    const tpoStatusCounts = /*[[${tpoStatusCounts}]]*/ [];
+    const driveCourseLabels = /*[[${driveCourseLabels}]]*/ [];
+    const driveCourseCounts = /*[[${driveCourseCounts}]]*/ [];
+
+    function palette(index) {
+        const colors = ['#4b49ac', '#7978e9', '#98bdff', '#f3797e', '#22c97a', '#2563eb', '#f59e0b'];
+        return colors[index % colors.length];
+    }
+
+    function makeChart(canvasId, type, labels, data, options = {}) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !window.Chart) return;
+        const wrapper = canvas.parentElement;
+        const normalized = Array.isArray(labels) && Array.isArray(data)
+            ? labels.map((label, index) => ({
+                label: String(label || '').trim(),
+                value: data[index]
+            })).filter(item => item.label && item.value !== null && item.value !== undefined && Number(item.value) > 0)
+            : [];
+        const safeLabels = normalized.map(item => item.label);
+        const safeData = normalized.map(item => item.value);
+        const hasData = safeLabels.length > 0 && safeData.length > 0;
+
+        const existingEmpty = wrapper.querySelector('.chart-empty');
+        if (existingEmpty) {
+            existingEmpty.remove();
+        }
+
+        if (!hasData) {
+            canvas.style.display = 'none';
+            const empty = document.createElement('div');
+            empty.className = 'chart-empty';
+            empty.textContent = options.emptyMessage || 'No data available yet';
+            wrapper.appendChild(empty);
+            return;
+        }
+
+        canvas.style.display = '';
+        new Chart(canvas, {
+            type,
+            data: {
+                labels: safeLabels,
+                datasets: [{
+                    label: options.datasetLabel || '',
+                    data: safeData,
+                    backgroundColor: safeLabels.map((_, i) => palette(i)),
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: options.legendPosition || 'bottom',
+                        labels: options.legendFromData ? {
+                            usePointStyle: true,
+                            boxWidth: 10,
+                            color: '#5f6477',
+                            generateLabels(chart) {
+                                const dataLabels = chart.data?.labels || [];
+                                const colors = chart.data?.datasets?.[0]?.backgroundColor || [];
+                                return dataLabels.map((label, index) => ({
+                                    text: label,
+                                    fillStyle: colors[index],
+                                    strokeStyle: colors[index],
+                                    lineWidth: 0,
+                                    hidden: false,
+                                    index
+                                }));
+                            }
+                        } : { usePointStyle: true, boxWidth: 10, color: '#5f6477' }
+                    }
+                },
+                scales: options.scales || {}
+            }
+        });
+    }
+
+    makeChart('feeCourseChart', 'bar', feeCourseLabels, feeCourseTotals, {
+        legendFromData: true,
+        scales: {
+            y: { beginAtZero: true, ticks: { color: '#6b7280' }, grid: { color: 'rgba(75,73,172,0.08)' } },
+            x: { ticks: { color: '#6b7280' }, grid: { display: false } }
+        },
+        emptyMessage: 'No data available yet'
+    });
+    makeChart('degreeChart', 'bar', academicMixLabels, academicMixCounts, {
+        legendFromData: true,
+        scales: {
+            y: { beginAtZero: true, ticks: { color: '#6b7280' }, grid: { color: 'rgba(75,73,172,0.08)' } },
+            x: { ticks: { color: '#6b7280' }, grid: { display: false } }
+        },
+        emptyMessage: 'No data available yet'
+    });
+    makeChart('studentCourseChart', 'doughnut', studentCourseLabels, studentCourseCounts, { legendPosition: 'right', emptyMessage: 'No data available yet' });
+    makeChart('placementChart', 'doughnut', tpoStatusLabels.length ? tpoStatusLabels : driveCourseLabels, tpoStatusCounts.length ? tpoStatusCounts : driveCourseCounts);
+</script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Class â€“ AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .helper-text { font-size:12px;color:#8b7f72;line-height:1.45;margin-top:6px; }
+        .success-actions { display:flex;gap:12px;flex-wrap:wrap;margin-top:12px; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/sidebar :: sidebar('add-class')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Add Class</div>
+        <div class="header-right">
+            <a href="/admin-notifications" class="header-btn"><i class="fa fa-bell"></i><span class="dot"></span></a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content" style="padding-top:28px">
+
+        <!-- ALERTS -->
+        <div class="alert alert-success" th:if="${success != null or param.success != null}">
+            <i class="fa fa-check-circle"></i>
+            <span th:text="${success != null ? success : param.success[0]}"></span>
+        </div>
+        <div class="alert alert-error" th:if="${error}">
+            <i class="fa fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="box" th:if="${param.success != null}" style="max-width:720px;margin-bottom:18px">
+            <div class="box-title"><i class="fa fa-circle-check" style="color:var(--green)"></i> Class Saved</div>
+            <div class="helper-text" th:text="${param.success[0]}">Class created successfully</div>
+            <div class="success-actions">
+                <a href="/add-class" class="btn-outline">Add Another Class</a>
+                <a href="/view-classes" class="btn-gold">View Classes</a>
+            </div>
+        </div>
+
+        <!-- FORM -->
+        <div class="box" style="max-width:720px;animation-delay:0.05s">
+            <div class="box-title"><i class="fa fa-school" style="color:var(--gold)"></i> Create New Class</div>
+
+            <form action="/add-class" method="post" novalidate>
+
+                <div class="form-section-title">Basic Information</div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Course *</label>
+                        <select name="courseId" id="courseSelect" class="form-select">
+                            <option value="">Select course</option>
+                            <option th:each="course : ${courses}"
+                                    th:value="${course.id}"
+                                    th:text="${course.name + ' (' + course.code + ')'}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Batch *</label>
+                        <select name="batchId" id="batchSelect" class="form-select">
+                            <option value="">Select batch</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Course Code</label>
+                        <input type="text" name="courseCode" id="courseCodeInput" class="form-input" placeholder="Auto-filled from selected course" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Course Duration</label>
+                        <input type="text" name="duration" id="courseDurationInput" class="form-input" placeholder="Auto-filled from selected course" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Batch Name</label>
+                        <input type="text" name="batchName" id="batchNameInput" class="form-input" placeholder="Auto-filled from selected batch" readonly>
+                    </div>
+                </div>
+                <input type="hidden" name="totalSemesters" id="totalSemestersInput">
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Department</label>
+                        <input type="text" name="department" id="departmentInput" class="form-input" placeholder="e.g. Computer Science">
+                        <div class="helper-text" id="departmentHint">Auto-fills from the course when available.</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Course Type</label>
+                        <select name="courseType" id="courseTypeSelect" class="form-select">
+                            <option value=""> Select Type</option>
+                            <option value="Undergraduate">Undergraduate (UG)</option>
+                            <option value="Postgraduate">Postgraduate (PG)</option>
+                            <option value="Diploma">Diploma</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Academic Year</label>
+                        <input type="text" name="academicYear" id="academicYearInput" class="form-input" placeholder="Auto-filled from selected batch" readonly>
+                    </div>
+                </div>
+
+                <div class="form-section-title">Batch Details</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Batch Start Year</label>
+                        <input type="number" name="batchStartYear" id="batchStartYearInput" class="form-input" placeholder="Auto-filled from selected batch" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Batch End Year</label>
+                        <input type="number" name="batchEndYear" id="batchEndYearInput" class="form-input" placeholder="Auto-filled from selected batch" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Intake Capacity</label>
+                        <input type="number" name="intakeCapacity" id="intakeCapacityInput" class="form-input" placeholder="e.g. 60" value="60">
+                    </div>
+                </div>
+
+                <div class="form-section-title">Class & Academic Structure</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Class Name *</label>
+                        <input type="text" name="name" id="classNameInput" class="form-input" placeholder="Auto-generated from selections">
+                        <div class="helper-text">Auto-generated from course, year, semester and section. You can still type your own class name.</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year *</label>
+                        <select name="year" id="yearSelect" class="form-select">
+                            <option value="">Select year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Semester *</label>
+                        <select name="semester" id="semesterSelect" class="form-select">
+                            <option value="">Select semester</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Section *</label>
+                        <input type="text" name="section" id="sectionInput" class="form-input" list="sectionOptions" placeholder="Select or type section">
+                        <datalist id="sectionOptions">
+                            <option value="A"></option>
+                            <option value="B"></option>
+                            <option value="C"></option>
+                            <option value="D"></option>
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Shift</label>
+                        <select name="shift" class="form-select">
+                            <option value=""> Select Shift</option>
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Room</label>
+                        <input type="text" name="room" class="form-input" placeholder="e.g. 101">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Remarks</label>
+                    <input type="text" name="remarks" class="form-input" placeholder="Optional notes">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-input" rows="3" placeholder="Course overview / remarks"></textarea>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:10px">
+                    <button type="submit" class="btn-gold"><i class="fa fa-plus"></i> Add Class</button>
+                    <button type="reset" class="btn-outline"><i class="fa fa-redo"></i> Reset</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    const addClassCourses = /*[[${courses.![{id: id, code: code, durationYears: durationYears, totalSemesters: totalSemesters, department: department, courseType: courseType, fallbackType: (name != null and #strings.containsIgnoreCase(name, 'master')) ? 'Postgraduate' : 'Undergraduate'}]}]]*/ [];
+    const addClassBatches = /*[[${batches.![{id: id, displayName: displayName, startYear: startYear, endYear: endYear, courseId: (course != null ? course.id : null)}]}]]*/ [];
+    const classCourseSelect = document.getElementById('courseSelect');
+    const classBatchSelect = document.getElementById('batchSelect');
+    const classCourseCodeInput = document.getElementById('courseCodeInput');
+    const classDurationInput = document.getElementById('courseDurationInput');
+    const totalSemestersInput = document.getElementById('totalSemestersInput');
+    const classCourseTypeSelect = document.getElementById('courseTypeSelect');
+    const departmentInput = document.getElementById('departmentInput');
+    const departmentHint = document.getElementById('departmentHint');
+    const batchNameInput = document.getElementById('batchNameInput');
+    const batchStartYearInput = document.getElementById('batchStartYearInput');
+    const batchEndYearInput = document.getElementById('batchEndYearInput');
+    const academicYearInput = document.getElementById('academicYearInput');
+    const intakeCapacityInput = document.getElementById('intakeCapacityInput');
+    const yearSelect = document.getElementById('yearSelect');
+    const semesterSelect = document.getElementById('semesterSelect');
+    const sectionInput = document.getElementById('sectionInput');
+    const classNameInput = document.getElementById('classNameInput');
+    const form = document.querySelector('form');
+    const courseDefaultsStorageKey = 'add-class-course-defaults';
+    let classNameTouched = false;
+
+    function formatAcademicYear(startYear) {
+        if (!startYear) return '';
+        const nextYear = String(Number(startYear) + 1).slice(-2);
+        return `${startYear}-${nextYear}`;
+    }
+
+    function fillSelect(select, values, placeholder, mapper) {
+        const currentValue = select.value;
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        values.forEach((value) => {
+            const option = document.createElement('option');
+            const mapped = mapper(value);
+            option.value = mapped.value;
+            option.textContent = mapped.label;
+            select.appendChild(option);
+        });
+        if ([...select.options].some(option => option.value === currentValue)) {
+            select.value = currentValue;
+        }
+    }
+
+    function currentCourse() {
+        return addClassCourses.find(course => String(course.id) === classCourseSelect.value) || null;
+    }
+
+    function currentBatch() {
+        return addClassBatches.find(batch => String(batch.id) === classBatchSelect.value) || null;
+    }
+
+    function loadCourseDefaults() {
+        try {
+            return JSON.parse(localStorage.getItem(courseDefaultsStorageKey) || '{}');
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function saveCourseDefaults(courseCode, values) {
+        if (!courseCode) return;
+        const defaults = loadCourseDefaults();
+        defaults[courseCode] = values;
+        localStorage.setItem(courseDefaultsStorageKey, JSON.stringify(defaults));
+    }
+
+    function syncBatchOptions() {
+        const selectedCourseId = classCourseSelect.value;
+        const filteredBatches = addClassBatches.filter(batch => String(batch.courseId) === selectedCourseId);
+        classBatchSelect.innerHTML = '<option value="">Select batch</option>';
+        filteredBatches.forEach((batch) => {
+            const option = document.createElement('option');
+            option.value = String(batch.id);
+            option.textContent = batch.displayName || 'Batch';
+            classBatchSelect.appendChild(option);
+        });
+        classBatchSelect.value = '';
+    }
+
+    function syncYearOptions(durationYears) {
+        const labels = ['FY', 'SY', 'TY', 'Final', 'Year 5', 'Year 6'];
+        const count = Number(durationYears) || 0;
+        fillSelect(yearSelect, labels.slice(0, count), 'Select year', (value) => ({ value, label: value }));
+    }
+
+    function syncSemesterOptions(totalSemesters) {
+        const count = Number(totalSemesters) || 0;
+        fillSelect(semesterSelect, Array.from({ length: count }, (_, index) => index + 1), 'Select semester', (value) => ({
+            value: String(value),
+            label: `Sem ${value}`
+        }));
+    }
+
+    function syncClassCourseMeta() {
+        const course = currentCourse();
+        syncBatchOptions();
+        classCourseCodeInput.value = '';
+        classDurationInput.value = '';
+        totalSemestersInput.value = '';
+        departmentInput.value = '';
+        classCourseTypeSelect.value = '';
+        batchNameInput.value = '';
+        batchStartYearInput.value = '';
+        batchEndYearInput.value = '';
+        academicYearInput.value = '';
+        yearSelect.innerHTML = '<option value="">Select batch first</option>';
+        semesterSelect.innerHTML = '<option value="">Select batch first</option>';
+        departmentHint.textContent = 'Select batch first to load course and batch details.';
+        if (!classNameTouched) {
+            classNameInput.value = '';
+        }
+    }
+
+    function syncBatchMeta() {
+        const batch = currentBatch();
+        const course = currentCourse();
+        if (!batch || !course) {
+            classCourseCodeInput.value = '';
+            classDurationInput.value = '';
+            totalSemestersInput.value = '';
+            departmentInput.value = '';
+            classCourseTypeSelect.value = '';
+            batchNameInput.value = '';
+            batchStartYearInput.value = '';
+            batchEndYearInput.value = '';
+            academicYearInput.value = '';
+            departmentHint.textContent = 'Select batch first to load course and batch details.';
+            yearSelect.innerHTML = '<option value="">Select batch first</option>';
+            semesterSelect.innerHTML = '<option value="">Select batch first</option>';
+            if (!classNameTouched) {
+                classNameInput.value = '';
+            }
+            return;
+        }
+        const savedDefaults = course ? loadCourseDefaults()[course.code] || {} : {};
+
+        classCourseCodeInput.value = course?.code || '';
+        classDurationInput.value = course?.durationYears ? `${course.durationYears} Years` : '';
+        totalSemestersInput.value = course?.totalSemesters || '';
+        departmentInput.value = course?.department || savedDefaults.department || '';
+        classCourseTypeSelect.value = course?.courseType || savedDefaults.courseType || course?.fallbackType || '';
+        departmentHint.textContent = course?.department
+            ? 'Fetched from the selected course.'
+            : 'Course has no saved department yet, so you can type it once and we will remember it on this browser.';
+
+        batchNameInput.value = batch?.displayName || '';
+        batchStartYearInput.value = batch?.startYear || '';
+        batchEndYearInput.value = batch?.endYear || '';
+        academicYearInput.value = formatAcademicYear(batch?.startYear);
+        syncYearOptions(course?.durationYears);
+        syncSemesterOptions(course?.totalSemesters);
+        syncSuggestedClassName();
+    }
+
+    function syncSuggestedClassName() {
+        if (classNameTouched) return;
+        const courseCode = classCourseCodeInput.value.trim();
+        const year = yearSelect.value.trim();
+        const semester = semesterSelect.selectedOptions[0]?.textContent?.trim() || '';
+        const section = sectionInput.value.trim();
+        if (!courseCode || !year || !semester || !section) {
+            classNameInput.value = '';
+            return;
+        }
+        classNameInput.value = `${courseCode} - ${year} - ${semester} - ${section}`;
+    }
+
+    if (classCourseSelect) {
+        classCourseSelect.addEventListener('change', syncClassCourseMeta);
+        classBatchSelect.addEventListener('change', syncBatchMeta);
+        yearSelect.addEventListener('change', () => {
+            syncSuggestedClassName();
+        });
+        semesterSelect.addEventListener('change', () => {
+            syncSuggestedClassName();
+        });
+        sectionInput.addEventListener('input', syncSuggestedClassName);
+        classNameInput.addEventListener('input', () => {
+            classNameTouched = classNameInput.value.trim().length > 0;
+        });
+        departmentInput.addEventListener('input', () => {
+            const course = currentCourse();
+            if (course && !course.department) {
+                saveCourseDefaults(course.code, {
+                    department: departmentInput.value.trim(),
+                    courseType: classCourseTypeSelect.value
+                });
+            }
+        });
+        classCourseTypeSelect.addEventListener('change', () => {
+            const course = currentCourse();
+            if (course && !course.courseType) {
+                saveCourseDefaults(course.code, {
+                    department: departmentInput.value.trim(),
+                    courseType: classCourseTypeSelect.value
+                });
+            }
+        });
+        form.addEventListener('reset', () => {
+            window.setTimeout(() => {
+                classNameTouched = false;
+                intakeCapacityInput.value = 60;
+                syncClassCourseMeta();
+                syncBatchMeta();
+            }, 0);
+        });
+        intakeCapacityInput.value = intakeCapacityInput.value || 60;
+        syncClassCourseMeta();
+        syncBatchMeta();
+    }
+</script>
+</body>
+</html>
+

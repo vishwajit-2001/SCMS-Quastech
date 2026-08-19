@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${'Exam Details - ' + (collegeName ?: 'AI Campus Institute')}">Exam Details - AI Campus Institute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .quiz-question-card { border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 20px; padding: 18px; background: rgba(255,255,255,0.92); box-shadow: 0 18px 36px rgba(15,23,42,0.06); }
+        .quiz-option-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+        .quiz-option { display: flex; align-items: center; gap: 10px; border: 1px solid rgba(37,99,235,0.12); border-radius: 16px; padding: 12px 14px; }
+        .quiz-meta-card { padding: 18px; border-radius: 20px; background: rgba(255,255,255,0.92); border: 1px solid rgba(15,23,42,0.08); }
+        .quiz-answer-good { border-color: rgba(20,184,166,0.45); background: rgba(20,184,166,0.08); }
+        .quiz-answer-bad { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); }
+        .quiz-answer-right { color: #0f766e; font-weight: 600; }
+        .quiz-timer { font-size: 1.25rem; font-weight: 700; color: #2563eb; }
+        @media (max-width: 900px) { .quiz-option-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='exams')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Exam Details')}"></div>
+
+        <main class="portal-page-body">
+            <div th:if="${examSuccess}" class="teacher-alert teacher-alert--success" th:text="${examSuccess}">Exam action completed.</div>
+            <div th:if="${examError}" class="teacher-alert teacher-alert--error" th:text="${examError}">Exam error</div>
+
+            <section class="portal-hero-banner portal-hero-banner--college">
+                <div class="portal-hero-copy portal-hero-college-copy">
+                    <div class="portal-hero-college-head">
+                        <div class="portal-hero-college-avatar"><span th:text="${studentInitials}">ST</span></div>
+                        <div class="portal-hero-college-text">
+                            <h2 class="portal-hero-student-name" th:text="${exam.title}">Exam title</h2>
+                            <p class="portal-hero-subtitle" th:text="${exam.instructions}">Instructions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portal-hero-side portal-hero-college-side">
+                    <h2 class="portal-hero-college-name portal-hero-college-name--side" th:text="${exam.examDateLabel}">Date</h2>
+                    <p class="portal-hero-college-year portal-hero-college-year--side" th:text="${exam.examModeLabel}">Mode</p>
+                </div>
+            </section>
+
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Subject</p>
+                    <h2 class="portal-summary-value" th:text="${exam.subject}">Subject</h2>
+                    <div class="portal-summary-meta">Class exam record</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Duration</p>
+                    <h2 class="portal-summary-value" th:text="${exam.durationLabel}">60 min</h2>
+                    <div class="portal-summary-meta">Teacher controlled timer</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Syllabus</p>
+                    <h2 class="portal-summary-value"><a th:if="${exam.syllabusFilePath != null}" th:href="${exam.syllabusFilePath}" target="_blank">Open file</a><span th:if="${exam.syllabusFilePath == null}">Not uploaded</span></h2>
+                    <div class="portal-summary-meta">Reference file</div>
+                </article>
+            </section>
+
+            <section th:if="${!exam.quiz}" class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Seating</h2>
+                    <span class="portal-badge portal-badge--neutral" th:text="${exam.seatingInfo}">Generated seating</span>
+                </div>
+                <div class="teacher-grid-three">
+                    <article class="teacher-kpi-card" th:each="seat : ${seatViews}">
+                        <p class="teacher-kpi-label" th:text="${seat.seatLabel}">Seat</p>
+                        <h3 class="teacher-kpi-value" th:text="${seat.student.name}">Student</h3>
+                        <p class="teacher-kpi-meta" th:text="${seat.rollNo}">Roll</p>
+                    </article>
+                </div>
+            </section>
+
+            <section th:if="${exam.quiz}" class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Online Quiz Workspace</h2>
+                    <span class="portal-badge portal-badge--warning" th:text="${exam.quizQuestionCount + ' MCQs'}">10 MCQs</span>
+                </div>
+
+                <div class="teacher-grid-two">
+                    <article class="quiz-meta-card">
+                        <p class="portal-summary-label">Quiz Status</p>
+                        <h3 class="portal-summary-value" th:text="${quizAttempt != null and quizAttempt.submitted ? 'Submitted' : (quizAvailable ? 'Live' : 'Waiting')}">Live</h3>
+                        <p class="portal-summary-meta">Start the quiz to load MCQs and begin your attempt timer.</p>
+                    </article>
+                    <article class="quiz-meta-card">
+                        <p class="portal-summary-label">Timer</p>
+                        <h3 class="quiz-timer" id="quizTimer" th:text="${quizRemainingSeconds + ' sec'}">0 sec</h3>
+                        <p class="portal-summary-meta">Auto-submit when the countdown reaches zero.</p>
+                    </article>
+                </div>
+
+                <div class="portal-empty-state" th:if="${quizAttempt == null and !quizAvailable}">
+                    <i class="fa-solid fa-hourglass-start"></i>
+                    <h3>Quiz is not available yet</h3>
+                    <p>The quiz will appear here after your teacher publishes generated MCQs for your class.</p>
+                </div>
+
+                <form th:if="${quizAttempt == null and quizAvailable}" method="post" th:action="@{'/student-exams/' + ${exam.id} + '/quiz/start'}" style="margin-top:18px;">
+                    <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-play"></i> Start quiz</button>
+                </form>
+
+                <form th:if="${quizAttempt != null and !quizAttempt.submitted}" method="post" th:action="@{'/student-exams/' + ${exam.id} + '/quiz/submit'}" id="quizSubmitForm" style="margin-top:18px;">
+                    <input type="hidden" name="autoSubmit" id="autoSubmitFlag" value="false">
+                    <div class="portal-stack" style="display:grid; gap:16px;">
+                        <article class="quiz-question-card" th:each="question : ${quizQuestions}">
+                            <p class="teacher-kpi-label" th:text="${'Question ' + question.questionOrder}">Question 1</p>
+                            <h3 class="portal-alert-title" th:text="${question.questionText}">Question text</h3>
+                            <div class="quiz-option-grid">
+                                <label class="quiz-option"><input type="radio" th:name="${'answer_' + question.id}" value="A"><span th:text="${question.optionA}">Option A</span></label>
+                                <label class="quiz-option"><input type="radio" th:name="${'answer_' + question.id}" value="B"><span th:text="${question.optionB}">Option B</span></label>
+                                <label class="quiz-option"><input type="radio" th:name="${'answer_' + question.id}" value="C"><span th:text="${question.optionC}">Option C</span></label>
+                                <label class="quiz-option"><input type="radio" th:name="${'answer_' + question.id}" value="D"><span th:text="${question.optionD}">Option D</span></label>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="teacher-actions-row" style="margin-top:18px;">
+                        <span class="teacher-pill"><i class="fa-solid fa-stopwatch"></i><span>Answers are checked automatically</span></span>
+                        <button type="submit" class="teacher-btn teacher-btn--primary"><i class="fa-solid fa-paper-plane"></i> Submit quiz</button>
+                    </div>
+                </form>
+
+                <section th:if="${quizAttempt != null and quizAttempt.submitted}" style="margin-top:18px;">
+                    <div class="teacher-grid-two">
+                        <article class="quiz-meta-card">
+                            <p class="portal-summary-label">Score</p>
+                            <h3 class="portal-summary-value" th:text="${quizAttempt.score + ' / ' + quizAttempt.totalQuestions}">0 / 10</h3>
+                            <p class="portal-summary-meta" th:text="${quizAttempt.percentage + '% auto-graded result'}">0%</p>
+                        </article>
+                        <article class="quiz-meta-card">
+                            <p class="portal-summary-label">Submission Mode</p>
+                            <h3 class="portal-summary-value" th:text="${quizAttempt.autoSubmitted ? 'Auto submitted' : 'Submitted'}">Submitted</h3>
+                            <p class="portal-summary-meta">Correct answers are shown for any incorrect response.</p>
+                        </article>
+                    </div>
+
+                    <div class="portal-stack" style="display:grid; gap:16px; margin-top:18px;">
+                        <article class="quiz-question-card" th:each="question : ${quizQuestions}" th:with="response=${quizResponsesByQuestionId[question.id]}">
+                            <p class="teacher-kpi-label" th:text="${'Question ' + question.questionOrder}">Question 1</p>
+                            <h3 class="portal-alert-title" th:text="${question.questionText}">Question text</h3>
+                            <div class="quiz-option-grid">
+                                <div class="quiz-option" th:classappend="${response != null and response.selectedOption == 'A'} ? (${response.correct} ? ' quiz-answer-good' : ' quiz-answer-bad') : ''"><strong>A.</strong><span th:text="${question.optionA}">Option A</span></div>
+                                <div class="quiz-option" th:classappend="${response != null and response.selectedOption == 'B'} ? (${response.correct} ? ' quiz-answer-good' : ' quiz-answer-bad') : ''"><strong>B.</strong><span th:text="${question.optionB}">Option B</span></div>
+                                <div class="quiz-option" th:classappend="${response != null and response.selectedOption == 'C'} ? (${response.correct} ? ' quiz-answer-good' : ' quiz-answer-bad') : ''"><strong>C.</strong><span th:text="${question.optionC}">Option C</span></div>
+                                <div class="quiz-option" th:classappend="${response != null and response.selectedOption == 'D'} ? (${response.correct} ? ' quiz-answer-good' : ' quiz-answer-bad') : ''"><strong>D.</strong><span th:text="${question.optionD}">Option D</span></div>
+                            </div>
+                            <p style="margin-top:12px;">
+                                <span th:if="${response == null or response.selectedOption == null}">No answer selected.</span>
+                                <span th:if="${response != null and response.correct}" class="quiz-answer-right">Correct answer submitted.</span>
+                                <span th:if="${response != null and !response.correct}">Accepted answer is <strong th:text="${question.correctOption + '. ' + question.correctAnswerText}">A. Correct</strong>.</span>
+                            </p>
+                            <p class="portal-summary-meta" th:text="${question.explanation}">Explanation</p>
+                        </article>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+<script th:if="${exam.quiz and quizAttempt != null and !quizAttempt.submitted}">
+    (function () {
+        const timerNode = document.getElementById('quizTimer');
+        const form = document.getElementById('quizSubmitForm');
+        const autoSubmitFlag = document.getElementById('autoSubmitFlag');
+        if (!timerNode || !form || !autoSubmitFlag) {
+            return;
+        }
+        let remaining = parseInt([[${quizRemainingSeconds}]], 10);
+        const render = () => {
+            const minutes = Math.floor(Math.max(remaining, 0) / 60);
+            const seconds = Math.max(remaining, 0) % 60;
+            timerNode.textContent = minutes + 'm ' + String(seconds).padStart(2, '0') + 's';
+        };
+        render();
+        const timer = setInterval(() => {
+            remaining -= 1;
+            render();
+            if (remaining <= 0) {
+                clearInterval(timer);
+                autoSubmitFlag.value = 'true';
+                form.submit();
+            }
+        }, 1000);
+    }());
+</script>
+</body>
+</html>

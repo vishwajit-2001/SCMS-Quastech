@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Documents - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .doc-shell { margin-left: 260px; min-height: 100vh; background: var(--cream); }
+        .doc-page { padding: 24px 28px 36px; }
+        .doc-head { display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px;flex-wrap:wrap; }
+        .doc-title { font-size: 30px;font-weight: 700;color: var(--black); }
+        .doc-sub { color:#7a6a5a;font-size:13px;margin-top:4px; }
+        .doc-card { background: var(--white); border:1px solid var(--light); border-radius:24px; box-shadow: 0 16px 40px rgba(20,20,20,.06); overflow:hidden; }
+        .doc-card-head { padding:18px 22px;border-bottom:1px solid var(--light); display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap; }
+        .doc-grid { width:100%; border-collapse:collapse; }
+        .doc-grid th, .doc-grid td { padding:14px 16px; border-bottom:1px solid #eee8dd; text-align:left; vertical-align:top; }
+        .doc-grid th { color:#7a6a5a;font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:#f8f5ef; }
+        .doc-badge { display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em; }
+        .doc-badge.pending { background:#fff4db;color:#b57b00; }
+        .doc-badge.verified { background:#e6f9e8;color:#167a33; }
+        .doc-badge.reupload { background:#ffe9e9;color:#c22; }
+        .doc-actions { display:flex;gap:8px;flex-wrap:wrap; }
+        .doc-actions form { display:inline-flex;gap:8px;align-items:flex-start; }
+        .doc-actions textarea { width:240px; min-height:70px; resize:vertical; border:1px solid var(--light); border-radius:14px; padding:10px 12px; font-family:var(--sans); font-size:13px; }
+        .doc-actions button, .doc-link { display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:999px;border:1px solid var(--light); background:var(--white); color:var(--black); font-weight:700;text-decoration:none; }
+        .doc-actions .view-btn { background:#eef6ff;border-color:#bfdcff;color:#195fad; }
+        .doc-actions .verify-btn { background:#e6f9e8;border-color:#bbebc3;color:#167a33; }
+        .doc-actions .reupload-btn { background:#ffe9e9;border-color:#efb4b4;color:#c22; }
+        .doc-note { color:#7a6a5a;font-size:13px;line-height:1.5;max-width:720px; }
+        .doc-empty { padding:28px 22px;color:#7a6a5a; }
+        .preview-modal { position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center; padding:18px; }
+        .preview-modal.open { display:flex; }
+        .preview-backdrop { position:absolute; inset:0; background:rgba(15,23,42,.66); backdrop-filter:blur(2px); }
+        .preview-dialog { position:relative; width:min(1040px,96vw); height:min(780px,90vh); background:#fff; border-radius:18px; box-shadow:0 30px 90px rgba(15,23,42,.38); display:flex; flex-direction:column; overflow:hidden; }
+        .preview-head { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 18px; border-bottom:1px solid #eee8dd; background:#fbfaf7; }
+        .preview-kicker { font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:#7a6a5a; font-weight:800; }
+        .preview-head h3 { margin:2px 0 0; font-size:20px; color:var(--black); line-height:1.2; }
+        .preview-controls { display:flex; align-items:center; gap:8px; }
+        .preview-controls button { width:36px; height:36px; border-radius:999px; border:1px solid var(--light); background:#fff; color:var(--black); font-weight:900; cursor:pointer; }
+        .preview-body { position:relative; flex:1; background:#eef2f7; overflow:auto; padding:18px; display:flex; align-items:center; justify-content:center; }
+        .preview-stage { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+        .preview-stage img { max-width:100%; max-height:100%; object-fit:contain; transition:transform .16s ease; transform-origin:center center; }
+        .preview-stage iframe { width:100%; height:100%; border:0; background:#fff; border-radius:12px; }
+        .preview-loading, .preview-error { position:absolute; top:18px; left:50%; transform:translateX(-50%); padding:9px 14px; border-radius:999px; background:#fff; color:#3d3328; font-weight:800; font-size:13px; box-shadow:0 8px 28px rgba(20,20,20,.13); }
+        .preview-error { color:#b42318; border:1px solid #efb4b4; }
+        @media (max-width: 760px) {
+            .doc-shell { margin-left:0; }
+            .preview-modal { padding:8px; }
+            .preview-dialog { width:100vw; height:94vh; border-radius:14px; }
+            .preview-head { padding:12px; }
+            .doc-actions form { flex-direction:column; width:100%; }
+            .doc-actions textarea { width:100%; }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('students')}"></div>
+<div class="doc-shell">
+    <div class="doc-page">
+        <div class="doc-head">
+            <div>
+                <div class="doc-title" th:text="${student.name} + ' Documents'">Student Documents</div>
+                <div class="doc-sub">
+                    <span th:text="${student.registrationNo != null ? student.registrationNo : 'Registration pending'}">Registration pending</span>
+                    <span> | </span>
+                    <span th:text="${student.course != null ? student.course : '-'}">Course</span>
+                    <span> | </span>
+                    <span th:text="${student.email}">email@example.com</span>
+                </div>
+            </div>
+            <a class="doc-link" href="/admin-students"><i class="fa fa-arrow-left"></i> Back to Students</a>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-card-head">
+                <div>
+                    <h2 style="margin:0;font-size:20px;color:var(--black)">Uploaded Documents</h2>
+                    <p class="doc-note" style="margin:6px 0 0;">Review each file, verify it, or request a reupload with a clear note when the document does not match.</p>
+                </div>
+                <div th:if="${pendingReuploadDocs != null and !#lists.isEmpty(pendingReuploadDocs)}"
+                     style="padding:10px 12px;border-radius:14px;background:#fff3f3;border:1px solid #efb4b4;color:#b42318;font-size:13px;">
+                    <strong>Reupload pending</strong>
+                    <span th:text="${pendingReuploadDocs.size()} + ' document(s)'">0 document(s)</span>
+                </div>
+            </div>
+
+            <table class="doc-grid">
+                <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${documents == null or #lists.isEmpty(documents)}">
+                    <td colspan="5" class="doc-empty">No documents uploaded yet.</td>
+                </tr>
+                <tr th:each="doc : ${documents}">
+                    <td>
+                        <div style="font-weight:700;color:var(--black);" th:text="${doc.documentName}">AADHAAR CARD</div>
+                        <div style="font-size:12px;color:#7a6a5a;" th:text="${doc.uploadedAt != null ? #temporals.format(doc.uploadedAt, 'dd MMM yyyy HH:mm') : ''}"></div>
+                    </td>
+                    <td>
+                        <a th:if="${doc.storedPath != null and !#strings.isEmpty(doc.storedPath)}"
+                           class="doc-link"
+                           th:href="${doc.storedPath}"
+                           download>
+                            <i class="fa fa-download"></i>
+                            <span th:text="${doc.originalFilename != null ? doc.originalFilename : 'Open file'}">Open file</span>
+                        </a>
+                    </td>
+                    <td>
+                        <span class="doc-badge"
+                              th:classappend="${doc.status != null and doc.status == 'VERIFIED'} ? ' verified' : (${doc.status != null and doc.status == 'REUPLOAD_REQUESTED'} ? ' reupload' : ' pending')"
+                              th:text="${doc.status != null ? doc.status.replace('_', ' ') : 'PENDING'}">PENDING</span>
+                    </td>
+                    <td th:text="${doc.remarks != null ? doc.remarks : '-'}">-</td>
+                    <td>
+                        <div class="doc-actions">
+                            <a th:if="${doc.storedPath != null and !#strings.isEmpty(doc.storedPath)}"
+                               class="doc-link"
+                               th:href="${doc.storedPath}"
+                               download>
+                                <i class="fa fa-download"></i> Download
+                            </a>
+                            <button th:if="${doc.storedPath != null and !#strings.isEmpty(doc.storedPath)}"
+                                    type="button"
+                                    class="view-btn"
+                                    th:attr="data-doc-preview-url=${doc.storedPath},data-doc-preview-name=${doc.documentName},data-doc-preview-file=${doc.originalFilename}">
+                                <i class="fa fa-eye"></i> View
+                            </button>
+                            <form th:action="@{/admin-students/{studentId}/documents/{docId}/verify(studentId=${student.id},docId=${doc.id})}" method="post">
+                                <button type="submit" class="verify-btn" onclick="return confirm('Mark this document as verified?')">
+                                    <i class="fa fa-check"></i> Verify
+                                </button>
+                            </form>
+                            <form th:action="@{/admin-students/{studentId}/documents/{docId}/request-reupload(studentId=${student.id},docId=${doc.id})}" method="post">
+                                <textarea name="remarks" placeholder="Message to student" th:text="${doc.remarks}"></textarea>
+                                <button type="submit" class="reupload-btn" onclick="return confirm('Request reupload for this document?')">
+                                    <i class="fa fa-rotate-left"></i> Request Reupload
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="preview-modal" id="adminDocumentPreviewModal" aria-hidden="true">
+    <div class="preview-backdrop" data-preview-close></div>
+    <div class="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="adminDocumentPreviewTitle">
+        <div class="preview-head">
+            <div>
+                <div class="preview-kicker">Document Preview</div>
+                <h3 id="adminDocumentPreviewTitle">Preview</h3>
+            </div>
+            <div class="preview-controls">
+                <button type="button" data-preview-zoom="out" title="Zoom out">-</button>
+                <button type="button" data-preview-zoom="in" title="Zoom in">+</button>
+                <button type="button" data-preview-close title="Close"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+        <div class="preview-body">
+            <div class="preview-loading">Loading preview...</div>
+            <div class="preview-error" hidden>Unable to preview document</div>
+            <div class="preview-stage"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const modal = document.getElementById("adminDocumentPreviewModal");
+        if (!modal) return;
+        const title = document.getElementById("adminDocumentPreviewTitle");
+        const stage = modal.querySelector(".preview-stage");
+        const loading = modal.querySelector(".preview-loading");
+        const error = modal.querySelector(".preview-error");
+        const zoomButtons = modal.querySelectorAll("[data-preview-zoom]");
+        let zoom = 1;
+
+        function extension(value) {
+            const clean = (value || "").split("?")[0].split("#")[0];
+            const index = clean.lastIndexOf(".");
+            return index >= 0 ? clean.substring(index + 1).toLowerCase() : "";
+        }
+
+        function typeFor(url, filename) {
+            const ext = extension(filename) || extension(url);
+            if (["jpg", "jpeg", "png"].includes(ext)) return "image";
+            if (ext === "pdf") return "pdf";
+            return "unsupported";
+        }
+
+        function closePreview() {
+            modal.classList.remove("open");
+            modal.setAttribute("aria-hidden", "true");
+            stage.innerHTML = "";
+        }
+
+        function openPreview(button) {
+            const url = button.dataset.docPreviewUrl;
+            const file = button.dataset.docPreviewFile || "";
+            const name = button.dataset.docPreviewName || file || "Document";
+            const type = typeFor(url, file);
+            zoom = 1;
+            title.textContent = name;
+            stage.innerHTML = "";
+            loading.hidden = false;
+            error.hidden = true;
+            zoomButtons.forEach(zoomButton => zoomButton.hidden = type !== "image");
+            modal.classList.add("open");
+            modal.setAttribute("aria-hidden", "false");
+
+            if (!url || type === "unsupported") {
+                loading.hidden = true;
+                error.hidden = false;
+                return;
+            }
+
+            if (type === "pdf") {
+                const frame = document.createElement("iframe");
+                frame.title = name;
+                frame.src = url;
+                frame.addEventListener("load", () => { loading.hidden = true; });
+                stage.appendChild(frame);
+                window.setTimeout(() => { loading.hidden = true; }, 1200);
+                return;
+            }
+
+            const image = document.createElement("img");
+            image.alt = name;
+            image.onload = function () {
+                loading.hidden = true;
+            };
+            image.onerror = function () {
+                loading.hidden = true;
+                error.hidden = false;
+                stage.innerHTML = "";
+            };
+            image.src = url;
+            stage.appendChild(image);
+        }
+
+        document.querySelectorAll("[data-doc-preview-url]").forEach(button => {
+            button.addEventListener("click", () => openPreview(button));
+        });
+
+        document.addEventListener("click", event => {
+            if (event.target.closest("[data-preview-close]")) {
+                closePreview();
+                return;
+            }
+            const zoomButton = event.target.closest("[data-preview-zoom]");
+            if (!zoomButton) return;
+            const image = stage.querySelector("img");
+            if (!image) return;
+            zoom += zoomButton.dataset.previewZoom === "in" ? 0.15 : -0.15;
+            zoom = Math.min(2.5, Math.max(0.5, zoom));
+            image.style.transform = `scale(${zoom})`;
+        });
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") closePreview();
+        });
+    })();
+</script>
+</body>
+</html>

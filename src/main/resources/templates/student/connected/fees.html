@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Fees - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='fees')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Fees')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Total Fees</p>
+                    <h2 class="portal-summary-value" th:text="${feesTotalFormatted}">Rs 0</h2>
+                    <div class="portal-summary-meta">From admin fee configuration</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Paid</p>
+                    <h2 class="portal-summary-value" th:text="${feesPaidFormatted}">Rs 0</h2>
+                    <div class="portal-summary-meta" th:text="${feesPaidPercentage} + '% completed'">0% completed</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Pending</p>
+                    <h2 class="portal-summary-value" th:text="${feesPendingFormatted}">Rs 0</h2>
+                    <div class="portal-summary-meta" th:text="${feesDueStatus}">Status</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Student</p>
+                    <h2 class="portal-summary-value" th:text="${studentRollNo}">Roll</h2>
+                    <div class="portal-summary-meta" th:text="${studentCourse}">Course</div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid">
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Fee Overview</h2>
+                        <span class="portal-badge"
+                              th:classappend="${feesPending > 0} ? ' portal-badge--warning' : ' portal-badge--success'"
+                              th:text="${feesDueStatus}">Pending</span>
+                    </div>
+
+                    <div class="portal-meta-grid portal-meta-grid--three">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Total</p>
+                            <p class="portal-meta-value" th:text="${feesTotalFormatted}">Rs 0</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Paid</p>
+                            <p class="portal-meta-value" th:text="${feesPaidFormatted}">Rs 0</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Pending</p>
+                            <p class="portal-meta-value" th:text="${feesPendingFormatted}">Rs 0</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:18px">
+                        <div class="portal-progress">
+                            <div class="portal-progress-bar" th:style="'width:' + ${feesPaidPercentage} + '%'"></div>
+                        </div>
+                        <div class="portal-note" th:text="${feesPaidPercentage} + '% of the current student fee record has been paid.'">Fee progress</div>
+                    </div>
+                </article>
+
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Account Context</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Student ID</p>
+                            <p class="portal-meta-value" th:text="${studentId}">Student ID</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Roll Number</p>
+                            <p class="portal-meta-value" th:text="${studentRollNo}">Roll</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Academic Scope</p>
+                            <p class="portal-meta-value" th:text="${studentClassLabel}">Academic Scope</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Academic Year</p>
+                            <p class="portal-meta-value" th:text="${studentAcademicYear}">Academic Year</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Bank</p>
+                            <p class="portal-meta-value" th:text="${studentBankName}">Bank</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Account</p>
+                            <p class="portal-meta-value" th:text="${studentBankAccMasked}">Account</p>
+                        </div>
+                    </div>
+
+                    <div class="portal-note">
+                        Fee totals are resolved from the admin fee setup for your course, batch, academic year, and semester. Payments update the paid and pending balance.
+                    </div>
+                </article>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Current Fee Record</h2>
+                </div>
+
+                <table class="portal-table">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Academic Scope</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Pending</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td th:text="${studentName}">Student Name</td>
+                        <td th:text="${studentClassLabel}">Academic Scope</td>
+                        <td th:text="${feesTotalFormatted}">Rs 0</td>
+                        <td th:text="${feesPaidFormatted}">Rs 0</td>
+                        <td th:text="${feesPendingFormatted}">Rs 0</td>
+                        <td>
+                            <span class="portal-badge"
+                                  th:classappend="${feesPending > 0} ? ' portal-badge--warning' : ' portal-badge--success'"
+                                  th:text="${feesDueStatus}">Pending</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Detail - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">College workspace</div>
+                <div class="sa-title" th:text="${college.collegeName}">College</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin/colleges"><i class="fa fa-arrow-left"></i> Back</a>
+                <a class="sa-btn primary" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/edit'}"><i class="fa fa-pen"></i> Edit</a>
+                <a class="sa-btn success" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/manage'}"><i class="fa fa-sitemap"></i> Manage</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-hero">
+                <div class="sa-hero-banner">
+                    <div th:if="${college.logoPath != null and !#strings.isEmpty(college.logoPath)}" style="margin-bottom:14px">
+                        <img th:src="${college.logoPath}" alt="College logo" style="width:72px;height:72px;border-radius:18px;object-fit:cover;border:1px solid rgba(255,255,255,.16)">
+                    </div>
+                    <div class="sa-badge" th:classappend="' ' + ${college.statusTone}" th:text="${college.status}">Active</div>
+                    <h1 style="margin-top:14px" th:text="${college.collegeName}">College</h1>
+                    <p>
+                        Code <strong th:text="${college.collegeCode}">C-001</strong> ·
+                        <span th:text="${college.address}">College address</span>
+                    </p>
+                    <div class="sa-hero-actions">
+                        <a class="sa-btn ghost" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/edit'}"><i class="fa fa-pen"></i> Edit college</a>
+                        <form th:action="@{'/super-admin/colleges/' + ${college.collegeId} + '/status'}" method="post" style="display:inline">
+                            <input type="hidden" name="status" th:value="${college.status == 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}">
+                            <button class="sa-btn soft" type="submit"><i class="fa fa-toggle-on"></i> <span th:text="${college.status == 'ACTIVE' ? 'Deactivate' : 'Activate'}">Toggle</span></button>
+                        </form>
+                        <form th:action="@{'/super-admin/colleges/' + ${college.collegeId} + '/delete'}" method="post" style="display:inline" onsubmit="return confirm('Delete this college?');">
+                            <button class="sa-btn danger" type="submit"><i class="fa fa-trash"></i> Delete</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="sa-mini-grid">
+                    <div class="sa-mini-card">
+                        <h3>College name</h3>
+                        <p th:text="${college.collegeName}">College</p>
+                    </div>
+                    <div class="sa-mini-card">
+                        <h3>College code</h3>
+                        <p th:text="${college.collegeCode}">C-001</p>
+                    </div>
+                    <div class="sa-mini-card">
+                        <h3>Status</h3>
+                        <p th:text="${college.status}">ACTIVE</p>
+                    </div>
+                    <div class="sa-mini-card">
+                        <h3>Linked admin</h3>
+                        <p th:text="${college.adminName}">Admin</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-grid-2">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>College profile</h2>
+                            <p>All college metadata is stored in the college master.</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-notice">
+                            <i class="fa fa-school"></i>
+                            <div>
+                                <div style="font-weight:800" th:text="${college.collegeName}">College</div>
+                                <div style="margin-top:4px" th:text="${college.address}">Address</div>
+                                <div style="margin-top:4px;color:var(--sa-muted)" th:text="${college.latestSummary}">Summary</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>College admin</h2>
+                            <p>The super admin creates the linked admin from the selected college.</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-notice">
+                            <i class="fa fa-user-tie"></i>
+                            <div>
+                                <div style="font-weight:800" th:text="${college.adminName}">Admin</div>
+                                <div style="margin-top:4px" th:text="${college.adminEmail}">admin@example.com</div>
+                                <div style="margin-top:4px;color:var(--sa-muted)" th:if="${college.adminId != null}" th:text="'Admin ID: ' + ${college.adminId}">Admin ID</div>
+                                <div style="margin-top:4px;color:var(--sa-muted)" th:if="${college.adminId == null}">No admin created yet</div>
+                            </div>
+                        </div>
+                        <div th:if="${college.adminId != null}" style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+                            <form th:action="@{'/super-admin/admins/' + ${college.adminId} + '/delete'}" method="post" onsubmit="return confirm('Delete this college admin?');">
+                                <button class="sa-btn danger" type="submit"><i class="fa fa-trash"></i> Delete linked admin</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

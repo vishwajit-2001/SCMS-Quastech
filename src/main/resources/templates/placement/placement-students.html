@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .table{width:100%;border-collapse:collapse;font-size:13px}
+        .table th,.table td{padding:12px 10px;border-bottom:1px solid rgba(24,22,15,.08);text-align:left;vertical-align:top}
+        .table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:24px;color:#6b6457;text-align:center;background:rgba(255,255,255,.78)}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='students')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Students', subtitle='View all registered students, check eligibility, and review their placement profile.')}"></div>
+        <main class="portal-page-body">
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Registered Students</h2><p>Students that can be evaluated for placement drives.</p></div>
+                    <span class="portal-badge portal-badge--neutral" th:text="${placementStudentCount} + ' students'">0 students</span>
+                </div>
+                <div class="panel-body">
+                    <table class="table" th:if="${!#lists.isEmpty(placementStudents)}">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Class</th>
+                            <th>Eligibility Notes</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="student : ${placementStudents}">
+                            <td th:text="${student.name}">Student</td>
+                            <td th:text="${student.course}">Course</td>
+                            <td th:text="${student.semester}">Semester</td>
+                            <td th:text="${student.classRoom != null ? student.classRoom.displayLabel : 'Not assigned'}">Class</td>
+                            <td><span class="pill" th:text="${student.degree != null ? student.degree : 'Degree n/a'}">Degree</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="empty" th:if="${#lists.isEmpty(placementStudents)}">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <h3 style="margin:10px 0 6px;">No students available</h3>
+                        <p>No registered students were found for the current TPO scope.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Attendance - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='attendance')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='My Attendance')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Attendance Records</p>
+                    <h2 class="portal-summary-value" th:text="${attendanceRecordCount}">0</h2>
+                    <div class="portal-summary-meta">Total marked subject slots</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Overall Attendance</p>
+                    <h2 class="portal-summary-value" th:text="${attendanceOverallPercentage + '%'}">0%</h2>
+                    <div class="portal-summary-meta" th:text="${attendanceAttendedCount + ' attended / ' + attendanceRecordCount + ' total'}">0 attended</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Late Marks</p>
+                    <h2 class="portal-summary-value" th:text="${attendanceLateCount}">0</h2>
+                    <div class="portal-summary-meta">Late counts as attended</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Absent</p>
+                    <h2 class="portal-summary-value" th:text="${attendanceAbsentCount}">0</h2>
+                    <div class="portal-summary-meta">Classes missed</div>
+                </article>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Subject Wise Attendance</h2>
+                </div>
+
+                <div class="portal-empty-state" th:if="${!attendanceAvailable}">
+                    <i class="fa-solid fa-user-check"></i>
+                    <h3>Attendance is not available yet</h3>
+                    <p>This page will show attendance as soon as teachers begin publishing attendance records for your subjects.</p>
+                </div>
+
+                <div class="portal-list" th:if="${attendanceAvailable}">
+                    <div class="portal-list-item" th:each="row : ${subjectAttendanceSummaries}">
+                        <div class="portal-list-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div>
+                            <h3 class="portal-list-title" th:text="${row.subject}">Subject</h3>
+                            <div class="portal-list-meta" th:text="${row.attended + ' attended, ' + row.absent + ' absent, ' + row.late + ' late | Latest: ' + row.latestDateLabel}">Summary</div>
+                        </div>
+                        <div class="portal-list-trail" th:text="${row.percentage + '%'}">0%</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

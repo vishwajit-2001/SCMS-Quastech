@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <title>Contact - Student Campus</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/home/home.css">
+
+    <style>
+
+        /* =========================
+        CONTACT HERO
+        ========================= */
+
+        .contact-hero{
+        padding-top:150px;
+        padding-bottom:60px;
+        text-align:center;
+        background:white;
+        }
+
+        .contact-hero h1{
+        font-family:'Cormorant Garamond',serif;
+        font-size:60px;
+        margin-bottom:10px;
+        }
+
+        .contact-hero em{
+        color:#c9972a;
+        font-style:italic;
+        }
+
+        .contact-hero p{
+        color:#888070;
+        max-width:500px;
+        margin:auto;
+        }
+
+
+        /* =========================
+        CONTACT SECTION
+        ========================= */
+
+        .contact-section{
+        padding:80px 24px;
+        background:#ffffff;
+        }
+
+        .contact-wrapper{
+        max-width:1100px;
+        margin:auto;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:40px;
+        }
+
+
+        /* =========================
+        CONTACT INFO CARDS
+        ========================= */
+
+        .contact-info{
+        display:grid;
+        gap:20px;
+        }
+
+        .info-card{
+        background:#f9f7f2;
+        border:1px solid #e8e1d0;
+        padding:30px;
+        border-radius:18px;
+        transition:.3s;
+        position:relative;
+        overflow:hidden;
+        }
+
+        .info-card:hover{
+        transform:translateY(-6px);
+        box-shadow:0 15px 40px rgba(0,0,0,0.08);
+        }
+
+        .info-card h3{
+        font-family:'Cormorant Garamond',serif;
+        margin-bottom:5px;
+        }
+
+        .info-card p{
+        color:#777;
+        font-size:14px;
+        }
+
+
+        /* =========================
+        CONTACT FORM
+        ========================= */
+
+        .contact-container{
+        background:#f9f7f2;
+        padding:40px;
+        border-radius:20px;
+        border:1px solid #e8e1d0;
+        box-shadow:0 15px 40px rgba(0,0,0,0.06);
+        }
+
+        .contact-container h2{
+        font-family:'Cormorant Garamond',serif;
+        margin-bottom:10px;
+        font-size:32px;
+        }
+
+        .contact-container p{
+        margin-bottom:25px;
+        color:#777;
+        }
+
+        .contact-form{
+        display:grid;
+        gap:15px;
+        }
+
+        .contact-form input,
+        .contact-form textarea{
+
+        padding:14px;
+        border-radius:10px;
+        border:1px solid #ddd;
+        font-family:'Jost',sans-serif;
+        transition:.25s;
+        background:white;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus{
+        outline:none;
+        border-color:#c9972a;
+        box-shadow:0 0 0 3px rgba(201,151,42,0.12);
+        }
+
+        .contact-form textarea{
+        resize:none;
+        }
+
+        /* BUTTON */
+
+        .contact-form button{
+        background:linear-gradient(135deg,#c9972a,#e2b24a);
+        color:black;
+        padding:14px;
+        border:none;
+        border-radius:10px;
+        font-weight:600;
+        cursor:pointer;
+        transition:.3s;
+        box-shadow:0 6px 18px rgba(201,151,42,0.3);
+        }
+
+        .contact-form button:hover{
+        transform:translateY(-2px);
+        box-shadow:0 10px 25px rgba(201,151,42,0.45);
+        }
+
+
+        /* =========================
+        MAP SECTION
+        ========================= */
+
+        .map-section{
+        margin-top:80px;
+        text-align:center;
+        }
+
+        .map-section iframe{
+        width:100%;
+        max-width:1100px;
+        height:350px;
+        border:0;
+        border-radius:18px;
+        box-shadow:0 10px 40px rgba(0,0,0,0.08);
+        }
+
+
+        /* =========================
+        RESPONSIVE
+        ========================= */
+
+        @media(max-width:900px){
+
+        .contact-wrapper{
+        grid-template-columns:1fr;
+        }
+
+        .contact-hero h1{
+        font-size:42px;
+        }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- =========================
+NAVBAR (GLOBAL)
+========================= -->
+
+<div th:replace="~{home/fragments/navbar :: homeNavbar}"></div>
+
+<div th:replace="~{home/fragments/navbar :: loginModal}"></div>
+
+<div th:replace="~{home/fragments/navbar :: loginScript}"></div>
+
+
+<!-- HERO -->
+
+<section class="contact-hero">
+
+    <h1>Get in <em>Touch</em></h1>
+
+    <p>
+        Have questions about our AI Smart Campus platform?
+        Our team is ready to help with demos, partnerships and support.
+    </p>
+
+</section>
+
+
+<!-- CONTACT SECTION -->
+
+<section class="contact-section">
+
+    <div class="contact-wrapper">
+
+        <!-- LEFT INFO -->
+
+        <div class="contact-info">
+
+            <div class="info-card">
+                <h3>Email Support</h3>
+                <p>support@studentcampus.ai</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Phone</h3>
+                <p>+91 98765 43210</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Office</h3>
+                <p>Mumbai, Maharashtra, India</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Working Hours</h3>
+                <p>Mon - Fri : 9AM - 6PM</p>
+            </div>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <div class="contact-container">
+
+            <h2>Contact Us</h2>
+
+            <p>For demo requests, partnerships or support, send us a message.</p>
+
+            <form class="contact-form">
+
+                <input type="text" placeholder="Your Name" required>
+
+                <input type="email" placeholder="Your Email" required>
+
+                <textarea rows="5" placeholder="Your Message"></textarea>
+
+                <button type="submit">Send Message</button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- MAP -->
+
+<section class="map-section">
+
+    <iframe
+            src="https://maps.google.com/maps?q=mumbai&t=&z=13&ie=UTF8&iwloc=&output=embed">
+    </iframe>
+
+</section>
+
+
+</body>
+</html>

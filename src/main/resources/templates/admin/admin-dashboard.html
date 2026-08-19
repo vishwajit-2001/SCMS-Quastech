@@ -1,0 +1,442 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${collegeName} + ' - Admin Dashboard'">Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .welcome-banner {
+            margin: 28px 36px 0;
+            background: linear-gradient(180deg, #ffffff 0%, #f7f8ff 100%);
+            border: 1px solid rgba(75,73,172,0.12);
+            border-radius: 22px;
+            padding: 28px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease both;
+            box-shadow: 0 18px 40px rgba(31,41,55,0.06);
+        }
+        .welcome-banner::before {
+            content:''; position:absolute; top:-50px; right:-50px; width:180px; height:180px;
+            border-radius:50%; background:radial-gradient(circle,rgba(120,128,255,0.18),transparent);
+        }
+        .wb-logo {
+            width: 84px;
+            height: 84px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid rgba(75,73,172,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 18px rgba(31,41,55,0.06);
+        }
+        .wb-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .wb-text {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .wb-greeting { font-size:15px; font-weight:500; color:#111827; }
+        .wb-greeting span {
+            font-weight:700;
+        }
+        .wb-name {
+            font-family:var(--serif);
+            font-size:26px;
+            font-weight:700;
+            color:#111827;
+            line-height:1.15;
+            max-width:920px;
+        }
+        .wb-name span { color: #4b49ac; }
+        .wb-sub { font-size:14px; color:#5f6b80; }
+        .wb-badges { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+        .wb-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; font-size:11.5px; font-weight:600; }
+        .wbb-green { background:rgba(34,201,122,0.12); color:var(--green); border:1px solid rgba(34,201,122,0.25); }
+        .wb-actions { position:relative; z-index:1; display:flex; gap:10px; flex-wrap:wrap; }
+        @media (max-width: 900px) {
+            .welcome-banner { padding: 22px; align-items: flex-start; }
+            .wb-logo { width: 72px; height: 72px; }
+            .wb-name { font-size: 22px; }
+        }
+        @media (max-width: 640px) {
+            .welcome-banner { margin: 20px 16px 0; flex-direction: column; align-items: flex-start; }
+            .wb-name { font-size: 20px; }
+            .wb-greeting, .wb-sub { font-size: 13px; }
+        }
+        .structure-overview-grid {
+            display:grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+            gap: 18px;
+        }
+        .structure-mini-cards {
+            display:grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .structure-mini-card {
+            border-radius: 16px;
+            border: 1px solid rgba(75,73,172,0.12);
+            background: linear-gradient(180deg, #ffffff 0%, #f6f7ff 100%);
+            padding: 16px;
+        }
+        .structure-mini-card strong {
+            display:block;
+            font-size: 28px;
+            color:#1f2937;
+            margin-top: 8px;
+        }
+        .structure-mini-card span {
+            font-size: 11px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color:#8a94b8;
+        }
+        .structure-filter-row {
+            display:grid;
+            grid-template-columns: minmax(180px, 1.2fr) repeat(2, minmax(0, 1fr)) auto;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .structure-matrix-wrap {
+            overflow:auto;
+            border: 1px solid rgba(75,73,172,0.12);
+            border-radius: 16px;
+        }
+        .structure-matrix-table {
+            width:100%;
+            min-width: 640px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .structure-matrix-table thead th {
+            background: linear-gradient(135deg, #4b49ac 0%, #7978e9 100%);
+            color:#fff;
+            text-align:left;
+            padding: 14px 16px;
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .structure-matrix-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(75,73,172,0.08);
+            color:#3a4568;
+        }
+        .structure-matrix-pill {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(75,73,172,0.08);
+            color:#4b49ac;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .structure-empty {
+            padding: 20px;
+            text-align:center;
+            color:#8a94b8;
+        }
+        @media (max-width: 980px) {
+            .structure-overview-grid,
+            .structure-mini-cards { grid-template-columns: 1fr; }
+            .structure-filter-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIDEBAR â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('dashboard')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Dashboard Overview</div>
+        <div class="header-right">
+            <a href="/admin-notifications" class="header-btn"><i class="fa fa-bell"></i><span class="dot"></span></a>
+            <a href="/admin-reports" class="header-btn"><i class="fa fa-chart-bar"></i></a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <!-- â•â• WELCOME BANNER â•â• -->
+    <div class="welcome-banner">
+        <div class="wb-logo" th:if="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}">
+            <img th:src="${collegeLogoPath}" alt="College logo">
+        </div>
+        <div class="wb-logo" th:unless="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}" aria-hidden="true">
+            <i class="fa fa-building-columns" style="font-size:30px;color:#4b49ac"></i>
+        </div>
+        <div class="wb-text">
+            <div class="wb-greeting">Welcome back, <span th:text="${adminName}">Admin</span></div>
+            <div class="wb-name">Welcome to <span th:text="${collegeName}">AI Campus Institute</span></div>
+            <div class="wb-sub">Here's what's happening on your campus today.</div>
+            <div class="wb-badges">
+                <span class="wb-badge wbb-green"><i class="fa fa-circle-check"></i> System Active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- â•â• STAT CARDS â•â• -->
+    <div class="cards">
+        <a class="card" href="/admin-students" style="text-decoration:none;color:inherit;display:block;">
+            <div class="card-icon"><i class="fa fa-users"></i></div>
+            <h3>Students</h3>
+            <p style="font-size:22px;line-height:1.15;" th:text="${totalStudents}">0</p>
+            <div class="card-trend trend-up"><i class="fa fa-arrow-right"></i> View student records</div>
+        </a>
+        <a class="card" href="/admin-teachers" style="text-decoration:none;color:inherit;display:block;">
+            <div class="card-icon"><i class="fa fa-chalkboard-teacher"></i></div>
+            <h3>Teachers</h3>
+            <p style="font-size:22px;line-height:1.15;" th:text="${totalTeachers}">0</p>
+            <div class="card-trend"><i class="fa fa-arrow-right"></i> View teacher records</div>
+        </a>
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-book"></i></div>
+            <h3>Total Courses</h3>
+            <p th:text="${totalCourses}">0</p>
+            <div class="card-trend trend-up"><i class="fa fa-arrow-right"></i> Academic master</div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-layer-group"></i></div>
+            <h3>Total Batches</h3>
+            <p th:text="${totalBatches}">0</p>
+            <div class="card-trend"><i class="fa fa-arrow-right"></i> Batch registry</div>
+        </div>
+    </div>
+
+    <!-- â•â• CONTENT â•â• -->
+    <div class="content">
+
+        <!-- QUICK ACTIONS -->
+        <div class="box" style="animation-delay:0.08s">
+            <div class="box-title">Quick Actions</div>
+            <div class="qa-grid">
+                <a href="/add-student"    class="qa-card"><div class="qa-icon"><i class="fa fa-user-plus"></i></div>Add Student</a>
+                <a href="/admin-students" class="qa-card"><div class="qa-icon"><i class="fa fa-users"></i></div>View Students</a>
+                <a href="/add-teacher"    class="qa-card"><div class="qa-icon"><i class="fa fa-chalkboard-teacher"></i></div>Add Teacher</a>
+                <a href="/admin-teachers" class="qa-card"><div class="qa-icon"><i class="fa fa-user-tie"></i></div>View Teachers</a>
+                <a href="/admin-courses"  class="qa-card"><div class="qa-icon"><i class="fa fa-book"></i></div>Courses</a>
+                <a href="/admin-batches"  class="qa-card"><div class="qa-icon"><i class="fa fa-layer-group"></i></div>Batches</a>
+            </div>
+        </div>
+
+        <!-- ROW: Recent Students + Recent Teachers -->
+        <div class="row-2">
+            <div class="box" style="animation-delay:0.12s">
+                <div class="box-title">Recent Students <a href="/admin-students">View All -></a></div>
+                <table>
+                    <thead><tr><th>#</th><th>Name</th><th>Course</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <tr th:each="student, iterStat : ${students}" th:if="${iterStat.index lt 5}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td th:text="${student.name}">â€”</td>
+                        <td th:text="${student.course}">â€”</td>
+                        <td><span class="badge badge-green">Active</span></td>
+                    </tr>
+                    <tr th:if="${students == null or #lists.isEmpty(students)}">
+                        <td colspan="4" style="text-align:center;color:#b0a898;padding:20px">â€” No students yet â€”</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="box" style="animation-delay:0.15s">
+                <div class="box-title">Recent Teachers <a href="/admin-teachers">View All -></a></div>
+                <table>
+                    <thead><tr><th>#</th><th>Name</th><th>Subject</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <tr th:each="teacher, iterStat : ${teachers}" th:if="${iterStat.index lt 5}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td th:text="${teacher.name}">â€”</td>
+                        <td th:text="${teacher.department != null and !#strings.isEmpty(teacher.department) ? teacher.department : (teacher.designation != null and !#strings.isEmpty(teacher.designation) ? teacher.designation : 'Unassigned')}">â€”</td>
+                        <td><span class="badge badge-blue">Active</span></td>
+                    </tr>
+                    <tr th:if="${teachers == null or #lists.isEmpty(teachers)}">
+                        <td colspan="4" style="text-align:center;color:#b0a898;padding:20px">â€” No teachers yet â€”</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- STATS ROW -->
+        <div class="row-2">
+            <div class="box" style="animation-delay:0.18s">
+                <div class="box-title">Course Distribution</div>
+                <div style="display:flex;flex-direction:column;gap:14px" th:if="${courseDistribution != null and !#lists.isEmpty(courseDistribution)}">
+                    <div th:each="item : ${courseDistribution}">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                            <span style="font-size:13px;font-weight:600" th:text="${item.courseName}">Course</span>
+                            <span style="font-size:13px;font-weight:700"
+                                  th:style="${item.colorClass == 'green' ? 'color:var(--green);' : (item.colorClass == 'blue' ? 'color:var(--blue);' : (item.colorClass == 'gold' ? 'color:var(--gold);' : 'color:#4b49ac;'))}"
+                                  th:text="${item.percentage + '%'}">0%</span>
+                        </div>
+                        <div class="progress-wrap">
+                            <div th:class="${item.colorClass == null or item.colorClass.isBlank() ? 'progress-bar' : 'progress-bar ' + item.colorClass}"
+                                 th:style="${'width:' + item.percentage + '%'}"></div>
+                        </div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:5px" th:text="${item.count + ' live record(s)'}">0 live record(s)</div>
+                    </div>
+                </div>
+                <div th:if="${courseDistribution == null or #lists.isEmpty(courseDistribution)}"
+                     style="text-align:center;color:#b0a898;padding:20px 12px">
+                    No active course distribution available.
+                </div>
+            </div>
+            <div class="box" style="animation-delay:0.21s">
+                <div class="box-title">System Summary</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div style="background:linear-gradient(135deg,#eef2ff,#dbeafe);border:1px solid rgba(75,73,172,0.12);border-radius:12px;padding:16px;text-align:center">
+                        <div class="stat-count" style="font-size:28px;font-weight:700;color:#4b49ac" th:text="${totalStudents}">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-top:4px">Students</div>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#7d7afa,#4b49ac);border:1px solid rgba(75,73,172,0.12);border-radius:12px;padding:16px;text-align:center">
+                        <div class="stat-count" style="font-size:28px;font-weight:700;color:#ffffff" th:text="${totalTeachers}">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.78);margin-top:4px">Teachers</div>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#9bbcff,#7da0fa);border:1px solid rgba(75,73,172,0.12);border-radius:12px;padding:16px;text-align:center">
+                        <div class="stat-count" style="font-size:28px;font-weight:700;color:#ffffff" th:text="${totalCourses}">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.78);margin-top:4px">Courses</div>
+                    </div>
+                    <div style="background:linear-gradient(135deg,#f3797e,#ef8da5);border:1px solid rgba(75,73,172,0.12);border-radius:12px;padding:16px;text-align:center">
+                        <div class="stat-count" style="font-size:28px;font-weight:700;color:#ffffff" th:text="${totalBatches}">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.78);margin-top:4px">Batches</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box" style="animation-delay:0.24s">
+            <div class="box-title">Academic Structure Overview <a href="/admin-academic-structure">Open Full Module -></a></div>
+            <div class="structure-overview-grid">
+                <div>
+                    <div class="structure-filter-row">
+                        <input class="form-input" id="dashboardStructureSearch" type="search" placeholder="Search course, batch, year, semester">
+                        <select class="form-select" id="dashboardStructureCourseFilter">
+                            <option value="">All Courses</option>
+                            <option th:each="course : ${courses}" th:value="${course.code}" th:text="${course.code}">Course</option>
+                        </select>
+                        <select class="form-select" id="dashboardStructureYearFilter">
+                            <option value="">All Years</option>
+                            <option th:each="year : ${dashboardStructureYears}" th:value="${year}" th:text="${year}">FY</option>
+                        </select>
+                        <button class="btn-outline" type="button" id="dashboardStructureReset"><i class="fa fa-rotate-right"></i> Reset</button>
+                    </div>
+                    <div class="structure-matrix-wrap" th:if="${summaryStructures != null and !#lists.isEmpty(summaryStructures)}">
+                        <table class="structure-matrix-table" id="dashboardStructureTable">
+                            <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Batch</th>
+                                <th>Academic Year</th>
+                                <th>Year Type</th>
+                                <th>Semester</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${summaryStructures}"
+                                th:attr="data-course=${row.courseCode},data-year=${row.yearLabel}">
+                                <td th:text="${row.courseCode}">MCA</td>
+                                <td th:text="${row.batchName}">Batch</td>
+                                <td><span class="structure-matrix-pill" th:text="${row.academicYear}">2026-27</span></td>
+                                <td th:text="${row.yearDisplay}">FYMCA</td>
+                                <td th:text="${row.semesterLabel}">Sem 1</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="structure-empty" th:if="${summaryStructures == null or #lists.isEmpty(summaryStructures)}">
+                        Academic structures will appear here once batches are created.
+                    </div>
+                </div>
+                <div class="structure-mini-cards">
+                    <div class="structure-mini-card">
+                        <span>Total Structures</span>
+                        <strong th:text="${totalAcademicStructures}">0</strong>
+                    </div>
+                    <div class="structure-mini-card">
+                        <span>Total Semesters</span>
+                        <strong th:text="${totalStructureSemesters}">0</strong>
+                    </div>
+                    <div class="structure-mini-card">
+                        <span>Total Courses</span>
+                        <strong th:text="${totalCourses}">0</strong>
+                    </div>
+                    <div class="structure-mini-card">
+                        <span>Total Batches</span>
+                        <strong th:text="${totalBatches}">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+
+    <footer class="admin-footer">
+        <div class="admin-footer__copy">
+            <strong th:text="${collegeName}">AI Campus Institute</strong>
+            <span>Admin Dashboard</span>
+        </div>
+        <div class="admin-footer__meta">
+            <span>Manage students, teachers, courses, and campus records in one place.</span>
+        </div>
+    </footer>
+</div><!-- /main -->
+<script>
+    window.addEventListener('pageshow', event => {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+    const dashboardStructureRows = Array.from(document.querySelectorAll('#dashboardStructureTable tbody tr'));
+    const dashboardStructureSearch = document.getElementById('dashboardStructureSearch');
+    const dashboardStructureCourseFilter = document.getElementById('dashboardStructureCourseFilter');
+    const dashboardStructureYearFilter = document.getElementById('dashboardStructureYearFilter');
+    const dashboardStructureReset = document.getElementById('dashboardStructureReset');
+
+    function applyDashboardStructureFilters() {
+        const search = dashboardStructureSearch?.value.trim().toLowerCase() || '';
+        const course = dashboardStructureCourseFilter?.value || '';
+        const year = dashboardStructureYearFilter?.value || '';
+        dashboardStructureRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const visible = (!search || text.includes(search))
+                && (!course || row.dataset.course === course)
+                && (!year || row.dataset.year === year);
+            row.style.display = visible ? '' : 'none';
+        });
+    }
+
+    dashboardStructureReset?.addEventListener('click', () => {
+        if (dashboardStructureSearch) dashboardStructureSearch.value = '';
+        if (dashboardStructureCourseFilter) dashboardStructureCourseFilter.value = '';
+        if (dashboardStructureYearFilter) dashboardStructureYearFilter.value = '';
+        applyDashboardStructureFilters();
+    });
+
+    [dashboardStructureSearch, dashboardStructureCourseFilter, dashboardStructureYearFilter]
+        .forEach(element => element?.addEventListener(element.tagName === 'INPUT' ? 'input' : 'change', applyDashboardStructureFilters));
+</script>
+</body>
+</html>

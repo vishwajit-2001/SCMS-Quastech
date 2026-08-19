@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Batch Detail - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+        .tab-link{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;border:1px solid var(--light);background:var(--offwhite);color:#6a6050;text-decoration:none;font-weight:700}
+        .tab-link.active{background:var(--black);color:var(--white);border-color:var(--black)}
+        .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .info-tile{padding:14px 16px;border:1px solid var(--light);border-radius:16px;background:var(--offwhite)}
+        .info-key{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px}
+        .info-value{font-size:14px;font-weight:600;color:var(--black)}
+        .badge-tag{display:inline-flex;align-items:center;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent}
+        .tag-core{background:#eef2ff;color:#4b49ac;border-color:#c7d2fe}
+        .tag-lab{background:rgba(34,197,94,.1);color:#15803d;border-color:rgba(34,197,94,.22)}
+        .tag-elective{background:rgba(245,158,11,.12);color:#b45309;border-color:rgba(245,158,11,.25)}
+        .tag-project{background:rgba(147,51,234,.12);color:#7e22ce;border-color:rgba(147,51,234,.24)}
+        .tag-custom{background:rgba(249,115,22,.12);color:#c2410c;border-color:rgba(249,115,22,.24)}
+        .empty-state{padding:34px 16px;text-align:center;color:#8a7a6a}
+        .empty-state strong{display:block;color:var(--black);margin-bottom:8px}
+        .action-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+        .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .form-grid .full{grid-column:1/-1}
+        .modal-shell{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(13,12,10,.58);backdrop-filter:blur(8px);z-index:700}
+        .modal-shell.open{display:flex}
+        .modal-card{width:min(760px,100%);max-height:88vh;overflow:auto;background:var(--white);border:1px solid var(--gold-br);border-radius:24px;box-shadow:0 28px 70px rgba(13,12,10,.32)}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px 22px;background:linear-gradient(135deg,var(--black),#191512);border-bottom:1px solid var(--gold-br)}
+        .modal-head h3{color:var(--white);font:700 26px var(--serif)}
+        .modal-head p{color:rgba(255,255,255,.58);margin-top:4px;font-size:13px}
+        .modal-close{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+        .modal-body{padding:22px}
+        .toast-stack{position:fixed;top:18px;right:18px;z-index:900;display:grid;gap:10px}
+        .toast{min-width:260px;max-width:360px;padding:14px 16px;border-radius:16px;box-shadow:0 16px 40px rgba(15,23,42,.16);border:1px solid var(--light);background:var(--white);font-size:13px;font-weight:600}
+        .toast.success{border-color:rgba(34,197,94,.2);color:#166534}
+        .toast.error{border-color:rgba(239,68,68,.2);color:#b91c1c}
+        @media (max-width:900px){.info-grid,.form-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('batches')}"></div>
+
+<div class="toast-stack">
+    <div class="toast success" th:if="${param['success'] != null}" th:text="${param['success'][0]}"></div>
+    <div class="toast error" th:if="${param['error'] != null}" th:text="${param['error'][0]}"></div>
+</div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title" th:text="${batch.displayName + ' Batch Detail'}">Batch Detail</div>
+        <div class="header-right">
+            <a href="/admin-batches" class="btn-dark"><i class="fa fa-arrow-left"></i> Back to Batches</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="tabs">
+            <a th:href="@{/admin-batches/{id}(id=${batch.id},tab='info')}" class="tab-link" th:classappend="${activeTab == 'info'} ? ' active' : ''"><i class="fa fa-circle-info"></i> Batch Info</a>
+            <a th:href="@{/admin-batches/{id}(id=${batch.id},tab='subjects')}" class="tab-link" th:classappend="${activeTab == 'subjects'} ? ' active' : ''"><i class="fa fa-book-open"></i> Subjects</a>
+        </div>
+
+        <div th:if="${activeTab == 'info'}" class="box">
+            <div class="box-title"><i class="fa fa-layer-group" style="color:var(--gold)"></i> Batch Info</div>
+            <div class="info-grid">
+                <div class="info-tile"><div class="info-key">Batch</div><div class="info-value" th:text="${batch.displayName}">Batch</div></div>
+                <div class="info-tile"><div class="info-key">Course</div><div class="info-value" th:text="${batch.course != null ? batch.course.name + ' (' + batch.course.code + ')' : '-'}">Course</div></div>
+                <div class="info-tile"><div class="info-key">Start Year</div><div class="info-value" th:text="${batch.startYear != null ? batch.startYear : '-'}">2025</div></div>
+                <div class="info-tile"><div class="info-key">End Year</div><div class="info-value" th:text="${batch.endYear != null ? batch.endYear : '-'}">2027</div></div>
+                <div class="info-tile">
+                    <div class="info-key">Academic Years</div>
+                    <div class="info-value" th:text="${batchAcademicYearsSummary}">2026-27 / 2027-28</div>
+                </div>
+                <div class="info-tile">
+                    <div class="info-key">Year Labels</div>
+                    <div class="info-value" th:text="${batchYearLabelsSummary}">FYMCA / SYMCA</div>
+                </div>
+                <div class="info-tile">
+                    <div class="info-key">Total Semesters</div>
+                    <div class="info-value" th:text="${batchTotalSemesters != null ? batchTotalSemesters : '-'}">4</div>
+                </div>
+            </div>
+            <div class="action-row">
+                <a th:href="@{/admin-batches/{id}(id=${batch.id},tab='subjects')}" class="btn-gold"><i class="fa fa-book-open"></i> View Semester Subjects</a>
+                <button type="button" class="btn-outline" onclick="openBatchEditModal()"><i class="fa fa-pen-to-square"></i> Edit Batch</button>
+                <a th:href="@{/admin-subject-registry(courseId=${batch.course != null ? batch.course.id : null})}" class="btn-outline"><i class="fa fa-book"></i> Open Subject Registry</a>
+                <button type="button" class="btn-red" onclick="openBatchDeleteModal()"><i class="fa fa-trash"></i> Delete Batch</button>
+            </div>
+        </div>
+
+        <div th:if="${activeTab == 'subjects'}" class="box">
+            <div class="box-title"><i class="fa fa-table" style="color:var(--gold)"></i> Batch Subjects</div>
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+                <div style="font-size:12px;color:#8a7a6a">This batch now reads from the central Subject Registry for the course and semester mapping.</div>
+                <a th:href="@{/admin-subject-registry(courseId=${batch.course != null ? batch.course.id : null})}" class="btn-outline"><i class="fa fa-book-open"></i> Manage in Subject Registry</a>
+            </div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Semester</th>
+                        <th>Credits</th>
+                        <th>Category</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="subject : ${batchSubjects}">
+                        <td th:text="${subject.code}">MCA101</td>
+                        <td>
+                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                                    <span th:text="${subject.name}">Subject</span>
+                                    <span class="badge-tag tag-custom" th:if="${subject.isOverride}">Legacy custom</span>
+                                </div>
+                        </td>
+                        <td th:text="${'Sem ' + subject.semester}">Sem 1</td>
+                        <td th:text="${subject.credits != null ? subject.credits : 4}">4</td>
+                        <td>
+                            <span class="badge-tag tag-lab"
+                                  th:if="${subject.courseCategory == 'LAB / PRACTICAL'}"
+                                  th:text="${subject.courseCategory}">LAB / PRACTICAL</span>
+                            <span class="badge-tag tag-elective"
+                                  th:if="${subject.courseCategory == 'ELECTIVE'}"
+                                  th:text="${subject.courseCategory}">ELECTIVE</span>
+                            <span class="badge-tag tag-project"
+                                  th:if="${subject.courseCategory == 'PROJECT'}"
+                                  th:text="${subject.courseCategory}">PROJECT</span>
+                            <span class="badge-tag tag-core"
+                                  th:if="${subject.courseCategory != 'LAB / PRACTICAL' and subject.courseCategory != 'ELECTIVE' and subject.courseCategory != 'PROJECT'}"
+                                  th:text="${subject.courseCategory != null ? subject.courseCategory : 'COMPULSORY (CORE)'}">COMPULSORY (CORE)</span>
+                        </td>
+                        <td>
+                            <button type="button" class="btn-red" th:attr="data-subject-id=${subject.id},data-subject-name=${subject.name}" onclick="openSubjectDeleteModal(this)"><i class="fa fa-trash"></i> Delete</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${batchSubjects == null or #lists.isEmpty(batchSubjects)}">
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <strong>No subjects available for this batch.</strong>
+                                Open the course Subject Registry to add semester subjects for this batch.
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="batchEditModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3>Edit Batch</h3><p>Academic structure and subject mappings refresh after save.</p></div>
+            <button type="button" class="modal-close" onclick="closeBatchEditModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form th:action="@{/admin-batches/{id}/update(id=${batch.id})}" method="post">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label class="form-label">Course *</label>
+                        <select class="form-select" name="courseId" required>
+                            <option th:each="course : ${courses}" th:value="${course.id}" th:selected="${batch.course != null and batch.course.id == course.id}" th:text="${course.code + ' - ' + course.name}">Course</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Start Year *</label><input class="form-input" type="number" name="startYear" th:value="${batch.startYear}" min="2020" max="2100" required></div>
+                    <div class="form-group"><label class="form-label">End Year *</label><input class="form-input" type="number" name="endYear" th:value="${batch.endYear}" min="2020" max="2100" required></div>
+                    <div class="form-group full"><label class="form-label">Display Name</label><input class="form-input" name="displayName" th:value="${batch.displayName}"></div>
+                </div>
+                <div class="action-row">
+                    <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn-outline" onclick="closeBatchEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form th:action="@{/admin-batches/{id}/delete(id=${batch.id})}" method="post" id="deleteBatchForm" style="display:none"></form>
+<form method="post" id="deleteBatchSubjectForm" style="display:none"></form>
+
+<div class="modal-shell" id="deleteConfirmModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3 id="deleteConfirmTitle">Confirm Delete</h3><p id="deleteConfirmSub">Linked data will refresh immediately.</p></div>
+            <button type="button" class="modal-close" onclick="closeDeleteConfirmModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="toast error" id="deleteConfirmText" style="max-width:100%;box-shadow:none">Are you sure?</div>
+            <div class="action-row">
+                <button type="button" class="btn-outline" onclick="closeDeleteConfirmModal()">Cancel</button>
+                <button type="button" class="btn-red" onclick="submitDeleteConfirm()"><i class="fa fa-trash"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="extraSubjectModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3>Add Extra Subject</h3><p>This subject will exist in this batch only.</p></div>
+            <button type="button" class="modal-close" onclick="closeExtraSubjectModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form th:action="@{/admin-batches/{id}/subjects/add-extra(id=${batch.id})}" method="post">
+                <div class="form-grid">
+                    <div class="form-group full"><label class="form-label">Subject Name *</label><input class="form-input" type="text" name="name" required></div>
+                    <div class="form-group"><label class="form-label">Subject Code *</label><input class="form-input" type="text" name="code" required></div>
+                    <div class="form-group"><label class="form-label">Semester Number *</label><select class="form-select" name="semesterNumber" required><option value="">Select semester</option><option th:each="sem : ${semesterOptions}" th:value="${sem}" th:text="${'Sem ' + sem}">Sem 1</option></select></div>
+                    <div class="form-group"><label class="form-label">Credits</label><input class="form-input" type="number" step="0.01" min="0" name="credits" value="4"></div>
+                    <div class="form-group"><label class="form-label">Category *</label><select class="form-select" name="category" required><option value="COMPULSORY (CORE)">COMPULSORY (CORE)</option><option value="ELECTIVE">ELECTIVE</option><option value="LAB / PRACTICAL">LAB / PRACTICAL</option><option value="PROJECT">PROJECT</option></select></div>
+                </div>
+                <div class="action-row">
+                    <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Save Extra Subject</button>
+                    <button type="button" class="btn-outline" onclick="closeExtraSubjectModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let pendingDeleteForm = null;
+    function openBatchEditModal() { document.getElementById('batchEditModal').classList.add('open'); }
+    function closeBatchEditModal() { document.getElementById('batchEditModal').classList.remove('open'); }
+    function openExtraSubjectModal() { document.getElementById('extraSubjectModal').classList.add('open'); }
+    function closeExtraSubjectModal() { document.getElementById('extraSubjectModal').classList.remove('open'); }
+    function closeDeleteConfirmModal() { document.getElementById('deleteConfirmModal').classList.remove('open'); pendingDeleteForm = null; }
+    function submitDeleteConfirm() { if (pendingDeleteForm) pendingDeleteForm.submit(); }
+    function openBatchDeleteModal() {
+        pendingDeleteForm = document.getElementById('deleteBatchForm');
+        document.getElementById('deleteConfirmTitle').textContent = 'Delete Batch?';
+        document.getElementById('deleteConfirmSub').textContent = 'Subjects, fee links, student batch links and academic structure mappings refresh safely.';
+        document.getElementById('deleteConfirmText').textContent = 'Delete this batch? Related subject rows and academic structure rows will be removed, and linked student/fee batch references will be cleared.';
+        document.getElementById('deleteConfirmModal').classList.add('open');
+    }
+    function openSubjectDeleteModal(button) {
+        const form = document.getElementById('deleteBatchSubjectForm');
+        const batchId = /*[[${batch.id}]]*/ 0;
+        form.action = `/admin-batches/${batchId}/subjects/${button.dataset.subjectId}/remove`;
+        pendingDeleteForm = form;
+        document.getElementById('deleteConfirmTitle').textContent = 'Delete Subject?';
+        document.getElementById('deleteConfirmSub').textContent = 'The batch subject list and counters refresh after deletion.';
+        document.getElementById('deleteConfirmText').textContent = `Delete ${button.dataset.subjectName || 'this subject'} from this batch?`;
+        document.getElementById('deleteConfirmModal').classList.add('open');
+    }
+    document.getElementById('extraSubjectModal')?.addEventListener('click', event => {
+        if (event.target === event.currentTarget) closeExtraSubjectModal();
+    });
+    document.querySelectorAll('.modal-shell').forEach(modal => {
+        modal.addEventListener('click', event => {
+            if (event.target === modal) {
+                modal.classList.remove('open');
+                if (modal.id === 'deleteConfirmModal') pendingDeleteForm = null;
+            }
+        });
+    });
+</script>
+</body>
+</html>

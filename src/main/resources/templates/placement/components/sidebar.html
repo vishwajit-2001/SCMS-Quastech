@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(activePage)" class="portal-sidebar">
+    <button class="portal-sidebar-toggle" type="button" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
+
+    <div class="portal-sidebar-brand">
+        <div class="portal-brand-icon">
+            <i class="fa-solid fa-briefcase"></i>
+        </div>
+        <div class="portal-brand-copy">
+            <h2>AI Campus</h2>
+            <p>Placement Portal</p>
+        </div>
+    </div>
+
+    <div class="portal-sidebar-frame">
+        <nav class="portal-sidebar-nav" aria-label="Placement navigation">
+            <div class="portal-section-title">Main</div>
+            <a th:href="@{/placement-dashboard}" class="portal-nav-item"
+               th:classappend="${activePage == 'dashboard'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
+                <span class="portal-nav-label">Dashboard</span>
+            </a>
+
+            <div class="portal-section-title">Placement Portal</div>
+            <a th:href="@{/placement-company-drives}" class="portal-nav-item"
+               th:classappend="${activePage == 'company-drives'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-building"></i></span>
+                <span class="portal-nav-label">Company Drives</span>
+            </a>
+            <a th:href="@{/placement-applications}" class="portal-nav-item"
+               th:classappend="${activePage == 'applications'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-file-signature"></i></span>
+                <span class="portal-nav-label">Applications</span>
+            </a>
+            <a th:href="@{/placement-students}" class="portal-nav-item"
+               th:classappend="${activePage == 'students'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-user-graduate"></i></span>
+                <span class="portal-nav-label">Students</span>
+            </a>
+            <a th:href="@{/placement-companies}" class="portal-nav-item"
+               th:classappend="${activePage == 'companies'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-industry"></i></span>
+                <span class="portal-nav-label">Companies</span>
+            </a>
+            <a th:href="@{/placement-interviews}" class="portal-nav-item"
+               th:classappend="${activePage == 'interviews'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-comments"></i></span>
+                <span class="portal-nav-label">Interviews</span>
+            </a>
+            <a th:href="@{/placement-analytics}" class="portal-nav-item"
+               th:classappend="${activePage == 'analytics'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+                <span class="portal-nav-label">Analytics</span>
+            </a>
+            <a th:href="@{/placement-reports}" class="portal-nav-item"
+               th:classappend="${activePage == 'reports'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-file-export"></i></span>
+                <span class="portal-nav-label">Reports</span>
+            </a>
+            <a th:href="@{/placement-announcements}" class="portal-nav-item"
+               th:classappend="${activePage == 'announcements'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-bullhorn"></i></span>
+                <span class="portal-nav-label">Announcements</span>
+            </a>
+            <a th:href="@{/placement-profile}" class="portal-nav-item"
+               th:classappend="${activePage == 'profile'} ? ' active' : ''">
+                <span class="portal-nav-icon"><i class="fa-solid fa-user"></i></span>
+                <span class="portal-nav-label">Profile</span>
+            </a>
+        </nav>
+
+        <div class="portal-sidebar-footer">
+            <a th:href="@{/placement-logout}" class="portal-logout-btn" title="Logout">
+                <span class="portal-nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                <span class="portal-nav-label">Logout</span>
+            </a>
+        </div>
+    </div>
+</aside>
+</body>
+</html>

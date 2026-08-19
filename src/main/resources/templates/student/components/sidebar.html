@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(activePage)"
+       class="portal-sidebar">
+    <div class="portal-sidebar-brand">
+        <div class="portal-brand-icon">
+            <img th:if="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}"
+                 th:src="${collegeLogoPath}"
+                 alt="College logo"
+                 style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+            <i th:unless="${collegeLogoPath != null and !#strings.isEmpty(collegeLogoPath)}" class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="portal-brand-copy">
+            <h2 th:text="${collegeName} ?: 'AI Campus'">AI Campus</h2>
+            <p>Student Portal</p>
+        </div>
+    </div>
+
+    <div class="portal-sidebar-frame">
+        <nav class="portal-sidebar-nav" aria-label="Student navigation">
+            <div class="portal-section-title">Main</div>
+            <a th:href="@{/student-dashboard}" class="portal-nav-item"
+               th:classappend="${activePage == 'dashboard'} ? ' active' : ''"
+               title="Dashboard">
+                <span class="portal-nav-icon"><i class="fa-solid fa-house"></i></span>
+                <span class="portal-nav-label">Dashboard</span>
+            </a>
+
+            <div class="portal-section-title">Academic</div>
+            <a th:href="@{/exam-results}" class="portal-nav-item"
+               th:classappend="${activePage == 'exam-results'} ? ' active' : ''"
+               title="Exam &amp; Results">
+                <span class="portal-nav-icon"><i class="fa-solid fa-file-lines"></i></span>
+                <span class="portal-nav-label">Exam &amp; Results</span>
+            </a>
+            <a th:href="@{/timetable}" class="portal-nav-item"
+               th:classappend="${activePage == 'timetable'} ? ' active' : ''"
+               title="Timetable">
+                <span class="portal-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                <span class="portal-nav-label">Timetable</span>
+            </a>
+            <a th:href="@{/subjects}" class="portal-nav-item"
+               th:classappend="${activePage == 'subjects'} ? ' active' : ''"
+               title="Subjects">
+                <span class="portal-nav-icon"><i class="fa-solid fa-book-open"></i></span>
+                <span class="portal-nav-label">Subjects</span>
+            </a>
+            <a th:href="@{/study-materials}" class="portal-nav-item"
+               th:classappend="${activePage == 'study-materials'} ? ' active' : ''"
+               title="Study Materials">
+                <span class="portal-nav-icon"><i class="fa-solid fa-folder-open"></i></span>
+                <span class="portal-nav-label">Study Materials</span>
+            </a>
+            <a th:href="@{/exams}" class="portal-nav-item"
+               th:classappend="${activePage == 'exams'} ? ' active' : ''"
+               title="Exams">
+                <span class="portal-nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                <span class="portal-nav-label">Exams</span>
+            </a>
+            <a th:href="@{/attendance}" class="portal-nav-item"
+               th:classappend="${activePage == 'attendance'} ? ' active' : ''"
+               title="Attendance">
+                <span class="portal-nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+                <span class="portal-nav-label">Attendance</span>
+            </a>
+            <a th:href="@{/assignments}" class="portal-nav-item"
+               th:classappend="${activePage == 'assignments'} ? ' active' : ''"
+               title="Assignments">
+                <span class="portal-nav-icon"><i class="fa-solid fa-pen-ruler"></i></span>
+                <span class="portal-nav-label">Assignments</span>
+            </a>
+            <a th:href="@{/events}" class="portal-nav-item"
+               th:classappend="${activePage == 'events'} ? ' active' : ''"
+               title="Events &amp; Activities">
+                <span class="portal-nav-icon"><i class="fa-solid fa-calendar-check"></i></span>
+                <span class="portal-nav-label">Events &amp; Activities</span>
+            </a>
+            <a th:href="@{/placements}" class="portal-nav-item"
+               th:classappend="${activePage == 'placements'} ? ' active' : ''"
+               title="Placements">
+                <span class="portal-nav-icon"><i class="fa-solid fa-briefcase"></i></span>
+                <span class="portal-nav-label">Placements</span>
+            </a>
+
+            <div class="portal-section-title">Account</div>
+            <a th:href="@{/student-profile}" class="portal-nav-item"
+               th:classappend="${activePage == 'profile'} ? ' active' : ''"
+               title="Profile">
+                <span class="portal-nav-icon"><i class="fa-solid fa-user"></i></span>
+                <span class="portal-nav-label">Profile</span>
+            </a>
+            <a th:href="@{/fees}" class="portal-nav-item"
+               th:classappend="${activePage == 'fees'} ? ' active' : ''"
+               title="Fees">
+                <span class="portal-nav-icon"><i class="fa-solid fa-indian-rupee-sign"></i></span>
+                <span class="portal-nav-label">Fees</span>
+            </a>
+            <a th:href="@{/notifications}" class="portal-nav-item"
+               th:classappend="${activePage == 'notifications'} ? ' active' : ''"
+               title="Notifications">
+                <span class="portal-nav-icon"><i class="fa-solid fa-bell"></i></span>
+                <span class="portal-nav-label">Notifications</span>
+            </a>
+        </nav>
+
+        <div class="portal-sidebar-footer">
+            <a th:href="@{/login-student}" class="portal-logout-btn" title="Logout">
+                <span class="portal-nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                <span class="portal-nav-label">Logout</span>
+            </a>
+        </div>
+    </div>
+</aside>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="panel" id="panel-doc-upload"
+         data-step-panel="doc-upload"
+         data-required-docs="[]"
+         data-required-docs-by-course='{
+            "MCA":["GRADUATION MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "MASTER OF COMPUTER APPLICATION":["GRADUATION MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "MASTER OF COMPUTER APPLICATIONS":["GRADUATION MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "BCA":["HSC/DIPLOMA MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "BACHELOR OF COMPUTER APPLICATION":["HSC/DIPLOMA MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "BACHELOR OF COMPUTER APPLICATIONS":["HSC/DIPLOMA MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "FYBCOM":["FYBCOM UNIVERSITY PRE-REGISTRATION FORM","HSC MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "B.COM":["FYBCOM UNIVERSITY PRE-REGISTRATION FORM","HSC MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "BCOM":["FYBCOM UNIVERSITY PRE-REGISTRATION FORM","HSC MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."],
+            "BACHELOR OF COMMERCE":["FYBCOM UNIVERSITY PRE-REGISTRATION FORM","HSC MARKSHEET","SSC MARKSHEET","AADHAAR CARD","ABC ID NO."]
+         }'
+         th:fragment="docUploadPanel" style="background:#fff;padding:0 0 14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 10px;border-bottom:1px solid #e5e7eb;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <h2 style="margin:0;font-size:12px;font-weight:700;color:#222;">Upload Document</h2>
+            <span style="color:#1631f3;font-size:12px;font-weight:700;">Application No:- <span th:text="${student.registrationNo != null ? student.registrationNo : 'N/A'}">N/A</span></span>
+        </div>
+        <div style="width:26px;height:26px;border-radius:3px;background:#25b04a;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800;line-height:1;">▶</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:14px;align-items:start;margin-top:10px;">
+        <div style="padding-right:10px;">
+            <div th:if="${hasDocumentReuploadRequest}"
+                 style="margin:0 0 12px;padding:10px 12px;border:1px solid #efb4b4;background:#fff3f3;color:#b42318;border-radius:10px;font-size:12px;line-height:1.5;">
+                <strong>Document reupload required.</strong>
+                <div th:if="${studentDocumentReviewRequests != null and !#lists.isEmpty(studentDocumentReviewRequests)}" style="margin-top:6px;">
+                    <div th:each="doc : ${studentDocumentReviewRequests}" style="margin-top:4px;">
+                        <span th:text="${doc.documentName}">AADHAAR CARD</span>
+                        <span th:if="${doc.remarks != null and !#strings.isEmpty(doc.remarks)}" th:text="${' - ' + doc.remarks}"> - Please upload clear copy.</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px;align-items:start;">
+                <div>
+                    <label style="display:block;margin:0 0 4px;font-size:11px;font-weight:700;color:#1f2937;">Name of Document<span style="color:#ff0000;">*</span></label>
+                    <select name="documentName" data-doc-field="name" style="width:100%;height:25px;padding:2px 10px;border:1px solid #c7d0da;background:#eaf1fb;font-size:12px;color:#334155;border-radius:2px;outline:none;">
+                        <option value="">Please Select</option>
+                        <option value="CASTE CERTIFICATE">CASTE CERTIFICATE*</option>
+                        <option value="AADHAAR CARD">AADHAAR CARD*</option>
+                        <option value="GRADUATION MARKSHEET">GRADUATION MARKSHEET*</option>
+                        <option value="HSC/DIPLOMA MARKSHEET">HSC/DIPLOMA MARKSHEET*</option>
+                        <option value="FYBCOM UNIVERSITY PRE-REGISTRATION FORM">FYBCOM UNIVERSITY PRE-REGISTRATION FORM*</option>
+                        <option value="SSC MARKSHEET">SSC MARKSHEET*</option>
+                        <option value="ABC ID NO.">ABC ID NO.*</option>
+                        <option value="SEM 1 GRADE CARD / GAZETTE">SEM 1 GRADE CARD / GAZETTE</option>
+                        <option value="FYBAF UNIVERSITY PRE-REGISTRATION FORM">FYBAF UNIVERSITY PRE-REGISTRATION FORM</option>
+                        <option value="FYBMS UNIVERSITY PRE-REGISTRATION FORM">FYBMS UNIVERSITY PRE-REGISTRATION FORM</option>
+                        <option value="HANDICAPPED CERTIFICATE">HANDICAPPED CERTIFICATE</option>
+                        <option value="LEAVING CERTIFICATE">LEAVING CERTIFICATE</option>
+                        <option value="SEM 5 GRADECARD / GAZETTE">SEM 5 GRADECARD / GAZETTE</option>
+                        <option value="SEM 6 GRADECARD / GAZETTE">SEM 6 GRADECARD / GAZETTE</option>
+                        <option value="UNDERTAKING FORM">UNDERTAKING FORM</option>
+                        <option value="INCOME CERTIFICATE">INCOME CERTIFICATE</option>
+                        <option value="FYMCOM UNIVERSITY PRE-REGISTRATION FORM">FYMCOM UNIVERSITY PRE-REGISTRATION FORM</option>
+                        <option value="SEM 3 GRADECARD / GAZETTE">SEM 3 GRADECARD / GAZETTE</option>
+                        <option value="SEM 2 GRADECARD / GAZETTE">SEM 2 GRADECARD / GAZETTE</option>
+                        <option value="SEM 4 GRADECARD / GAZETTE">SEM 4 GRADECARD / GAZETTE</option>
+                        <option value="HSC MARKSHEET">HSC MARKSHEET</option>
+                        <option value="T.C.">T.C.</option>
+                        <option value="TRANSFER CERTIFICATE">TRANSFER CERTIFICATE</option>
+                        <option value="BONAFIDE CERTIFICATE">BONAFIDE CERTIFICATE</option>
+                        <option value="DOMICILE CERTIFICATE">DOMICILE CERTIFICATE</option>
+                        <option value="RATION CARD">RATION CARD</option>
+                        <option value="DRIVING LICENCE">DRIVING LICENCE</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;margin:0 0 4px;font-size:11px;font-weight:700;color:#1f2937;">Upload Document<span style="color:#ff0000;">*</span></label>
+                    <input type="file" name="documentFile" data-doc-field="file" accept=".jpg,.jpeg,.png,.gif,.pdf" style="width:100%;height:25px;padding:2px 6px;border:1px solid #c7d0da;background:#eaf1fb;font-size:12px;color:#334155;border-radius:2px;outline:none;">
+                </div>
+            </div>
+            <div style="color:#ff1616;font-size:12px;line-height:1.45;margin:14px 0 10px;">
+                <div>* Please select valid image file(e.g. JPG,JPEG,GIF,PNG,PDF)</div>
+                <div>* Maximum size 200 kb</div>
+            </div>
+            <button type="button" data-doc-add style="background:#1ea7b6;color:#fff;border:0;border-radius:2px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;min-height:30px;display:inline-flex;align-items:center;justify-content:center;">+ Add</button>
+        </div>
+
+        <div style="border-left:1px solid #e5e7eb;padding-left:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span style="width:18px;height:18px;border:1px solid #cbd5e1;border-radius:2px;color:#94a3b8;display:grid;place-items:center;font-size:10px;">☰</span>
+                <h3 style="margin:0;font-size:12px;font-weight:700;color:#334155;">Document List</h3>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                <tr>
+                    <th style="padding:7px 8px;border:1px solid #e2e8f0;border-left:0;text-align:left;color:#334155;font-weight:700;">Document Name</th>
+                    <th style="padding:7px 8px;border:1px solid #e2e8f0;text-align:center;color:#334155;font-weight:700;">Download</th>
+                    <th style="padding:7px 8px;border:1px solid #e2e8f0;text-align:center;color:#334155;font-weight:700;">View</th>
+                    <th style="padding:7px 8px;border:1px solid #e2e8f0;text-align:center;color:#334155;font-weight:700;">Delete</th>
+                </tr>
+                </thead>
+                <tbody data-doc-list>
+                <tr th:each="doc : ${studentDocuments}"
+                    data-existing-doc="true"
+                    th:attr="data-name=${doc.documentName},data-url=${doc.storedPath},data-file=${doc.originalFilename},data-size=${doc.fileSize}">
+                    <td colspan="4" style="height:34px;border:1px solid #e2e8f0;border-left:0;color:#94a3b8;padding:8px 10px;">&nbsp;</td>
+                </tr>
+                <tr data-doc-empty>
+                    <td colspan="4" style="height:34px;border:1px solid #e2e8f0;border-left:0;color:#94a3b8;padding:8px 10px;">&nbsp;</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="actions" style="justify-content:flex-end;margin-top:14px;">
+        <button type="button" class="btn btn-prev" data-step-prev>Back</button>
+        <button type="button" class="btn btn-next" data-step-next>Save & Next</button>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,562 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Add Timetable - AI Campus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin/admin-common.css">
+  <style>
+    :root{
+      --paper:#f8f8ff;--paper2:#eef2ff;--ink:#4b49ac;--gold:#4b49ac;--gold2:#7978e9;
+      --gold-soft:rgba(75,73,172,.10);--line:#e4e8ff;--muted:#6b7280;
+    }
+    body{background:var(--paper);color:#1f2937}
+    .main{background:radial-gradient(circle at top left, rgba(75,73,172,.06), transparent 28%),linear-gradient(180deg,var(--paper),var(--paper2))}
+    .header{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .header-title{font-family:var(--serif);font-size:24px;font-weight:700}
+    .content{padding:22px 26px 32px;display:flex;flex-direction:column;gap:18px}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .scope-box{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.92);padding:16px 18px;box-shadow:0 10px 28px rgba(31,41,55,.05)}
+    .scope-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .scope-title{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink)}
+    .scope-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+    .scope-row .form-group{margin:0;min-width:160px;flex:1}
+    .scope-row .form-label{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+    .scope-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .scope-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.86);color:#6b7280}
+    .scope-badge--gold{background:rgba(75,73,172,.12);border-color:rgba(75,73,172,.16);color:var(--gold2)}
+    .scope-subjects{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:12px}
+    .scope-subjects-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    .scope-subjects-title{font-size:14px;font-weight:800;color:var(--ink)}
+    .scope-subject-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .scope-subject-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+    .scope-subject-name{font-size:13px;font-weight:700;color:#2b2620}
+    .scope-subject-code{font-size:11px;font-weight:800;color:var(--gold2);letter-spacing:.6px;text-transform:uppercase}
+    .scope-inline-note{font-size:12px;color:var(--muted)}
+    .bulk-box{border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.94);padding:18px 20px;box-shadow:0 10px 28px rgba(31,41,55,.05)}
+    .bulk-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .bulk-title{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink)}
+    .bulk-note{font-size:12px;color:var(--muted);line-height:1.5;max-width:760px}
+    .bulk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+    .bulk-grid .form-group{margin:0}
+    .bulk-grid .form-label{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+    .bulk-text{min-height:220px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+    .bulk-help{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+    .bulk-help code{display:block;padding:10px 12px;border-radius:12px;background:#f6f7ff;border:1px solid var(--line);font-size:12px;color:#4b49ac;word-break:break-word}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .summary-card{background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:18px;padding:18px 18px;display:flex;align-items:center;gap:14px;min-height:84px;box-shadow:0 6px 22px rgba(31,41,55,.05)}
+    .summary-ico{width:42px;height:42px;border-radius:12px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--gold)}
+    .summary-num{font-family:var(--sans);font-size:30px;font-weight:700;color:var(--gold2);line-height:1;font-style:normal;font-variant-numeric:tabular-nums}
+    .summary-lbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
+    .grid-box{border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.92);overflow:hidden;box-shadow:0 14px 34px rgba(31,41,55,.05)}
+    .grid-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--paper))}
+    .grid-title{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:23px;font-weight:700;color:var(--ink)}
+    .grid-sub{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+    .grid-wrap{overflow-x:auto}
+    .tt-table{width:100%;min-width:1180px;border-collapse:separate;border-spacing:0}
+    .tt-table th{background:var(--ink);color:#fff;padding:15px 12px;font:700 12px var(--sans);text-transform:uppercase;letter-spacing:1px;border-right:1px solid rgba(255,255,255,.06);white-space:nowrap}
+    .tt-table th.time-head{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#fff;min-width:140px}
+    .tt-table td{border-top:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;padding:10px;background:#fff}
+    .time-cell{background:linear-gradient(180deg,#eef2ff,#fff);font-weight:700;color:#4b49ac;text-align:center;min-width:140px}
+    .time-main{font-size:20px;font-family:var(--serif);line-height:1}
+    .time-sub{font-size:11px;color:#8d7b66;font-weight:700;margin-top:4px}
+    .slot-cell{min-height:84px;cursor:pointer}
+    .card-stack{display:flex;flex-direction:column;gap:8px}
+    .tt-card{border-radius:14px;padding:11px 12px;border:1px solid transparent;cursor:pointer;position:relative;overflow:hidden;background:linear-gradient(180deg,#f8f8ff,#ffffff)}
+    .tt-card::before{content:'';position:absolute;left:0;top:0;height:100%;width:4px;background:var(--gold);opacity:.9}
+    .tt-card.break{background:linear-gradient(180deg,rgba(123,92,255,.12),rgba(123,92,255,.06));border-style:dashed;border-color:rgba(123,92,255,.24)}
+    .tt-card.break::before{background:#7978e9}
+    .tt-card.live{outline:2px solid rgba(75,73,172,.8);box-shadow:0 0 0 4px rgba(75,73,172,.10)}
+    .tt-subject{font-size:14px;font-weight:800;line-height:1.25;color:#2b2620}
+    .tt-card.break .tt-subject{color:#4b49ac;letter-spacing:.6px;text-transform:uppercase}
+    .tt-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:7px;font-size:11px;color:#8b7c68;font-weight:700}
+    .tt-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+    .tt-chip.break{background:rgba(255,178,90,.24);color:#b36100}
+    .empty-slot{min-height:58px;border:1px dashed #d9dffb;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#b8c0ee;font-size:12px;background:rgba(255,255,255,.5);transition:.15s ease}
+    .empty-slot:hover{border-color:var(--gold);background:rgba(75,73,172,.05);color:var(--gold2)}
+    .badge-strip{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.86);color:#6b7280}
+    .badge--dark{background:var(--ink);color:#fff;border-color:rgba(255,255,255,.08)}
+    .badge--gold{background:rgba(75,73,172,.12);color:#4b49ac;border-color:rgba(75,73,172,.16)}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#4b49ac;box-shadow:0 0 0 4px rgba(75,73,172,.12)}
+    .grid-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .grid-actions .btn-outline,.grid-actions .btn-red{padding:6px 10px;font-size:11px}
+    .empty-grid-note{padding:18px;border:1px dashed var(--line);border-radius:14px;background:#fff;color:#8a7a6a;font-size:13px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(13,11,8,.55);display:none;align-items:center;justify-content:center;z-index:1200;padding:18px}
+    .modal-backdrop.show{display:flex}
+    .modal{width:min(980px,100%);max-height:92vh;overflow:auto;background:var(--white);border-radius:20px;border:1px solid var(--gold-br);box-shadow:0 24px 60px rgba(0,0,0,.22)}
+    .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--paper))}
+    .modal-title{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--ink)}
+    .modal-sub{font-size:12px;color:#8a7a6a;margin-top:4px}
+    .modal-body{padding:20px 22px 22px}
+    .modal-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+    .modal-panel{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}
+    .section-title{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--gold);font-weight:700;margin-bottom:12px}
+    .info-list{display:grid;gap:10px}
+    .info-item{display:flex;justify-content:space-between;gap:14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--offwhite)}
+    .info-key{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#9a8979;font-weight:700}
+    .info-val{font-size:13px;font-weight:600;color:var(--black);text-align:right}
+    .type-toggle{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .type-toggle button{border:1px solid var(--line);background:var(--offwhite);border-radius:999px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer}
+    .type-toggle button.active{background:var(--gold);border-color:var(--gold);color:#fff}
+    .hidden{display:none !important}
+    .tiny-note{font-size:12px;color:#8a7a6a;line-height:1.5}
+    .searchable-select{display:grid;gap:8px}
+    .searchable-select .form-input{height:40px;border-radius:12px;background:#fbfbff}
+    @media (max-width: 1100px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.modal-grid{grid-template-columns:1fr}}
+    @media print{.sidebar,.header,.filters,.legend,.seg,.no-print,.modal-backdrop{display:none !important}.main{margin-left:0 !important;padding:0 !important}.content{padding:0 !important}.grid-box{border:none}.tt-table{min-width:100%}}
+  </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('add-timetable')}"></div>
+
+<div class="main">
+  <div class="header no-print">
+    <div class="header-title">Timetable</div>
+    <div class="top-actions">
+      <button type="button" class="btn-gold" onclick="openEntryModal(null, null)"><i class="fa fa-plus"></i> Add Entry</button>
+      <a th:href="@{/view-timetable(batchId=${selectedBatchId}, classId=${selectedClassId}, course=${selectedCourse}, academicYear=${selectedAcademicYear}, semester=${selectedSemester})}" class="btn-dark"><i class="fa fa-table"></i> View Timetable</a>
+      <a th:href="@{/view-timetable/export/pdf(batchId=${selectedBatchId}, classId=${selectedClassId}, course=${selectedCourse}, academicYear=${selectedAcademicYear}, semester=${selectedSemester}, printMode=true)}" class="btn-dark"><i class="fa fa-file-pdf"></i> Export PDF</a>
+        <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+      </div>
+    </div>
+
+  <div class="content">
+    <div class="summary-grid no-print">
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-calendar-days"></i></div><div><div class="summary-num" th:text="${totalEntries} ?: 0">0</div><div class="summary-lbl">Total Entries</div></div></div>
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-book"></i></div><div><div class="summary-num" th:text="${totalSubjects} ?: 0">0</div><div class="summary-lbl">Subjects</div></div></div>
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-chalkboard-user"></i></div><div><div class="summary-num" th:text="${totalTeachers} ?: 0">0</div><div class="summary-lbl">Teachers</div></div></div>
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-school"></i></div><div><div class="summary-num" th:text="${totalClasses} ?: 0">0</div><div class="summary-lbl">Classes</div></div></div>
+    </div>
+
+    <div class="scope-box no-print">
+      <div class="scope-head">
+        <div class="scope-title"><i class="fa fa-layer-group" style="color:var(--gold)"></i> Timetable Scope</div>
+        <div class="scope-badges">
+          <span class="scope-badge" th:text="${selectedBatch != null ? selectedBatch.displayName : 'All Batches'}">All Batches</span>
+          <span class="scope-badge scope-badge--gold" th:text="${selectedAcademicYear != null ? selectedAcademicYear : 'All Years'}">All Years</span>
+        </div>
+      </div>
+      <form class="scope-row" method="get" action="/add-timetable">
+        <div class="form-group">
+          <label class="form-label">Batch</label>
+          <select class="form-select" name="batchId">
+            <option value="">All Batches</option>
+            <option th:each="b : ${batches}" th:value="${b.id}" th:text="${b.displayName}" th:selected="${selectedBatchId != null and selectedBatchId == b.id}">Batch</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Course</label>
+          <select class="form-select" name="course">
+            <option value="">All Courses</option>
+            <option th:each="c : ${courses}" th:value="${c}" th:text="${c}" th:selected="${selectedCourse != null and #strings.equalsIgnoreCase(selectedCourse, c)}">Course</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Academic Year</label>
+          <select class="form-select" name="academicYear">
+            <option value="">All Years</option>
+            <option th:each="y : ${academicYears}" th:value="${y}" th:text="${y}" th:selected="${selectedAcademicYear != null and #strings.equalsIgnoreCase(selectedAcademicYear, y)}">2025-26</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Semester</label>
+          <select class="form-select" name="semester">
+            <option value="">All Semesters</option>
+            <option th:each="sem : ${semesters}" th:value="${#strings.substring(sem, 4)}" th:text="${sem}" th:selected="${selectedSemester != null and selectedSemester == T(java.lang.Integer).valueOf(#strings.substring(sem, 4))}">Sem 1</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn-gold"><i class="fa fa-filter"></i> Apply Scope</button>
+          <a href="/add-timetable" class="btn-outline"><i class="fa fa-rotate-right"></i> Reset</a>
+        </div>
+      </form>
+      <div class="scope-subjects" th:if="${scopeSubjectsLoaded}">
+        <div class="scope-subjects-head">
+          <div>
+            <div class="scope-subjects-title">Scoped Subjects</div>
+            <div class="scope-inline-note">Subjects loaded from the selected batch, course, and semester.</div>
+          </div>
+          <button type="button"
+                  class="btn-outline"
+                  onclick="autoFillTimetableRows()"
+                  th:disabled="${#lists.isEmpty(scopeSubjects)}">
+            <i class="fa fa-wand-magic-sparkles"></i> Auto Fill Timetable Rows
+          </button>
+        </div>
+        <div class="scope-subject-list" th:if="${!#lists.isEmpty(scopeSubjects)}">
+          <div class="scope-subject-item" th:each="subject : ${scopeSubjects}">
+            <span class="scope-subject-name" th:text="${subject.name}">Subject Name</span>
+            <span class="scope-subject-code" th:text="${subject.code}">SUB101</span>
+          </div>
+        </div>
+        <div class="tiny-note" th:if="${#lists.isEmpty(scopeSubjects)}">No subjects found. Please add subjects in Course Subject Master first.</div>
+      </div>
+    </div>
+
+    <div class="bulk-box no-print">
+      <div class="bulk-head">
+        <div class="bulk-title"><i class="fa fa-list-check" style="color:var(--gold)"></i> Bulk Add Timetable</div>
+        <div class="scope-badges">
+          <span class="scope-badge">One class, many slots</span>
+          <span class="scope-badge scope-badge--gold">Paste rows and save once</span>
+        </div>
+      </div>
+      <form action="/add-timetable/bulk" method="post" novalidate>
+        <input type="hidden" name="batchId" th:value="${selectedBatchId}">
+        <input type="hidden" name="course" th:value="${selectedCourse}">
+        <input type="hidden" name="semester" th:value="${selectedSemester}">
+        <div class="bulk-grid">
+          <div class="form-group">
+            <label class="form-label">Class *</label>
+            <select class="form-select" name="classId" id="bulkClassSelect">
+              <option value="">Select class</option>
+              <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.name + ' (' + c.courseCode + ')'}" th:attr="data-room=${c.room}" th:selected="${selectedClassId != null and selectedClassId == c.id}">Class</option>
+            </select>
+            <div class="tiny-note" th:if="${classes == null or #lists.isEmpty(classes)}">No classes created yet. Go to <a href="/add-class">Add Class</a> first.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Academic Year</label>
+            <input type="text" class="form-input" name="academicYear" th:value="${selectedAcademicYear}" placeholder="2025-26">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bulk Rows *</label>
+          <textarea class="form-input bulk-text" name="bulkRows" placeholder="Monday,09:00,10:00,Java Programming,Dr. Meera Shah,Room 101,LECTURE,2025-26
+Monday,10:00,11:00,Data Structures,Prof. Amit Patel,Room 101,LECTURE,2025-26
+Tuesday,11:15,13:15,Web Lab,Dr. Neha Rao,Lab 3,LECTURE,2025-26
+Tuesday,13:15,14:00,Lunch Break,, ,BREAK,2025-26"></textarea>
+        </div>
+        <div class="alert alert-error" th:if="${bulkValidationErrors != null and !#lists.isEmpty(bulkValidationErrors)}" style="display:block">
+          <div style="font-weight:700;margin-bottom:8px">Please fix these bulk rows:</div>
+          <ul style="margin-left:18px">
+            <li th:each="rowError : ${bulkValidationErrors}" th:text="${rowError}">Row 2: Invalid day name</li>
+          </ul>
+        </div>
+        <div class="alert" th:if="${param.warning != null}" style="background:#fff7db;color:#8a6500;border:1px solid #f1df96">
+          <i class="fa fa-triangle-exclamation"></i>
+          <span th:text="${param.warning[0]}"></span>
+        </div>
+        <div class="alert alert-success" th:if="${param.success != null}">
+          <i class="fa fa-circle-check"></i>
+          <span th:text="${param.success[0]}"></span>
+        </div>
+        <div class="bulk-help">
+          <code>Format: Day,Start,End,Subject,Teacher,Room[,Type][,AcademicYear]</code>
+          <code>Teacher is row-wise. Keep it blank only for BREAK rows.</code>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+          <button type="button" class="btn-outline" onclick="fillWeeklyTemplate()"><i class="fa fa-calendar-week"></i> Fill One-Week Template</button>
+          <button type="submit" class="btn-gold"><i class="fa fa-floppy-disk"></i> Save All Entries</button>
+          <a href="/view-timetable" class="btn-outline"><i class="fa fa-table"></i> View Timetable</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid-box">
+      <div class="grid-head">
+        <div class="grid-title"><i class="fa fa-table" style="color:var(--gold)"></i> Weekly Timetable Grid</div>
+        <div class="badge-strip no-print">
+          <span class="badge badge--dark">Mon to Sat</span>
+          <span class="badge badge--gold"><span class="live-dot"></span> Click a cell to add</span>
+        </div>
+      </div>
+      <div class="grid-wrap" th:if="${timeRows != null and !#lists.isEmpty(timeRows)}">
+        <table class="tt-table">
+          <thead>
+            <tr>
+              <th class="time-head">Time</th>
+              <th th:each="day : ${dayColumns}" th:text="${day.day}">Monday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="row : ${timeRows}">
+              <td class="time-cell"><div class="time-main" th:text="${row.slot.start}">10:00</div><div class="time-sub" th:text="${row.slot.end != null ? row.slot.end : ''}">- 11:00</div></td>
+              <td th:each="cell : ${row.cells}" class="slot-cell">
+                <div class="card-stack" th:with="entries=${cell.entries}">
+                  <div th:if="${entries == null or #lists.isEmpty(entries)}" class="empty-slot" onclick="openEntryModal(null, this)" th:attr="data-day=${cell.day},data-start=${cell.start},data-end=${cell.end}">
+                    <span><i class="fa fa-plus"></i> Add</span>
+                  </div>
+                  <div th:each="entry, stat : ${entries}"
+                       th:class="${'tt-card ' + (entry.entryType != null and entry.entryType.equalsIgnoreCase('BREAK') ? 'break' : '')}"
+                       th:attr="data-id=${entry.id},data-type=${entry.entryType != null ? entry.entryType : 'LECTURE'},data-day=${entry.day},data-start=${entry.startTime},data-end=${entry.endTime},data-subject=${entry.subject},data-room=${entry.room},data-academic=${entry.academicYear},data-classid=${entry.classRoom != null ? entry.classRoom.id : ''},data-teacherid=${entry.teacher != null ? entry.teacher.id : ''},data-classname=${entry.classRoom != null ? entry.classRoom.name : ''},data-teachername=${entry.teacher != null ? entry.teacher.name : ''}"
+                       onclick="openEntryModal(this, null)">
+                    <div class="tt-subject" th:text="${entry.subject}">Subject</div>
+                    <div class="tt-meta" th:if="${entry.entryType == null or !entry.entryType.equalsIgnoreCase('BREAK')}"><span th:text="${entry.teacher != null ? entry.teacher.name : '—'}">Teacher</span><span th:text="${entry.room != null ? entry.room : '—'}">Room</span></div>
+                    <div class="tt-meta" th:if="${entry.entryType != null and entry.entryType.equalsIgnoreCase('BREAK')}"><span class="tt-chip break">Break</span></div>
+                    <div class="grid-actions no-print"><button type="button" class="btn-outline" onclick="event.stopPropagation(); openEntryModal(this.closest('.tt-card'), null)"><i class="fa fa-pen"></i> Edit</button><a th:href="@{/delete-timetable/{id}(id=${entry.id})}" class="btn-red" onclick="event.stopPropagation(); return confirm('Delete this timetable entry?')"><i class="fa fa-trash"></i> Delete</a></div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div th:if="${timeRows == null or #lists.isEmpty(timeRows)}" class="empty-grid-note">No timetable entries found. Use <b>Add Entry</b> to create the first lecture or break.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="entryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="modal-title" id="modalTitle">Add Timetable Entry</div><div class="modal-sub" id="modalSubtitle">Create or edit directly from the grid.</div></div>
+      <button type="button" class="btn-outline" onclick="closeModal()"><i class="fa fa-times"></i> Close</button>
+    </div>
+    <div class="modal-body">
+      <form action="/add-timetable" method="post" id="ttForm" novalidate>
+        <input type="hidden" name="entryId" id="entryId">
+        <input type="hidden" name="batchId" id="hiddenBatchId" th:value="${selectedBatchId}">
+        <input type="hidden" name="semester" id="hiddenSemester" th:value="${selectedSemester}">
+        <div class="modal-grid">
+          <div class="modal-panel">
+            <div class="section-title">Entry Details</div>
+            <div class="type-toggle"><button type="button" id="typeLectureBtn" class="active" onclick="setEntryType('LECTURE')">Lecture</button><button type="button" id="typeBreakBtn" onclick="setEntryType('BREAK')">Break</button></div>
+            <div class="form-row-2">
+              <div class="form-group"><label class="form-label">Day of Week *</label><select name="day" id="selDay" class="form-select" required><option value="">- Select Day -</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div>
+              <div class="form-group"><label class="form-label">Academic Year</label><input type="text" name="academicYear" id="inpAcademicYear" class="form-input" th:value="${academicYear}" placeholder="Auto from class"></div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group"><label class="form-label">Start Time *</label><input type="time" name="startTime" id="inpStart" class="form-input" required></div>
+              <div class="form-group"><label class="form-label">End Time *</label><input type="time" name="endTime" id="inpEnd" class="form-input" required></div>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label" id="subjectLabel">Subject *</label>
+                  <input type="text" name="subject" id="inpSubject" class="form-input" list="subjectSuggestions" placeholder="e.g. Java Programming" required>
+                  <datalist id="subjectSuggestions">
+                    <option th:each="subjectOption : ${subjectOptions}" th:value="${subjectOption.name}" th:text="${subjectOption.code + ' · ' + subjectOption.courseCategory}">Subject</option>
+                  </datalist>
+                  <div id="subjectCategoryHint" class="tiny-note"></div>
+                  <div id="teacherSubjectMessage" class="tiny-note"></div>
+                  <div class="tiny-note">LAB / PRACTICAL subjects are auto-marked as LAB when they match this batch's subject setup.</div>
+                </div>
+              <div class="form-group"><label class="form-label">Room / Lab</label><input type="text" name="room" id="inpRoom" class="form-input" placeholder="e.g. 101, Lab A"></div>
+            </div>
+            <div id="lectureFields">
+              <div class="form-row-2">
+                <div class="form-group"><label class="form-label">Select Class *</label><select name="classId" id="selClass" class="form-select"><option value="">- Select Class -</option><option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.name}" th:attr="data-course=${c.course},data-academic=${c.academicYear},data-semester=${c.semester},data-section=${c.section},data-room=${c.room},data-batch=${c.batchName != null ? c.batchName : c.batch},data-coursecode=${c.courseCode},data-batchname=${c.batchName != null ? c.batchName : c.batch},data-batchid=${selectedBatchId != null ? selectedBatchId : ''}"></option></select></div>
+                <div class="form-group">
+                  <label class="form-label">Select Teacher *</label>
+                  <div class="searchable-select">
+                    <input type="search" id="teacherSearch" class="form-input" placeholder="Search faculty by name or subject">
+                    <select name="teacherId" id="selTeacher" class="form-select">
+                      <option value="">- Select Teacher -</option>
+                      <option th:each="t : ${teachers}" th:value="${t.id}" th:text="${t.name + ' (' + t.subject + ')'}" th:attr="data-name=${t.name},data-subject=${t.subject},data-email=${t.email}"></option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tiny-note">Lectures block teacher, class, and room conflicts. Breaks reserve the chosen time window and are highlighted in the grid.</div>
+            <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap"><button type="submit" class="btn-gold"><i class="fa fa-save"></i> <span id="saveLabel">Save Entry</span></button><button type="button" class="btn-outline" onclick="resetForm()"><i class="fa fa-rotate-left"></i> Reset</button></div>
+          </div>
+          <div class="modal-panel">
+            <div class="section-title">Live Preview</div>
+            <div class="info-list">
+              <div class="info-item"><span class="info-key">Type</span><span class="info-val" id="pvType">Lecture</span></div>
+              <div class="info-item"><span class="info-key">Day</span><span class="info-val" id="pvDay">-</span></div>
+              <div class="info-item"><span class="info-key">Time</span><span class="info-val" id="pvTime">-</span></div>
+              <div class="info-item"><span class="info-key">Subject</span><span class="info-val" id="pvSubject">-</span></div>
+              <div class="info-item lecture-only"><span class="info-key">Class</span><span class="info-val" id="pvClass">-</span></div>
+              <div class="info-item lecture-only"><span class="info-key">Teacher</span><span class="info-val" id="pvTeacher">-</span></div>
+              <div class="info-item"><span class="info-key">Room</span><span class="info-val" id="pvRoom">-</span></div>
+              <div class="info-item"><span class="info-key">Academic Year</span><span class="info-val" id="pvAcademic">-</span></div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  const subjectOptions = /*[[${subjectOptions}]]*/ [];
+  const scopedSubjects = /*[[${timetableSubjectOptions}]]*/ [];
+  const selectedScopeClassId = /*[[${selectedClassId}]]*/ null;
+  const modal=document.getElementById('entryModal');
+  const lectureFields=document.getElementById('lectureFields');
+  const lectureOnly=document.querySelectorAll('.lecture-only');
+  let currentType='LECTURE';
+
+  function parseMinutes(time){if(!time||!time.includes(':')) return null; const [h,m]=time.split(':').map(Number); return Number.isNaN(h)||Number.isNaN(m)?null:h*60+m;}
+  function markLive(){const now=new Date(); const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']; const day=days[now.getDay()]; const min=now.getHours()*60+now.getMinutes(); document.querySelectorAll('.tt-card').forEach(card=>{const s=parseMinutes(card.dataset.start); const e=parseMinutes(card.dataset.end); const live=card.dataset.day===day&&s!==null&&e!==null&&min>=s&&min<=e; card.classList.toggle('live', live);});}
+
+  function openEntryModal(sourceCard, emptyCell){
+    const isEdit=!!sourceCard;
+    document.getElementById('modalTitle').textContent=isEdit?'Edit Timetable Entry':'Add Timetable Entry';
+    document.getElementById('modalSubtitle').textContent=isEdit?'Update the entry directly from the grid.':'Create a new entry from the grid.';
+    document.getElementById('saveLabel').textContent=isEdit?'Update Entry':'Save Entry';
+    document.getElementById('entryId').value=isEdit?(sourceCard.dataset.id||''):'';
+    const day=isEdit?(sourceCard.dataset.day||''):(emptyCell?emptyCell.dataset.day:'');
+    const start=isEdit?(sourceCard.dataset.start||''):(emptyCell?emptyCell.dataset.start:'');
+    const end=isEdit?(sourceCard.dataset.end||''):(emptyCell?emptyCell.dataset.end:'');
+    const subject=isEdit?(sourceCard.dataset.subject||''):'';
+    const room=isEdit?(sourceCard.dataset.room||''):'';
+    const academic=isEdit?(sourceCard.dataset.academic||document.getElementById('inpAcademicYear').value||''):(document.getElementById('inpAcademicYear').value||'');
+    const classId=isEdit?(sourceCard.dataset.classid||''):'';
+    const teacherId=isEdit?(sourceCard.dataset.teacherid||''):'';
+    const type=isEdit?((sourceCard.dataset.type||'LECTURE').toUpperCase()):'LECTURE';
+    document.getElementById('selDay').value=day;
+    document.getElementById('inpStart').value=start;
+    document.getElementById('inpEnd').value=end;
+    document.getElementById('inpSubject').value=subject;
+    document.getElementById('inpRoom').value=room;
+    document.getElementById('inpAcademicYear').value=academic;
+    document.getElementById('selClass').value=classId;
+    const teacherSearch=document.getElementById('teacherSearch');
+    if(teacherSearch){teacherSearch.value='';}
+    document.getElementById('selTeacher').value=teacherId;
+    setEntryType(type);
+    filterTeacherOptions();
+    updatePreview();
+    modal.classList.add('show');
+  }
+  function closeModal(){modal.classList.remove('show');}
+  function setEntryType(type){currentType=type; document.getElementById('typeLectureBtn').classList.toggle('active',type==='LECTURE'); document.getElementById('typeBreakBtn').classList.toggle('active',type==='BREAK'); lectureFields.classList.toggle('hidden',type==='BREAK'); lectureOnly.forEach(el=>el.classList.toggle('hidden',type==='BREAK')); document.getElementById('subjectLabel').textContent=type==='BREAK'?'Break Title *':'Subject *'; document.getElementById('inpSubject').placeholder=type==='BREAK'?'e.g. Lunch Break':'e.g. Java Programming'; document.getElementById('inpRoom').placeholder=type==='BREAK'?'Optional for break':'e.g. 101, Lab A'; document.getElementById('selClass').required=type!=='BREAK'; document.getElementById('selTeacher').required=type!=='BREAK'; document.getElementById('selClass').disabled=type==='BREAK'; document.getElementById('selTeacher').disabled=type==='BREAK'; const teacherSearch=document.getElementById('teacherSearch'); if(teacherSearch){teacherSearch.disabled=type==='BREAK';} updatePreview(); }
+  function updateSubjectCategoryHint(){const hint=document.getElementById('subjectCategoryHint'); const subject=(document.getElementById('inpSubject').value||'').trim().toLowerCase(); if(!hint){return;} if(!subject){hint.textContent=''; return;} const match=scopedSubjects.find(option=>{const name=((option.name||'')+'').trim().toLowerCase(); const code=((option.code||'')+'').trim().toLowerCase(); return subject===name || subject===code;}); hint.textContent=match && match.courseCategory ? `Category: ${match.courseCategory}` : ''; }
+  function filterTeacherOptions(){
+    const search=(document.getElementById('teacherSearch')?.value||'').trim().toLowerCase();
+    const subject=(document.getElementById('inpSubject')?.value||'').trim().toLowerCase();
+    const select=document.getElementById('selTeacher');
+    if(!select){return;}
+    [...select.options].forEach(option=>{
+      if(!option.value){option.hidden=false; return;}
+      const haystack=[option.textContent, option.dataset.name, option.dataset.subject, option.dataset.email].join(' ').toLowerCase();
+      const matchesSearch=!search || haystack.includes(search);
+      const teacherSubject=(option.dataset.subject||'').trim().toLowerCase();
+      const matchesSubject=!subject || !teacherSubject || subject.includes(teacherSubject) || teacherSubject.includes(subject);
+      option.hidden=!(matchesSearch && matchesSubject);
+    });
+    if(select.value && select.options[select.selectedIndex]?.hidden){select.value='';}
+  }
+  function populateSubjectSuggestions(){
+    const list=document.getElementById('subjectSuggestions');
+    const teacherMessage=document.getElementById('teacherSubjectMessage');
+    const teacherId=document.getElementById('selTeacher').value;
+    if(!list){return;}
+    const options=scopedSubjects;
+    list.innerHTML=options.map(option=>`<option value="${option.name}">${option.code || ''}${option.courseCategory ? ' · ' + option.courseCategory : ''}</option>`).join('');
+    if(teacherMessage){
+      teacherMessage.textContent=teacherId && options.length===0
+        ? 'No subjects found for the selected timetable scope.'
+        : '';
+    }
+    filterTeacherOptions();
+  }
+  function applyClassMeta(){
+    const sel=document.getElementById('selClass');
+    const opt=sel.options[sel.selectedIndex];
+    const academic=opt?.dataset.academic||'';
+    const room=opt?.dataset.room||'';
+    const semester=opt?.dataset.semester||'';
+    const batchId=opt?.dataset.batchid||'';
+    if(academic&&!document.getElementById('inpAcademicYear').value) document.getElementById('inpAcademicYear').value=academic;
+    if(!document.getElementById('inpRoom').value&&room) document.getElementById('inpRoom').value=room;
+    document.getElementById('hiddenSemester').value=semester || document.getElementById('hiddenSemester').value || '';
+  }
+  function formatAutoTime(totalMinutes){
+    const hours=String(Math.floor(totalMinutes/60)).padStart(2,'0');
+    const mins=String(totalMinutes%60).padStart(2,'0');
+    return `${hours}:${mins}`;
+  }
+  function normalizeAutoStart(startMinutes, durationMinutes){
+    let start=startMinutes;
+    const lunchStart=13*60+15;
+    const lunchEnd=14*60;
+    if(start>=lunchStart && start<lunchEnd){start=lunchEnd;}
+    if(start<lunchStart && start+durationMinutes>lunchStart){start=lunchEnd;}
+    return start;
+  }
+  function autoFillTimetableRows(){
+    if(!scopedSubjects.length){return;}
+    const bulkClass=document.getElementById('bulkClassSelect');
+    if(bulkClass && !bulkClass.value){
+      if(selectedScopeClassId){
+        bulkClass.value=String(selectedScopeClassId);
+      }
+      if(!bulkClass.value && bulkClass.options.length===2){
+        bulkClass.selectedIndex=1;
+      }
+    }
+    const academic=(document.querySelector('input[name="academicYear"]')?.value||document.getElementById('inpAcademicYear').value||'').trim();
+    const selectedClass=bulkClass ? bulkClass.options[bulkClass.selectedIndex] : null;
+    const defaultRoom=(selectedClass?.dataset.room||'Room 101').trim() || 'Room 101';
+    const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const dayState=days.map(()=>({next:9*60}));
+    const rows=[];
+    const fillableSubjects=scopedSubjects.filter(subject=>!subject.project);
+    fillableSubjects.forEach((subject,index)=>{
+      const dayIndex=index % days.length;
+      const durationMinutes=(subject.durationHours===2 ? 120 : 60);
+      const state=dayState[dayIndex];
+      const start=normalizeAutoStart(state.next,durationMinutes);
+      const end=start+durationMinutes;
+      state.next=end;
+      rows.push({
+        day:days[dayIndex],
+        start:formatAutoTime(start),
+        end:formatAutoTime(end),
+        subject:subject.name || 'Subject',
+        room:defaultRoom,
+        type:'LECTURE',
+        academic
+      });
+    });
+    days.forEach(day=>{
+      const existingOverlap=[...document.querySelectorAll('.tt-card')]
+        .some(card=>{
+          if((card.dataset.day||'')!==day){return false;}
+          const start=parseMinutes(card.dataset.start);
+          const end=parseMinutes(card.dataset.end);
+          return start!==null && end!==null && start < parseMinutes('14:00') && end > parseMinutes('13:15');
+        });
+      if(!existingOverlap){
+        rows.push({day,start:'13:15',end:'14:00',subject:'Lunch Break',room:' ',type:'BREAK',academic});
+      }
+    });
+    const dayOrder=new Map(days.map((day,index)=>[day,index]));
+    rows.sort((left,right)=>{
+      const dayDiff=(dayOrder.get(left.day)??99)-(dayOrder.get(right.day)??99);
+      if(dayDiff!==0){return dayDiff;}
+      return left.start.localeCompare(right.start);
+    });
+    document.querySelector('textarea[name="bulkRows"]').value=rows
+      .map(row=>[row.day,row.start,row.end,row.subject,'',row.room,row.type,row.academic].join(','))
+      .join('\n');
+  }
+  function updatePreview(){const day=document.getElementById('selDay').value; const start=document.getElementById('inpStart').value; const end=document.getElementById('inpEnd').value; const subject=document.getElementById('inpSubject').value.trim(); const room=document.getElementById('inpRoom').value.trim(); const classSel=document.getElementById('selClass'); const teacherSel=document.getElementById('selTeacher'); const classText=classSel.options[classSel.selectedIndex]?.text||'-'; const teacherText=teacherSel.options[teacherSel.selectedIndex]?.text||'-'; const academic=document.getElementById('inpAcademicYear').value.trim(); document.getElementById('pvDay').textContent=day||'-'; document.getElementById('pvTime').textContent=(start&&end)?start+' - '+end:'-'; document.getElementById('pvSubject').textContent=subject||'-'; document.getElementById('pvClass').textContent=classSel.disabled?'Not required':(classSel.value?classText:'-'); document.getElementById('pvTeacher').textContent=teacherSel.disabled?'Not required':(teacherSel.value?teacherText:'-'); document.getElementById('pvRoom').textContent=room||'-'; document.getElementById('pvAcademic').textContent=academic||'-'; document.getElementById('pvType').textContent=currentType==='BREAK'?'Break':'Lecture'; updateSubjectCategoryHint(); }
+  function resetForm(){document.getElementById('ttForm').reset(); document.getElementById('entryId').value=''; document.getElementById('inpAcademicYear').value=''; document.getElementById('hiddenBatchId').value=''; document.getElementById('hiddenSemester').value=''; setEntryType('LECTURE'); updatePreview();}
+  function fillWeeklyTemplate(){
+    const academic = document.getElementById('inpAcademicYear').value.trim() || document.getElementById('hiddenSemester').value || '';
+    const daySlots = [
+      ['09:00','10:00'],
+      ['10:00','11:00'],
+      ['11:00','12:00'],
+      ['12:00','13:00'],
+      ['13:00','14:00'],
+      ['14:00','15:00'],
+      ['15:00','16:00'],
+      ['16:00','17:00'],
+      ['17:00','17:30']
+    ];
+    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const rows = [
+      ...days.flatMap(day => daySlots.map(slot => [day, slot[0], slot[1], '[Subject]', '', 'Room 101', 'LECTURE', academic]))
+    ];
+    const text = rows.map(r => r.join(',')).join('\n');
+    document.querySelector('textarea[name="bulkRows"]').value = text;
+  }
+  document.getElementById('selClass').addEventListener('change', applyClassMeta);
+  document.getElementById('selTeacher').addEventListener('change', ()=>{populateSubjectSuggestions(); updatePreview();});
+  document.getElementById('teacherSearch').addEventListener('input', filterTeacherOptions);
+  document.getElementById('inpSubject').addEventListener('input', ()=>{updateSubjectCategoryHint(); filterTeacherOptions();});
+  modal.addEventListener('click', e=>{if(e.target===modal) closeModal();});
+  document.addEventListener('keydown', e=>{if(e.key==='Escape') closeModal();});
+  window.addEventListener('load', markLive);
+  populateSubjectSuggestions();
+  setEntryType('LECTURE');
+</script>
+</body>
+</html>
+

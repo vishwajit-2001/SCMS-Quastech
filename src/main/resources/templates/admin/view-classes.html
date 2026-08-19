@@ -1,0 +1,413 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>View Classes - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .search-bar { display:flex;align-items:center;gap:10px;background:var(--offwhite);border:1px solid var(--light);border-radius:50px;padding:9px 18px;width:260px;transition:all 0.2s; }
+        .search-bar:focus-within { border-color:var(--gold-br);background:var(--cream);box-shadow:0 0 0 3px rgba(201,151,42,0.08); }
+        .search-bar i { color:#a09080;font-size:13px; }
+        .search-bar input { border:none;background:transparent;outline:none;font-family:var(--sans);font-size:13.5px;color:var(--black);width:100%; }
+        .search-bar input::placeholder { color:#c0b8a8; }
+        .row-actions { display:inline-flex; gap:8px; flex-wrap:wrap; }
+        .btn-view {
+            padding: 8px 18px;
+            background: rgba(74,154,240,0.08);
+            color: var(--blue);
+            border: 1px solid rgba(74,154,240,0.25);
+            border-radius: 50px;
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-view:hover {
+            background: rgba(74,154,240,0.16);
+            border-color: rgba(74,154,240,0.45);
+        }
+        .class-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13,12,10,0.58);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            padding: 20px;
+        }
+        .class-modal.open { display: flex; }
+        .class-modal-card {
+            width: min(860px, 100%);
+            max-height: min(88vh, 920px);
+            overflow: auto;
+            background: var(--white);
+            border: 1px solid var(--gold-br);
+            border-radius: 24px;
+            box-shadow: 0 28px 70px rgba(13,12,10,0.32);
+            position: relative;
+        }
+        .class-modal-head {
+            display:flex;
+            justify-content:space-between;
+            gap:14px;
+            align-items:center;
+            padding:20px 22px;
+            background:linear-gradient(135deg, var(--black), #191512);
+            border-bottom:1px solid var(--gold-br);
+        }
+        .class-modal-head h3 { color:var(--white); font-family:var(--serif); font-size:26px; }
+        .class-modal-head p { color:rgba(255,255,255,0.55); margin-top:4px; font-size:13px; }
+        .class-modal-close {
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,0.15);
+            background:rgba(255,255,255,0.06);
+            color:var(--white);
+            cursor:pointer;
+        }
+        .class-modal-body { padding:22px; }
+        .class-modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .class-modal-field { display:flex; flex-direction:column; gap:5px; }
+        .class-modal-field.full { grid-column:1 / -1; }
+        .class-modal-label {
+            font-size:10.5px;
+            text-transform:uppercase;
+            letter-spacing:1px;
+            color:var(--gold);
+            font-weight:700;
+        }
+        .class-modal-value,
+        .class-modal-field input,
+        .class-modal-field select,
+        .class-modal-field textarea {
+            font-size:13.5px;
+            font-weight:600;
+            color:var(--black);
+            padding:10px 14px;
+            background:var(--offwhite);
+            border:1px solid var(--light);
+            border-radius:10px;
+            width:100%;
+            font-family:var(--sans);
+        }
+        .class-modal-value { min-height:44px; display:flex; align-items:center; }
+        .class-modal-field textarea { min-height:96px; resize:vertical; }
+        .class-modal-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+        @media (max-width: 760px) {
+            .class-modal-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/sidebar :: sidebar('view-classes')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">View Classes</div>
+        <div class="header-right">
+            <div class="search-bar">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search classes..." oninput="searchTable()">
+            </div>
+            <a href="/add-class" class="btn-gold"><i class="fa fa-plus"></i> Add Class</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="content" style="padding-top:28px">
+        <div class="alert alert-success" th:if="${param.success != null}" th:text="${param.success[0]}"></div>
+        <div class="alert alert-error" th:if="${param.error != null}" th:text="${param.error[0]}"></div>
+
+        <div class="box" style="animation-delay:0.05s">
+            <div class="box-title"><i class="fa fa-school" style="color:var(--gold)"></i> Class List</div>
+
+            <div style="overflow-x:auto">
+                <table id="classTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Class</th>
+                        <th>Course</th>
+                        <th>Code</th>
+                        <th>Batch</th>
+                        <th>Academic Year</th>
+                        <th>Semester</th>
+                        <th>Section</th>
+                        <th>Room</th>
+                        <th>Fees</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${classes}">
+                        <td th:text="${c.id}"></td>
+                        <td>
+                            <div style="font-family:var(--serif);font-size:16px;font-weight:700" th:text="${c.displayLabel}"></div>
+                            <div style="font-size:11px;color:#a09080" th:text="${c.name}"></div>
+                        </td>
+                        <td><span class="badge badge-gold" th:text="${c.course}"></span></td>
+                        <td th:text="${c.courseCode != null ? c.courseCode : '-'}"></td>
+                        <td th:text="${c.batchName != null ? c.batchName : (c.batch != null ? c.batch : '-')}"></td>
+                        <td th:text="${c.academicYear != null ? c.academicYear : '-'}"></td>
+                        <td th:text="${c.semester != null ? 'Sem ' + c.semester : '-'}"></td>
+                        <td th:text="${c.section ?: '-'}"></td>
+                        <td th:text="${c.room ?: '-'}"></td>
+                        <td th:text="${c.totalFees != null ? #numbers.formatDecimal(c.totalFees, 0, 'COMMA', 0, 'POINT') : '-'}"></td>
+                        <td><span class="badge badge-green" th:text="${c.status != null ? c.status : 'Active'}"></span></td>
+                        <td>
+                            <div class="row-actions">
+                                <button type="button"
+                                        class="btn-view"
+                                        onclick="openClassModal(this, 'view')"
+                                        th:attr="data-id=${c.id},data-name=${c.name},data-displaylabel=${c.displayLabel},data-course=${c.course},data-coursecode=${c.courseCode},data-batch=${c.batchName != null ? c.batchName : c.batch},data-academicyear=${c.academicYear},data-year=${c.year},data-semester=${c.semester},data-section=${c.section},data-room=${c.room},data-fees=${c.totalFees},data-status=${c.status},data-shift=${c.shift},data-intake=${c.intakeCapacity},data-remarks=${c.remarks},data-description=${c.description},data-duration=${c.duration},data-coursetype=${c.courseType},data-department=${c.department}">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
+                                <button type="button"
+                                        class="btn-view"
+                                        onclick="openClassModal(this, 'edit')"
+                                        th:attr="data-id=${c.id},data-name=${c.name},data-displaylabel=${c.displayLabel},data-course=${c.course},data-coursecode=${c.courseCode},data-batch=${c.batchName != null ? c.batchName : c.batch},data-academicyear=${c.academicYear},data-year=${c.year},data-semester=${c.semester},data-section=${c.section},data-room=${c.room},data-fees=${c.totalFees},data-status=${c.status},data-shift=${c.shift},data-intake=${c.intakeCapacity},data-remarks=${c.remarks},data-description=${c.description},data-duration=${c.duration},data-coursetype=${c.courseType},data-department=${c.department}">
+                                    <i class="fa fa-pen-to-square"></i> Edit
+                                </button>
+                                <a th:href="@{/delete-class/{id}(id=${c.id})}"
+                                   class="btn-red"
+                                   onclick="return confirm('Delete this class?')">
+                                    <i class="fa fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${classes == null or #lists.isEmpty(classes)}">
+                        <td colspan="12" style="text-align:center;padding:32px;color:#b0a898">
+                            <i class="fa fa-school" style="font-size:28px;color:var(--light);display:block;margin-bottom:10px"></i>
+                            No classes found -
+                            <a href="/add-class" style="color:var(--gold);font-weight:600">Add first class</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="class-modal" id="classViewModal" aria-hidden="true">
+    <div class="class-modal-card" role="dialog" aria-modal="true" aria-labelledby="classViewModalTitle">
+        <div class="class-modal-head">
+            <div>
+                <h3 id="classViewModalTitle">Class Details</h3>
+                <p>Review the saved class information.</p>
+            </div>
+            <button type="button" class="class-modal-close" onclick="closeClassModal('classViewModal')" aria-label="Close view modal">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="class-modal-body">
+            <div class="class-modal-grid">
+                <div class="class-modal-field"><div class="class-modal-label">Class</div><div class="class-modal-value" id="viewClassDisplayLabel">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Course</div><div class="class-modal-value" id="viewClassCourse">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Course Code</div><div class="class-modal-value" id="viewClassCourseCode">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Batch</div><div class="class-modal-value" id="viewClassBatch">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Academic Year</div><div class="class-modal-value" id="viewClassAcademicYear">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Duration</div><div class="class-modal-value" id="viewClassDuration">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Year</div><div class="class-modal-value" id="viewClassYear">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Semester</div><div class="class-modal-value" id="viewClassSemester">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Section</div><div class="class-modal-value" id="viewClassSection">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Shift</div><div class="class-modal-value" id="viewClassShift">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Room</div><div class="class-modal-value" id="viewClassRoom">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Intake Capacity</div><div class="class-modal-value" id="viewClassIntake">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Fees</div><div class="class-modal-value" id="viewClassFees">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Status</div><div class="class-modal-value" id="viewClassStatus">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Department</div><div class="class-modal-value" id="viewClassDepartment">-</div></div>
+                <div class="class-modal-field"><div class="class-modal-label">Course Type</div><div class="class-modal-value" id="viewClassCourseType">-</div></div>
+                <div class="class-modal-field full"><div class="class-modal-label">Remarks</div><div class="class-modal-value" id="viewClassRemarks">-</div></div>
+                <div class="class-modal-field full"><div class="class-modal-label">Description</div><div class="class-modal-value" id="viewClassDescription">-</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="class-modal" id="classEditModal" aria-hidden="true">
+    <div class="class-modal-card" role="dialog" aria-modal="true" aria-labelledby="classEditModalTitle">
+        <div class="class-modal-head">
+            <div>
+                <h3 id="classEditModalTitle">Edit Class</h3>
+                <p>Update the selected class without changing its course or batch.</p>
+            </div>
+            <button type="button" class="class-modal-close" onclick="closeClassModal('classEditModal')" aria-label="Close edit modal">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="class-modal-body">
+            <form id="classEditForm" method="post">
+                <div class="class-modal-grid">
+                    <div class="class-modal-field full">
+                        <label class="class-modal-label" for="editClassName">Class Name</label>
+                        <input id="editClassName" name="name" type="text" required>
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassYear">Year</label>
+                        <select id="editClassYear" name="year" required>
+                            <option value="">Select year</option>
+                            <option value="FY">FY</option>
+                            <option value="SY">SY</option>
+                            <option value="TY">TY</option>
+                            <option value="Final">Final</option>
+                        </select>
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassSemester">Semester</label>
+                        <select id="editClassSemester" name="semester" required>
+                            <option value="">Select semester</option>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassSection">Section</label>
+                        <input id="editClassSection" name="section" type="text" required>
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassRoom">Room</label>
+                        <input id="editClassRoom" name="room" type="text">
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassShift">Shift</label>
+                        <select id="editClassShift" name="shift">
+                            <option value="">Select shift</option>
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening</option>
+                        </select>
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassStatus">Status</label>
+                        <select id="editClassStatus" name="status">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="class-modal-field">
+                        <label class="class-modal-label" for="editClassIntake">Intake Capacity</label>
+                        <input id="editClassIntake" name="intakeCapacity" type="number" min="0">
+                    </div>
+                    <div class="class-modal-field full">
+                        <label class="class-modal-label" for="editClassRemarks">Remarks</label>
+                        <input id="editClassRemarks" name="remarks" type="text">
+                    </div>
+                    <div class="class-modal-field full">
+                        <label class="class-modal-label" for="editClassDescription">Description</label>
+                        <textarea id="editClassDescription" name="description"></textarea>
+                    </div>
+                </div>
+                <div class="class-modal-actions">
+                    <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn-outline" onclick="closeClassModal('classEditModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function safeText(value, fallback = '-') {
+        return value && String(value).trim() ? String(value).trim() : fallback;
+    }
+
+    function formatSemesterValue(value) {
+        return value && String(value).trim() ? `Sem ${String(value).trim()}` : '-';
+    }
+
+    function formatFeeValue(value) {
+        if (value === undefined || value === null || value === '') return '-';
+        const number = Number(value);
+        return Number.isFinite(number) ? number.toLocaleString('en-IN') : String(value);
+    }
+
+    function searchTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#classTable tbody tr').forEach((row) => {
+            row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    function closeClassModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function openClassModal(button, mode) {
+        const data = button.dataset;
+        if (mode === 'edit') {
+            document.getElementById('classEditForm').action = `/edit-class/${data.id}`;
+            document.getElementById('editClassName').value = safeText(data.name, '');
+            document.getElementById('editClassYear').value = safeText(data.year, '');
+            document.getElementById('editClassSemester').value = safeText(data.semester, '');
+            document.getElementById('editClassSection').value = safeText(data.section, '');
+            document.getElementById('editClassRoom').value = safeText(data.room, '');
+            document.getElementById('editClassShift').value = safeText(data.shift, '');
+            document.getElementById('editClassStatus').value = safeText(data.status, 'Active');
+            document.getElementById('editClassIntake').value = safeText(data.intake, '');
+            document.getElementById('editClassRemarks').value = safeText(data.remarks, '');
+            document.getElementById('editClassDescription').value = safeText(data.description, '');
+            document.getElementById('classEditModal').classList.add('open');
+            document.getElementById('classEditModal').setAttribute('aria-hidden', 'false');
+            return;
+        }
+
+        document.getElementById('viewClassDisplayLabel').textContent = safeText(data.displaylabel);
+        document.getElementById('viewClassCourse').textContent = safeText(data.course);
+        document.getElementById('viewClassCourseCode').textContent = safeText(data.coursecode);
+        document.getElementById('viewClassBatch').textContent = safeText(data.batch);
+        document.getElementById('viewClassAcademicYear').textContent = safeText(data.academicyear);
+        document.getElementById('viewClassDuration').textContent = safeText(data.duration);
+        document.getElementById('viewClassYear').textContent = safeText(data.year);
+        document.getElementById('viewClassSemester').textContent = formatSemesterValue(data.semester);
+        document.getElementById('viewClassSection').textContent = safeText(data.section);
+        document.getElementById('viewClassShift').textContent = safeText(data.shift);
+        document.getElementById('viewClassRoom').textContent = safeText(data.room);
+        document.getElementById('viewClassIntake').textContent = safeText(data.intake);
+        document.getElementById('viewClassFees').textContent = formatFeeValue(data.fees);
+        document.getElementById('viewClassStatus').textContent = safeText(data.status, 'Active');
+        document.getElementById('viewClassDepartment').textContent = safeText(data.department);
+        document.getElementById('viewClassCourseType').textContent = safeText(data.coursetype);
+        document.getElementById('viewClassRemarks').textContent = safeText(data.remarks);
+        document.getElementById('viewClassDescription').textContent = safeText(data.description);
+        document.getElementById('classViewModal').classList.add('open');
+        document.getElementById('classViewModal').setAttribute('aria-hidden', 'false');
+    }
+
+    document.addEventListener('click', (event) => {
+        const modal = event.target.closest('.class-modal');
+        if (modal && event.target === modal) {
+            closeClassModal(modal.id);
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeClassModal('classViewModal');
+            closeClassModal('classEditModal');
+        }
+    });
+</script>
+</body>
+</html>

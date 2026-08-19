@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Admins - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Tenant administration</div>
+                <div class="sa-title">College Admins</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-arrow-left"></i> Dashboard</a>
+                <a class="sa-btn primary" href="/super-admin/communications"><i class="fa fa-comments"></i> Communicate</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Create college admin</h2>
+                        <p>Admin accounts are created only from the super-admin console.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div th:if="${superAdminError}" class="sa-notice warning" style="margin-bottom:14px" th:text="${superAdminError}"></div>
+                    <div th:if="${superAdminSuccess}" class="sa-notice success" style="margin-bottom:14px" th:text="${superAdminSuccess}"></div>
+                    <form action="/super-admin/admins/create" method="post" class="sa-form-grid">
+                        <div class="field">
+                            <label>Admin Name</label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="field">
+                            <label>Admin Email</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="field">
+                            <label>Password</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <div class="field full">
+                            <label>College</label>
+                            <select name="collegeId" required>
+                                <option value="">Select college</option>
+                                <option th:each="college : ${colleges}" th:value="${college.id}" th:text="${college.name + ' (' + college.code + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Phone</label>
+                            <input type="text" name="phone">
+                        </div>
+                        <div class="field full">
+                            <button class="sa-btn primary" type="submit"><i class="fa fa-user-plus"></i> Create College Admin</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>College admin registry</h2>
+                        <p>Search and manage only the admin accounts linked to colleges.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <form class="sa-toolbar" method="get" action="/super-admin/admins">
+                        <div class="sa-toolbar-left">
+                            <div class="sa-search">
+                                <i class="fa fa-search"></i>
+                                <input type="text" name="q" placeholder="Search admin, college, code..." th:value="${query}">
+                            </div>
+                            <div class="field" style="min-width:180px">
+                                <select name="status">
+                                    <option value="All">All Statuses</option>
+                                    <option th:each="opt : ${statusOptions}" th:value="${opt}" th:text="${opt}" th:selected="${statusFilter == opt}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="sa-toolbar-right">
+                            <button class="sa-btn primary" type="submit"><i class="fa fa-filter"></i> Apply</button>
+                            <a class="sa-btn soft" href="/super-admin/admins"><i class="fa fa-rotate-right"></i> Reset</a>
+                        </div>
+                    </form>
+
+                    <div class="sa-table-wrap" style="margin-top:18px">
+                        <table class="sa-table">
+                            <thead>
+                            <tr>
+                                <th>Admin</th>
+                                <th>College</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(admins)}">
+                                <td colspan="4" class="sa-empty">No college admins found.</td>
+                            </tr>
+                            <tr th:each="admin : ${admins}">
+                                <td>
+                                    <div style="font-weight:800" th:text="${admin.adminName}">Admin</div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:4px" th:text="${admin.email}">admin@example.com</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight:800" th:text="${admin.collegeName}">College</div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:4px">
+                                        Code: <span th:text="${admin.collegeCode}">C-001</span>
+                                    </div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:4px" th:text="${admin.collegeAddress}"></div>
+                                </td>
+                                <td><span class="sa-badge" th:classappend="' ' + ${admin.statusTone}" th:text="${admin.status}">ACTIVE</span></td>
+                                <td>
+                                    <div class="sa-quick-actions">
+                                        <a class="sa-action view" th:href="@{'/super-admin/colleges/' + ${admin.collegeId}}"><i class="fa fa-eye"></i> View</a>
+                                        <form th:action="@{'/super-admin/admins/' + ${admin.adminId} + '/status'}" method="post" style="display:inline">
+                                            <input type="hidden" name="status" th:value="${admin.status == 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}">
+                                            <button class="sa-action manage" type="submit"><i class="fa fa-toggle-on"></i> Toggle</button>
+                                        </form>
+                                        <a class="sa-action edit" th:href="@{'/super-admin/colleges/' + ${admin.collegeId} + '/edit'}"><i class="fa fa-pen"></i> Edit</a>
+                                        <form th:action="@{'/super-admin/admins/' + ${admin.adminId} + '/delete'}" method="post" style="display:inline" onsubmit="return confirm('Delete this college admin?');">
+                                            <button class="sa-action delete" type="submit"><i class="fa fa-trash"></i> Delete</button>
+                                        </form>
+                                        <form th:action="@{'/super-admin/admins/' + ${admin.adminId} + '/message'}" method="post" style="display:inline">
+                                            <input type="hidden" name="recipientEmail" th:value="${admin.email}">
+                                            <input type="hidden" name="title" value="Super Admin Message">
+                                            <input type="hidden" name="message" value="Please review your college setup and respond to the super admin.">
+                                            <button class="sa-action" type="submit"><i class="fa fa-comments"></i> Message</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sa-pagination" th:if="${pageSlice.totalPages > 1}">
+                        <div style="color:var(--sa-muted);font-size:13px">
+                            Showing <strong th:text="${pageSlice.items.size()}">0</strong> of <strong th:text="${pageSlice.totalItems}">0</strong> admins
+                        </div>
+                        <div class="sa-pages">
+                            <a class="sa-page" th:if="${pageSlice.hasPrev}" th:href="@{/super-admin/admins(page=${pageSlice.currentPage - 1}, size=${pageSlice.size}, q=${query}, status=${statusFilter})}">Prev</a>
+                            <a class="sa-page" th:each="pageNo : ${pageSlice.pageNumbers}" th:href="@{/super-admin/admins(page=${pageNo}, size=${pageSlice.size}, q=${query}, status=${statusFilter})}" th:classappend="${pageNo == pageSlice.currentPage} ? ' active' : ''" th:text="${pageNo}">1</a>
+                            <a class="sa-page" th:if="${pageSlice.hasNext}" th:href="@{/super-admin/admins(page=${pageSlice.currentPage + 1}, size=${pageSlice.size}, q=${query}, status=${statusFilter})}">Next</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

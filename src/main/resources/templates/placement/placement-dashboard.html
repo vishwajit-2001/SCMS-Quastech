@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Dashboard - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .workspace-grid{display:grid;gap:18px}
+        .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+        .stat-card{border-radius:24px;background:linear-gradient(180deg,#fff,rgba(249,243,231,.95));border:1px solid rgba(200,146,42,.16);padding:18px;box-shadow:0 14px 36px rgba(24,22,15,.05)}
+        .stat-card.dark{background:linear-gradient(180deg,#18160f,#232019);color:#fff}
+        .stat-card label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a8070;font-weight:700}
+        .stat-card.dark label{color:rgba(255,255,255,.55)}
+        .stat-card strong{display:block;margin-top:8px;font-size:30px}
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .portal-section-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .portal-section-nav a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:18px;text-decoration:none;color:#18160f;background:linear-gradient(135deg,#f6f0e4,#fff);border:1px solid rgba(200,146,42,.14);font-weight:700}
+        .app{border:1px solid rgba(24,22,15,.08);border-radius:18px;background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:14px}
+        .app-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+        .meta{margin-top:6px;color:#6b6457;font-size:13px;line-height:1.5}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:24px;color:#6b6457;text-align:center;background:rgba(255,255,255,.78)}
+        @media (max-width:1100px){.stat-grid{grid-template-columns:1fr 1fr}}
+        @media (max-width:768px){.stat-grid,.portal-section-nav{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='dashboard')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Dashboard', subtitle='Overview of placement statistics, drives posted, applications received, and students placed in one place.')}"></div>
+        <main class="portal-page-body">
+            <section class="portal-college-banner">
+                <div class="portal-college-avatar">
+                    <span th:text="${placementTpoInitials}">TP</span>
+                </div>
+                <div class="portal-college-banner-copy">
+                    <p class="portal-college-greeting" th:text="${dashboardGreeting}">Good Afternoon</p>
+                    <h2 class="portal-college-name" th:text="${collegeName}">College Name</h2>
+                    <p class="portal-college-year" th:text="${dashboardAcademicYear}">2025-2026</p>
+                </div>
+                <div class="portal-college-mark">
+                    <span th:text="${collegeInitials}">AI</span>
+                </div>
+            </section>
+
+            <section class="workspace-grid">
+                <section class="stat-grid">
+                    <article class="stat-card"><label>Drives posted</label><strong th:text="${placementDriveCount}">0</strong></article>
+                    <article class="stat-card dark"><label>Applications received</label><strong th:text="${placementApplicationCount}">0</strong></article>
+                    <article class="stat-card"><label>Students</label><strong th:text="${placementStudentCount}">0</strong></article>
+                    <article class="stat-card"><label>Companies</label><strong th:text="${placementCompanyCount}">0</strong></article>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-head">
+                        <div><h2>Placement Portal Sections</h2><p>Open each module as its own page.</p></div>
+                        <span class="portal-badge portal-badge--neutral">Workspace</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="portal-section-nav">
+                            <a th:href="@{/placement-company-drives}"><span><i class="fa-solid fa-building"></i> Company Drives</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-applications}"><span><i class="fa-solid fa-file-signature"></i> Applications</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-students}"><span><i class="fa-solid fa-user-graduate"></i> Students</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-companies}"><span><i class="fa-solid fa-industry"></i> Companies</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-interviews}"><span><i class="fa-solid fa-comments"></i> Interviews</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-analytics}"><span><i class="fa-solid fa-chart-line"></i> Analytics</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-reports}"><span><i class="fa-solid fa-file-export"></i> Reports</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-announcements}"><span><i class="fa-solid fa-bullhorn"></i> Announcements</span><i class="fa-solid fa-arrow-right"></i></a>
+                            <a th:href="@{/placement-profile}"><span><i class="fa-solid fa-user"></i> Profile</span><i class="fa-solid fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-head">
+                        <div><h2>Recent Applications</h2><p>Latest student responses submitted to the TPO.</p></div>
+                        <span class="portal-badge portal-badge--info" th:text="${recentPlacementApplicationsCount} + ' recent'">0 recent</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="app" th:each="placementApplication : ${recentPlacementApplications}">
+                            <div class="app-top">
+                                <div>
+                                    <h3 th:text="${placementApplication.fullName}">Student</h3>
+                                    <div class="meta" th:text="${placementApplication.placementDrive != null ? placementApplication.placementDrive.companyName : 'Company'}">Company</div>
+                                </div>
+                                <span class="portal-badge portal-badge--info" th:text="${placementApplication.status}">Submitted</span>
+                            </div>
+                            <div class="pill-row">
+                                <span class="pill" th:text="${placementApplication.course}">Course</span>
+                                <span class="pill" th:text="${placementApplication.semester}">Semester</span>
+                                <span class="pill" th:text="${placementApplication.specialization != null ? placementApplication.specialization : 'Specialization n/a'}">Specialization</span>
+                                <span class="pill" th:text="${placementApplication.currentLocation != null ? placementApplication.currentLocation : 'Location n/a'}">Location</span>
+                            </div>
+                        </div>
+                        <div class="empty" th:if="${#lists.isEmpty(recentPlacementApplications)}">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <h3 style="margin:10px 0 6px;">No applications yet</h3>
+                            <p>Once students apply, the latest submissions will appear here.</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

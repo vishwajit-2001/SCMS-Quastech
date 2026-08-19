@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='profile')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Profile', subtitle='View the active placement TPO record and portal identity details.')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-surface portal-surface--profile-hero">
+                <div class="portal-avatar-card">
+                    <div class="portal-avatar">
+                        <span th:text="${placementTpoInitials} ?: 'TP'">TP</span>
+                    </div>
+                    <div class="portal-avatar-copy" style="flex:1">
+                        <h2 th:text="${placementTpoName} ?: 'Placement TPO'">Placement TPO</h2>
+                        <p>
+                            <span th:text="${placementTpoDesignation} ?: 'TPO'">TPO</span>
+                            <span> | </span>
+                            <span th:text="${placementTpoDepartment} ?: 'Placement'">Placement</span>
+                            <span> | </span>
+                            <span th:text="${placementTpoCollege} ?: 'College'">College</span>
+                        </p>
+                        <div class="portal-chip-row">
+                            <span class="portal-chip"><i class="fa-solid fa-envelope"></i><strong th:text="${placementTpoEmail} ?: 'Not available'">Email</strong></span>
+                            <span class="portal-chip"><i class="fa-solid fa-id-badge"></i><span th:text="${placementTpoEmployeeId} ?: 'Not assigned'">TPO001</span></span>
+                            <span class="portal-chip"><i class="fa-solid fa-phone"></i><span th:text="${placementTpoPhone} ?: 'Not provided'">Phone</span></span>
+                            <span class="portal-chip"><i class="fa-solid fa-circle-check"></i><span th:text="${placementTpoStatus} ?: 'Active'">Active</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portal-actions-row" style="margin-top:18px">
+                    <a class="portal-muted-link" th:href="@{/placement-company-drives}"><i class="fa-solid fa-building"></i> Company drives</a>
+                    <a class="portal-muted-link" th:href="@{/placement-announcements}"><i class="fa-solid fa-bullhorn"></i> Announcements</a>
+                </div>
+            </section>
+
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Name</p>
+                    <h2 class="portal-summary-value" th:text="${placementTpoName} ?: 'Placement TPO'">Placement TPO</h2>
+                    <div class="portal-summary-meta">Portal account owner</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">College</p>
+                    <h2 class="portal-summary-value" th:text="${placementTpoCollege} ?: 'College'">College</h2>
+                    <div class="portal-summary-meta">Assigned institution</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Drives Posted</p>
+                    <h2 class="portal-summary-value" th:text="${placementDriveCount}">0</h2>
+                    <div class="portal-summary-meta">Published placement drives</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Applications</p>
+                    <h2 class="portal-summary-value" th:text="${placementApplicationCount}">0</h2>
+                    <div class="portal-summary-meta">Received from students</div>
+                </article>
+            </section>
+
+            <section class="portal-section-grid">
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Basic Information</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Employee ID</p>
+                            <p class="portal-meta-value" th:text="${placementTpoEmployeeId} ?: 'Not assigned'">TPO001</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Email</p>
+                            <p class="portal-meta-value" th:text="${placementTpoEmail} ?: 'Not available'">Email</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Phone</p>
+                            <p class="portal-meta-value" th:text="${placementTpoPhone} ?: 'Not provided'">Phone</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Designation</p>
+                            <p class="portal-meta-value" th:text="${placementTpoDesignation} ?: 'TPO'">Designation</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Department</p>
+                            <p class="portal-meta-value" th:text="${placementTpoDepartment} ?: 'Placement'">Department</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">College Name</p>
+                            <p class="portal-meta-value" th:text="${placementTpoCollege} ?: 'College'">College</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Status</p>
+                            <p class="portal-meta-value" th:text="${placementTpoStatus} ?: 'Active'">Status</p>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="portal-surface">
+                    <div class="portal-surface-head">
+                        <h2 class="portal-surface-title">Portal Snapshot</h2>
+                    </div>
+                    <div class="portal-meta-grid">
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Students</p>
+                            <p class="portal-meta-value" th:text="${placementStudentCount}">0</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Companies</p>
+                            <p class="portal-meta-value" th:text="${placementCompanyCount}">0</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Published Drives</p>
+                            <p class="portal-meta-value" th:text="${placementPublishedCount}">0</p>
+                        </div>
+                        <div class="portal-meta-item">
+                            <p class="portal-meta-label">Open Drives</p>
+                            <p class="portal-meta-value" th:text="${placementDriveOpenCount}">0</p>
+                        </div>
+                    </div>
+
+                    <div class="portal-note">
+                        This profile page is view-only and keeps only the basic TPO record visible, similar to the student profile layout.
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

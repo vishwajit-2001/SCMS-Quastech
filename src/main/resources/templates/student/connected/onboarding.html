@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Student Onboarding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --navy:#22415e;
+            --navy2:#173149;
+            --blue:#3b8fc5;
+            --green:#6b8d25;
+            --card:#ffffff;
+            --line:#cfd8e3;
+            --line-strong:#b9c8d8;
+            --muted:#66758f;
+            --ink:#182338;
+            --bg:#eef1f5;
+            --panel:#f8fafc;
+            --header:#dbeaf7;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0;min-height:100%}
+        body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+        .page{width:min(1320px,calc(100% - 16px));margin:0 auto;padding:0 0 18px}
+        .topbar{min-height:50px;background:linear-gradient(180deg,var(--navy),var(--navy2));color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 14px;border-radius:0 0 6px 6px;box-shadow:0 6px 18px rgba(15,25,40,.08)}
+        .topbar-brand{display:flex;align-items:center;gap:14px;min-width:0}
+        .topbar-logo{width:40px;height:40px;border-radius:3px;overflow:hidden;background:#fff;flex:0 0 auto;display:grid;place-items:center}
+        .topbar-logo img{width:100%;height:100%;object-fit:cover;display:block}
+        .topbar-title{font-size:13px;font-weight:800;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .topbar-sub{font-size:11px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .topbar-user{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;white-space:nowrap}
+        .topbar-user a{color:#fff;text-decoration:none;background:rgba(255,255,255,.08);padding:7px 10px;border-radius:999px}
+        .stepper{margin-top:2px;display:flex;align-items:stretch;background:linear-gradient(90deg,#60b5ea,#4ba0d0 55%,#4e9430);border-radius:3px;padding:8px 6px 6px;gap:0;position:relative;z-index:3;overflow:hidden;border:1px solid #7ea8c7}
+        .stepper button{border:0;background:transparent;color:#fff;cursor:pointer;padding:2px 6px 0;display:flex;flex:1 1 0;width:100%;min-height:46px;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;position:relative;z-index:2;pointer-events:auto;-webkit-tap-highlight-color:transparent;user-select:none;font:inherit}
+        .stepper button span{width:18px;height:18px;border-radius:50%;background:#edf45a;color:#25415c;font-size:10px;font-weight:800;display:grid;place-items:center;border:1px solid rgba(255,255,255,.65)}
+        .stepper button strong{font-size:9px;font-weight:700;opacity:.96;line-height:1.05;text-align:center}
+        .stepper button.is-active{box-shadow:inset 0 -2px 0 rgba(255,255,255,.88);background:rgba(255,255,255,.05)}
+        .main{margin-top:10px;background:var(--panel);border-radius:4px;padding:10px;border:1px solid var(--line);box-shadow:none}
+        .alert{margin:0 0 10px;padding:8px 10px;border-radius:3px;font-size:12px;line-height:1.35;border:1px solid}
+        .alert-success{background:#edf8ee;color:#276831;border-color:#c2dfc8}
+        .alert-error{background:#fdeeee;color:#a62b2b;border-color:#efc0c0}
+        .panel{display:none;background:#fff;border:1px solid var(--line);border-radius:3px;padding:12px 12px 14px}
+        .panel.is-active{display:block}
+        .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 8px;margin-bottom:10px;border:1px solid var(--line-strong);background:var(--header);border-radius:2px}
+        .panel-title{margin:0;font-size:13px;font-weight:800;color:#24384d}
+        .panel-kicker{margin:0 0 2px;font-size:10px;color:#36668f;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+        .panel-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 8px;border-radius:2px;background:#f7fbff;color:#335d83;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid var(--line-strong)}
+        .notice-line{color:#ba1f1f;font-size:12px;font-weight:600;margin:0 0 10px}
+        .section{margin-top:8px}
+        .section h3{margin:0 0 8px;font-size:12px;font-weight:800;color:#24384d;background:var(--header);padding:5px 10px;border:1px solid var(--line-strong);border-radius:2px}
+        .grid-4,.grid-2{display:grid;gap:8px 10px}
+        .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+        .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .field{min-width:0}
+        .field label{display:block;margin:0 0 4px;font-size:10px;font-weight:700;color:#3d4f6a}
+        .field input,.field select,.field textarea{width:100%;border:1px solid #bcc8d6;background:#fff;border-radius:2px;padding:5px 7px;font:inherit;font-size:11px;color:#4a5871;outline:none;min-height:26px}
+        .field textarea{min-height:60px;resize:vertical}
+        .field input:focus,.field select:focus,.field textarea:focus{border-color:#6e9cc5;background:#fff;box-shadow:none}
+        .field.is-invalid > label{color:#b42318}
+        .field.is-invalid input,.field.is-invalid select,.field.is-invalid textarea,
+        input.is-invalid,select.is-invalid,textarea.is-invalid{
+            border-color:#d92d20 !important;
+            background:#fff7f7 !important;
+            box-shadow:0 0 0 1px rgba(217,45,32,.12);
+        }
+        .validation-banner{
+            margin:0 0 10px;
+            padding:8px 10px;
+            border:1px solid #efc0c0;
+            background:#fdeeee;
+            color:#a62b2b;
+            border-radius:3px;
+            font-size:12px;
+            line-height:1.35;
+        }
+        .full{grid-column:1/-1}
+        .inline-check{width:auto !important;margin-right:8px;vertical-align:middle}
+        .actions{display:flex;justify-content:flex-end;gap:8px;align-items:center;margin-top:10px}
+        .btn{border:1px solid #aebbc9;border-radius:2px;padding:6px 12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-size:11px;min-height:28px}
+        .btn-next,.btn-submit{background:#93c01f;color:#fff;border-color:#7ea317}
+        .btn-prev{background:#eef2f6;color:#334155}
+        .btn-add{background:#1ea7b6;color:#fff;border-color:#178c99}
+        .module-shell{border:1px solid var(--line-strong);border-radius:3px;background:#f7f9fc;box-shadow:none;overflow:hidden}
+        .module-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line-strong);background:#e8f1f9}
+        .module-head h3{margin:0;font-size:13px;font-weight:800;color:#24384d}
+        .module-head p{margin:2px 0 0;font-size:10px;color:var(--muted)}
+        .module-body{padding:10px}
+        .address-layout{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .address-card{border:1px solid var(--line-strong);border-radius:3px;background:#f9fbfd;padding:10px}
+        .address-card .section{margin-top:0}
+        .address-card .section h3{background:var(--header);border-radius:2px}
+        .education-workbench{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:10px}
+        .education-entry,.education-history,.qualification-form,.qualification-board,.documents-form,.documents-list,.payment-panel,.confirm-panel{border:1px solid var(--line-strong);border-radius:3px;background:#f9fbfd}
+        .education-entry,.education-history,.qualification-form,.qualification-board,.documents-form,.documents-list,.payment-panel,.confirm-panel{padding:10px}
+        .education-table,.document-table,.payment-summary-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+        .education-table th,.education-table td,.document-table th,.document-table td,.payment-summary-table th,.payment-summary-table td{border:1px solid #cfd8e3;padding:7px 8px;text-align:left}
+        .education-table th,.document-table th,.payment-summary-table th{color:#27435f;font-size:10px;text-transform:uppercase;letter-spacing:.05em;background:#dbeaf7}
+        .education-table tr:last-child td,.document-table tr:last-child td,.payment-summary-table tr:last-child td{border-bottom:0}
+        .upload-stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        .upload-card{border:1px solid var(--line-strong);border-radius:3px;padding:10px;min-height:240px;display:flex;flex-direction:column;justify-content:flex-start;background:#f9fbfd}
+        .upload-drop{border:1px solid #cfd8e3;border-radius:2px;padding:10px;background:#fff}
+        .upload-preview{min-height:120px;display:flex;align-items:center;justify-content:center;margin-top:10px;background:#fff;border-radius:2px;border:1px solid #d6dfe8}
+        .upload-placeholder{color:#8b97ab;font-size:12px;padding:8px 10px;border:1px dashed #d9e4f1;border-radius:999px;background:#f7faff}
+        .upload-button{display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:2px;background:#2f79c5;color:#fff;font-weight:700;cursor:pointer;margin-bottom:8px;font-size:11px;border:1px solid #245f9d}
+        .upload-note{margin-top:6px;color:#8a1e1e;font-size:10px;line-height:1.35}
+        .cs-note{color:#8a1e1e;font-size:12px;line-height:1.3;margin:2px 0 10px}
+        .cs-shell{padding:0;background:#fff}
+        .cs-summary{
+            margin:6px 0 14px;
+            border:1px solid #d6e2ee;
+            background:#fcfeff;
+        }
+        .cs-summary-head{
+            padding:8px 10px;
+            border-bottom:1px solid #d6e2ee;
+            background:#f2f8fd;
+            color:#23384e;
+            font-size:12px;
+            font-weight:800;
+        }
+        .cs-summary-grid{
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:8px;
+            padding:10px;
+        }
+        .cs-summary-item{
+            min-height:60px;
+            padding:8px 10px;
+            border:1px solid #d8e2ec;
+            background:#fff;
+        }
+        .cs-summary-item span{
+            display:block;
+            margin-bottom:4px;
+            color:#7a8796;
+            font-size:10px;
+            text-transform:uppercase;
+            letter-spacing:.06em;
+        }
+        .cs-summary-item b{
+            display:block;
+            color:#182338;
+            font-size:13px;
+            line-height:1.25;
+            font-weight:800;
+        }
+        .cs-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            gap:12px;
+            margin:0 0 12px;
+        }
+        .cs-card{
+            position:relative;
+            display:block;
+            border:1px solid #cfd8e3;
+            border-radius:4px;
+            background:#fff;
+            padding:12px 13px 13px;
+            cursor:pointer;
+            transition:border-color .15s ease, background .15s ease, box-shadow .15s ease, transform .15s ease;
+        }
+        .cs-card:hover{
+            border-color:#8fb5d6;
+            box-shadow:0 2px 10px rgba(41,71,107,.06);
+            transform:translateY(-1px);
+            background:#fbfdff;
+        }
+        .cs-card.is-selected{
+            border-color:#2fa86e;
+            background:#eefaf3;
+            box-shadow:inset 0 0 0 1px rgba(47,168,110,.22), 0 2px 10px rgba(47,168,110,.08);
+        }
+        .cs-card input{
+            position:absolute;
+            opacity:0;
+            pointer-events:none;
+        }
+        .cs-card-top{
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            align-items:flex-start;
+        }
+        .cs-card h4{
+            margin:0;
+            font-size:13px;
+            line-height:1.35;
+            font-weight:800;
+            color:#21344a;
+            text-transform:uppercase;
+        }
+        .cs-card .code{
+            margin-top:4px;
+            font-size:11px;
+            color:#5e7188;
+            letter-spacing:.02em;
+        }
+        .cs-card .status{
+            flex:0 0 auto;
+            padding:4px 8px;
+            border-radius:999px;
+            background:#edf8f2;
+            border:1px solid #c7ead6;
+            color:#2d7d56;
+            font-size:10px;
+            font-weight:800;
+            text-transform:uppercase;
+        }
+        .cs-card .chips{
+            display:flex;
+            flex-wrap:wrap;
+            gap:6px;
+            margin-top:10px;
+        }
+        .cs-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:4px;
+            padding:5px 8px;
+            border-radius:999px;
+            background:#eef5ff;
+            color:#345d8b;
+            font-size:10px;
+            font-weight:700;
+            border:1px solid #d7e3f0;
+        }
+        .cs-empty{
+            margin-top:4px;
+            padding:14px 12px;
+            border:1px dashed #d6e2ee;
+            background:#fafcff;
+            color:#8a1e1e;
+            font-size:12px;
+        }
+        .split-screen{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:10px}
+        .center-panel{max-width:640px;margin:0 auto;text-align:center;padding:12px 12px 14px}
+        .center-panel .pay-amount{font-size:30px;font-weight:900;color:#2f7a35;margin:6px 0 12px}
+        .confirm-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:10px}
+        .confirm-hero{padding:12px;background:#f8fbff;border:1px solid var(--line-strong);border-radius:3px}
+        .confirm-steps{display:grid;gap:8px;margin-top:10px}
+        .confirm-step{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 10px;border-radius:2px;background:#fff;border:1px solid #d8e2ec;font-size:11px}
+        @media (max-width:1100px){
+            .grid-4,.upload-stage,.summary-grid,.address-layout,.education-workbench,.split-screen,.confirm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .cs-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .stepper{flex-wrap:wrap}
+            .stepper button{flex:1 1 50%}
+            .topbar{gap:8px;align-items:flex-start;flex-direction:column;padding:12px 14px}
+        }
+        @media (max-width:760px){
+            .grid-4,.grid-2,.upload-stage,.summary-grid,.address-layout,.education-workbench,.split-screen,.confirm-grid{grid-template-columns:1fr}
+            .cs-summary-grid,.cs-grid{grid-template-columns:1fr}
+            .stepper{flex-direction:column}
+            .stepper button{flex:1 1 auto}
+            .actions{flex-direction:column;align-items:stretch}
+            .btn{width:100%}
+        }
+    </style>
+</head>
+<body>
+<div class="page" th:with="
+        pageTitle=${collegeName != null ? 'Complete Your Admission - ' + collegeName : 'Student Onboarding'},
+        displayCollegeName=${collegeName != null ? collegeName : 'Admissions Portal'},
+        displayCollegeAddress=${collegeAddress != null and !#strings.isEmpty(collegeAddress) ? collegeAddress : 'Student admission and onboarding'},
+        displayHello=${studentName != null ? 'Hello, ' + studentName : 'Hello, Student'}">
+    <header class="topbar">
+        <div class="topbar-brand">
+            <div class="topbar-logo">
+                <img th:if="${collegeLogoPath != null and collegeLogoPath != ''}" th:src="${collegeLogoPath}" alt="College logo" onerror="this.remove(); this.parentElement.textContent='SC';">
+            </div>
+            <div>
+                <div class="topbar-title" th:text="${displayCollegeName}">Admissions Portal</div>
+                <div class="topbar-sub" th:text="${displayCollegeAddress}">Student admission and onboarding</div>
+            </div>
+        </div>
+        <div class="topbar-user">
+            <span th:text="${displayHello}">Hello, Student</span>
+            <a th:href="@{/login-student}">Logout</a>
+        </div>
+    </header>
+
+    <nav class="stepper" aria-label="Admission steps" role="tablist">
+        <button type="button" data-step-nav="personal" role="tab" aria-controls="panel-personal" aria-selected="true"><span>1</span><strong>Personal</strong></button>
+        <button type="button" data-step-nav="address" role="tab" aria-controls="panel-address" aria-selected="false"><span>2</span><strong>Address</strong></button>
+        <button type="button" data-step-nav="education" role="tab" aria-controls="panel-education" aria-selected="false"><span>3</span><strong>Education</strong></button>
+        <button type="button" data-step-nav="documents" role="tab" aria-controls="panel-documents" aria-selected="false"><span>4</span><strong>Photo Signature</strong></button>
+        <button type="button" data-step-nav="course" role="tab" aria-controls="panel-course" aria-selected="false"><span>5</span><strong>Course Selection</strong></button>
+        <button type="button" data-step-nav="last-qualifying" role="tab" aria-controls="panel-last-qualifying" aria-selected="false"><span>6</span><strong>Last Qualifying</strong></button>
+        <button type="button" data-step-nav="doc-upload" role="tab" aria-controls="panel-doc-upload" aria-selected="false"><span>7</span><strong>Documents</strong></button>
+        <button type="button" data-step-nav="payment" role="tab" aria-controls="panel-payment" aria-selected="false"><span>8</span><strong>Payment</strong></button>
+        <button type="button" data-step-nav="confirm" role="tab" aria-controls="panel-confirm" aria-selected="false"><span>9</span><strong>Confirm Registration</strong></button>
+    </nav>
+
+    <main class="main">
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${errorLogin}" class="alert alert-error" th:text="${errorLogin}"></div>
+
+        <form th:action="@{/student-onboarding/{collegeCode}(collegeCode=${collegeCode})}" method="post" enctype="multipart/form-data" data-onboarding-form>
+            <input type="hidden" name="collegeCode" th:value="${collegeCode}">
+            <section th:replace="~{student/connected/onboarding/personal-panel :: personalPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/address-panel :: addressPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/education-panel :: educationPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/documents-panel :: documentsPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/course-panel :: coursePanel}"></section>
+            <section th:replace="~{student/connected/onboarding/last-qualifying-panel :: lastQualifyingPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/doc-upload-panel :: docUploadPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/payment-panel :: paymentPanel}"></section>
+            <section th:replace="~{student/connected/onboarding/confirm-panel :: confirmPanel}"></section>
+        </form>
+</main>
+</div>
+
+<script th:src="@{/js/student-onboarding-address.js}"></script>
+<script th:src="@{/js/student-onboarding-education.js}"></script>
+<script th:src="@{/js/student-onboarding-last-qualifying.js}"></script>
+<script th:src="@{/js/student-onboarding-documents.js}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("[data-onboarding-form]");
+    if (!form) return;
+
+    const panels = Array.from(form.querySelectorAll("[data-step-panel]"));
+    const navButtons = Array.from(document.querySelectorAll("[data-step-nav]"));
+    const steps = panels.map(p => p.getAttribute("data-step-panel"));
+    const hashStep = window.location.hash ? window.location.hash.replace(/^#/, "") : "";
+    let active = steps.includes(hashStep) ? hashStep : steps[0];
+    const courseValue = form.querySelector("[data-course-value]");
+    const courseSelect = form.querySelector("[data-course-select]");
+    const courseRow = form.querySelector("[data-course-row]");
+    const courseProceed = form.querySelector("[data-course-proceed]");
+    const validationBanner = document.createElement("div");
+    validationBanner.className = "validation-banner";
+    validationBanner.hidden = true;
+    validationBanner.setAttribute("data-validation-banner", "true");
+    validationBanner.textContent = "Please fill the highlighted required fields before continuing.";
+    form.parentNode.insertBefore(validationBanner, form);
+
+    function valueOf(field) {
+        if (!field) return "";
+        if (field.type === "checkbox") return field.checked ? "Yes" : "";
+        if (field.type === "file") return field.files && field.files[0] ? field.files[0].name : "";
+        return (field.value || "").trim();
+    }
+
+    function clearFieldState(field) {
+        if (!field) return;
+        field.classList.remove("is-invalid");
+        field.removeAttribute("aria-invalid");
+        const container = field.closest(".field") || field.parentElement;
+        if (container) container.classList.remove("is-invalid");
+        const msg = container ? container.querySelector(":scope > .validation-hint") : null;
+        if (msg) msg.remove();
+    }
+
+    function setFieldInvalid(field, message) {
+        if (!field) return;
+        field.classList.add("is-invalid");
+        field.setAttribute("aria-invalid", "true");
+        const container = field.closest(".field") || field.parentElement;
+        if (container) {
+            container.classList.add("is-invalid");
+            let msg = container.querySelector(":scope > .validation-hint");
+            if (!msg) {
+                msg = document.createElement("div");
+                msg.className = "validation-hint";
+                msg.style.marginTop = "4px";
+                msg.style.fontSize = "10px";
+                msg.style.color = "#b42318";
+                container.appendChild(msg);
+            }
+            msg.textContent = message || "This field is required.";
+        }
+    }
+
+    function clearPanelValidation(panel) {
+        if (!panel) return;
+        panel.querySelectorAll("input, select, textarea").forEach(clearFieldState);
+    }
+
+      function clearRadioGroup(field) {
+          if (!field || field.type !== "radio" || !field.name) return;
+          const group = field.closest("[data-step-panel]")?.querySelectorAll('input[type="radio"][name="' + field.name + '"]');
+          if (!group) return;
+          group.forEach(clearFieldState);
+      }
+
+      function normalizeDocKey(value) {
+          return String(value || "")
+              .trim()
+              .toUpperCase()
+              .replace(/&/g, "AND")
+              .replace(/[^A-Z0-9]+/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+      }
+
+      function selectedCourseCandidates() {
+          const values = [];
+          if (courseValue && courseValue.value) values.push(courseValue.value);
+          if (courseSelect && courseSelect.value) values.push(courseSelect.value);
+          if (form.dataset.courseLabel) values.push(form.dataset.courseLabel);
+          if (courseSelect && courseSelect.selectedOptions && courseSelect.selectedOptions[0]) {
+              values.push(courseSelect.selectedOptions[0].textContent);
+          }
+          return values.map(normalizeDocKey).filter(Boolean);
+      }
+
+      function parseRequiredDocs(panel) {
+          if (!panel) return [];
+          const mapRaw = panel.getAttribute("data-required-docs-by-course") || "{}";
+          try {
+              const requiredByCourse = JSON.parse(mapRaw);
+              const normalizedMap = {};
+              Object.keys(requiredByCourse || {}).forEach(key => {
+                  const docs = requiredByCourse[key];
+                  if (Array.isArray(docs)) {
+                      normalizedMap[normalizeDocKey(key)] = docs.filter(Boolean).map(value => String(value).trim());
+                  }
+              });
+              const candidates = selectedCourseCandidates();
+              for (const candidate of candidates) {
+                  if (normalizedMap[candidate]) return normalizedMap[candidate];
+              }
+              for (const candidate of candidates) {
+                  const matchingKey = Object.keys(normalizedMap).find(key => candidate.includes(key) || key.includes(candidate));
+                  if (matchingKey) return normalizedMap[matchingKey];
+              }
+          } catch (err) {
+              // Fall through to legacy per-panel list.
+          }
+
+          const raw = panel.getAttribute("data-required-docs") || "[]";
+          try {
+              const parsed = JSON.parse(raw);
+              return Array.isArray(parsed) ? parsed.filter(Boolean).map(value => String(value).trim()) : [];
+          } catch (err) {
+              return [];
+          }
+      }
+
+      function parseUploadedDocs(form, panel) {
+          try {
+              const raw = panel?.dataset.docList || form?.dataset.docList || "[]";
+              const parsed = JSON.parse(raw);
+              return Array.isArray(parsed) ? parsed : [];
+          } catch (err) {
+              return [];
+          }
+      }
+
+    function getRadioGroups(panel) {
+        const groups = new Map();
+        panel.querySelectorAll('input[type="radio"]').forEach(field => {
+            if (!field.name) return;
+            const list = groups.get(field.name) || [];
+            list.push(field);
+            groups.set(field.name, list);
+        });
+        return groups;
+    }
+
+    function updateSummary() {
+        form.querySelectorAll("[data-summary]").forEach(target => {
+            const name = target.getAttribute("data-summary");
+            const source = form.querySelector('[name="' + name + '"]');
+            const value = valueOf(source);
+            if (name === "course") {
+                const courseLabel = form.dataset.courseLabel || value;
+                if (courseLabel) target.textContent = courseLabel;
+                return;
+            }
+            if (value) target.textContent = value;
+        });
+    }
+
+    function syncCourseChoice(value) {
+        if (!courseValue) return;
+        courseValue.value = value || "";
+        if (courseSelect && courseSelect.value !== value) {
+            courseSelect.value = value || "";
+        }
+        if (value) {
+            const option = courseSelect ? courseSelect.selectedOptions && courseSelect.selectedOptions[0] : null;
+            form.dataset.courseLabel = option ? option.textContent.trim() : value;
+        } else {
+            delete form.dataset.courseLabel;
+        }
+        if (courseRow) {
+            courseRow.style.display = value ? "" : "none";
+            const courseNameCell = courseRow.querySelector('[data-course-cell="name"]');
+            if (courseNameCell && courseSelect && courseSelect.selectedOptions && courseSelect.selectedOptions[0]) {
+                courseNameCell.textContent = courseSelect.selectedOptions[0].textContent.trim();
+            }
+        }
+        courseValue.dispatchEvent(new Event("input", { bubbles: true }));
+        courseValue.dispatchEvent(new Event("change", { bubbles: true }));
+        updateSummary();
+    }
+
+    function showStep(step) {
+        if (!steps.includes(step)) step = steps[0];
+        active = step;
+        panels.forEach(p => {
+            const on = p.getAttribute("data-step-panel") === step;
+            p.hidden = !on;
+            p.style.display = on ? "block" : "none";
+            p.classList.toggle("is-active", on);
+        });
+        navButtons.forEach(b => {
+            const on = b.getAttribute("data-step-nav") === step;
+            b.classList.toggle("is-active", on);
+            b.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        if (history.replaceState) history.replaceState(null, "", "#" + step);
+        else window.location.hash = step;
+        window.scrollTo({top:0, behavior:"smooth"});
+        updateSummary();
+    }
+
+    window.__onboardingGoToStep = showStep;
+
+    function validate(panel) {
+        if (!panel) return true;
+        clearPanelValidation(panel);
+        validationBanner.hidden = true;
+
+        if (panel.getAttribute("data-step-panel") === "doc-upload") {
+            const requiredDocs = parseRequiredDocs(panel);
+            const uploadedDocs = parseUploadedDocs(form, panel);
+            const uploadedNames = new Set(
+                uploadedDocs
+                    .map(doc => String(doc && doc.name ? doc.name : "").trim())
+                    .filter(Boolean)
+                    .map(normalizeDocKey)
+            );
+            const missingDocs = requiredDocs.filter(name => !uploadedNames.has(normalizeDocKey(name)));
+            if (missingDocs.length) {
+                const nameField = panel.querySelector('[data-doc-field="name"]');
+                const fileField = panel.querySelector('[data-doc-field="file"]');
+                const message = "Please upload all required documents before continuing. Missing: " + missingDocs.join(", ");
+                if (nameField) setFieldInvalid(nameField, message);
+                if (fileField) setFieldInvalid(fileField, message);
+                validationBanner.textContent = message;
+                validationBanner.hidden = false;
+                (nameField || fileField || panel).focus?.();
+                return false;
+            }
+            validationBanner.textContent = "Please fill the highlighted required fields before continuing.";
+            return true;
+        }
+
+        const fields = Array.from(panel.querySelectorAll("input, select, textarea"));
+        let first = null;
+        const seenRadio = new Set();
+
+        fields.forEach(field => {
+            if (field.type === "radio") {
+                if (seenRadio.has(field.name)) return;
+                seenRadio.add(field.name);
+                const group = Array.from(panel.querySelectorAll('input[type="radio"][name="' + field.name + '"]'));
+                if (!group.some(r => r.checked) && group.some(r => r.required)) {
+                    const target = group.find(r => !r.disabled) || group[0];
+                    setFieldInvalid(target, "Please select an option.");
+                    group.forEach(r => {
+                        const container = r.closest(".field") || r.parentElement;
+                        if (container) container.classList.add("is-invalid");
+                    });
+                    if (!first) first = target;
+                }
+                return;
+            }
+
+            if (!field.required) return;
+            let ok = true;
+            if (field.type === "checkbox") ok = field.checked;
+            else if (field.type === "file") ok = Boolean(field.files && field.files.length);
+            else ok = Boolean(valueOf(field));
+            if (!ok) {
+                setFieldInvalid(field, "This field is required.");
+                if (!first) first = field;
+            }
+        });
+        if (first) {
+            validationBanner.hidden = false;
+            first.focus();
+            return false;
+        }
+        return true;
+    }
+
+    navButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            showStep(btn.getAttribute("data-step-nav"));
+        });
+        btn.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                showStep(btn.getAttribute("data-step-nav"));
+            }
+        });
+    });
+
+    if (courseSelect) {
+        courseSelect.addEventListener("change", function () {
+            syncCourseChoice(courseSelect.value);
+        });
+    }
+
+    if (courseProceed) {
+        courseProceed.addEventListener("click", function () {
+            const panel = courseSelect ? courseSelect.closest("[data-step-panel]") : null;
+            if (panel && !validate(panel)) return;
+            syncCourseChoice(courseSelect ? courseSelect.value : courseValue?.value);
+            if (window.__onboardingGoToStep) {
+                window.__onboardingGoToStep("last-qualifying");
+            }
+        });
+    }
+
+    if (courseValue) {
+        syncCourseChoice(courseValue.value || (courseSelect ? courseSelect.value : ""));
+    }
+
+    showStep(active);
+
+    form.querySelectorAll("[data-step-next]").forEach(btn => btn.addEventListener("click", () => {
+        const idx = steps.indexOf(active);
+        if (!validate(panels[idx])) return;
+        showStep(steps[idx + 1] || active);
+    }));
+
+    form.querySelectorAll("[data-step-prev]").forEach(btn => btn.addEventListener("click", () => {
+        const idx = steps.indexOf(active);
+        showStep(steps[idx - 1] || active);
+    }));
+
+    form.querySelectorAll("[name]").forEach(field => {
+        field.addEventListener("input", updateSummary);
+        field.addEventListener("change", updateSummary);
+        field.addEventListener("input", function () {
+            if (field.type === "radio") clearRadioGroup(field);
+            else clearFieldState(field);
+            validationBanner.hidden = true;
+        });
+        field.addEventListener("change", function () {
+            if (field.type === "radio") clearRadioGroup(field);
+            else clearFieldState(field);
+            validationBanner.hidden = true;
+        });
+    });
+
+    form.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener("change", function () {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const preview = input.closest(".upload-card")?.querySelector(".upload-preview");
+            if (!preview) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.innerHTML = "";
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.alt = file.name;
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    form.addEventListener("submit", function (event) {
+        if (!panels.every(validate)) {
+            event.preventDefault();
+            const invalid = form.querySelector("input:invalid, select:invalid, textarea:invalid");
+            if (invalid) {
+                const panel = invalid.closest("[data-step-panel]");
+                if (panel) showStep(panel.getAttribute("data-step-panel"));
+            }
+        }
+    });
+
+    updateSummary();
+});
+</script>
+</body>
+</html>

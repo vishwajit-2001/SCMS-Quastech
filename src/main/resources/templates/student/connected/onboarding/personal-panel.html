@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="panel is-active" id="panel-personal" data-step-panel="personal" th:fragment="personalPanel">
+    <div class="panel-head">
+        <div>
+            <p class="panel-kicker">Step 1 of 9</p>
+            <h2 class="panel-title">Student Information</h2>
+        </div>
+        <div class="panel-badge">Identity, family and background data</div>
+    </div>
+
+    <div class="module-shell">
+        <div class="module-head">
+            <div>
+                <h3>Student Personal Section</h3>
+                <p>Enter the exact details from official records and admission documents.</p>
+            </div>
+            <div class="panel-badge">Application No: <span th:text="${student.registrationNo != null ? student.registrationNo : 'N/A'}">N/A</span></div>
+        </div>
+
+        <div class="module-body">
+            <div class="section">
+                <div class="grid-4">
+                    <div class="field">
+                        <label>Title *</label>
+                        <select name="title" required>
+                            <option value="">Please Select</option>
+                            <option value="Mr" th:selected="${student.title == 'Mr'}">Mr</option>
+                            <option value="Ms" th:selected="${student.title == 'Ms'}">Ms</option>
+                            <option value="Mrs" th:selected="${student.title == 'Mrs'}">Mrs</option>
+                            <option value="Dr" th:selected="${student.title == 'Dr'}">Dr</option>
+                            <option value="Prof" th:selected="${student.title == 'Prof'}">Prof</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Last Name *</label><input type="text" name="lastName" th:value="${student.lastName}" required></div>
+                    <div class="field"><label>First Name *</label><input type="text" name="firstName" th:value="${student.firstName}" required></div>
+                    <div class="field"><label>Middle Name</label><input type="text" name="middleName" th:value="${student.middleName}"></div>
+
+                    <div class="field"><label>Lname As 12Std *</label><input type="text" name="lnameAs12thStd" th:value="${student.lnameAs12thStd}" required></div>
+                    <div class="field"><label>Fname As 12Std *</label><input type="text" name="fnameAs12thStd" th:value="${student.fnameAs12thStd}" required></div>
+                    <div class="field"><label>Name As Per Aadhar *</label><input type="text" name="nameAsPerAadhaar" th:value="${student.nameAsPerAadhaar}" required></div>
+                    <div class="field"><label>Mname As 12Std *</label><input type="text" name="mnameAs12thStd" th:value="${student.mnameAs12thStd}" required></div>
+
+                    <div class="field"><label>Mobile No *</label><input type="text" name="mobileNumber" th:value="${student.mobileNumber}" required></div>
+                    <div class="field"><label>Phone</label><input type="text" name="phoneNumber" th:value="${student.phoneNumber}"></div>
+                    <div class="field"><label>Email *</label><input type="email" name="email" th:value="${student.email}" readonly></div>
+                    <div class="field">
+                        <label>Marital Status *</label>
+                        <select name="maritalStatus" required>
+                            <option value="">Please Select</option>
+                            <option value="Single" th:selected="${student.maritalStatus == 'Single'}">Single</option>
+                            <option value="Married" th:selected="${student.maritalStatus == 'Married'}">Married</option>
+                            <option value="Divorced" th:selected="${student.maritalStatus == 'Divorced'}">Divorced</option>
+                            <option value="Widowed" th:selected="${student.maritalStatus == 'Widowed'}">Widowed</option>
+                            <option value="Other" th:selected="${student.maritalStatus == 'Other'}">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Blood Group *</label>
+                        <select name="bloodGroup" required>
+                            <option value="">Please Select</option>
+                            <option value="A+" th:selected="${student.bloodGroup == 'A+'}">A+</option>
+                            <option value="A-" th:selected="${student.bloodGroup == 'A-'}">A-</option>
+                            <option value="B+" th:selected="${student.bloodGroup == 'B+'}">B+</option>
+                            <option value="B-" th:selected="${student.bloodGroup == 'B-'}">B-</option>
+                            <option value="AB+" th:selected="${student.bloodGroup == 'AB+'}">AB+</option>
+                            <option value="AB-" th:selected="${student.bloodGroup == 'AB-'}">AB-</option>
+                            <option value="O+" th:selected="${student.bloodGroup == 'O+'}">O+</option>
+                            <option value="O-" th:selected="${student.bloodGroup == 'O-'}">O-</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Gender *</label>
+                        <select name="gender" required>
+                            <option value="">Please Select</option>
+                            <option value="Male" th:selected="${student.gender == 'Male'}">Male</option>
+                            <option value="Female" th:selected="${student.gender == 'Female'}">Female</option>
+                            <option value="Other" th:selected="${student.gender == 'Other'}">Other</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Date Of Birth *</label><input type="date" name="dob" th:value="${student.dob}" required></div>
+
+                    <div class="field">
+                        <label>Mother Tongue *</label>
+                        <select name="motherTongue" required>
+                            <option value="">Please Select</option>
+                            <option value="English" th:selected="${student.motherTongue == 'English'}">English</option>
+                            <option value="Hindi" th:selected="${student.motherTongue == 'Hindi'}">Hindi</option>
+                            <option value="Marathi" th:selected="${student.motherTongue == 'Marathi'}">Marathi</option>
+                            <option value="Marwadi" th:selected="${student.motherTongue == 'Marwadi'}">Marwadi</option>
+                            <option value="Other" th:selected="${student.motherTongue == 'Other'}">Other</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Native Place *</label><input type="text" name="nativePlace" th:value="${student.nativePlace}" required></div>
+                    <div class="field"><label>Birth Place *</label><input type="text" name="birthPlace" th:value="${student.birthPlace}" required></div>
+                    <div class="field">
+                        <label>Birth Country *</label>
+                        <select name="birthCountry" required>
+                            <option value="">Please Select</option>
+                            <option value="INDIA" th:selected="${student.birthCountry == 'INDIA'}">INDIA</option>
+                            <option value="Other" th:selected="${student.birthCountry == 'Other'}">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Nationality *</label>
+                        <select name="nationality" required>
+                            <option value="">Please Select</option>
+                            <option value="Indian" th:selected="${student.nationality == 'Indian'}">Indian</option>
+                            <option value="Other" th:selected="${student.nationality == 'Other'}">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Religion *</label>
+                        <select name="religion" required>
+                            <option value="">Please Select</option>
+                            <option value="Hindu" th:selected="${student.religion == 'Hindu'}">Hindu</option>
+                            <option value="Muslim" th:selected="${student.religion == 'Muslim'}">Muslim</option>
+                            <option value="Christian" th:selected="${student.religion == 'Christian'}">Christian</option>
+                            <option value="Sikh" th:selected="${student.religion == 'Sikh'}">Sikh</option>
+                            <option value="Buddhist" th:selected="${student.religion == 'Buddhist'}">Buddhist</option>
+                            <option value="Jain" th:selected="${student.religion == 'Jain'}">Jain</option>
+                            <option value="Other" th:selected="${student.religion == 'Other'}">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Category Type *</label>
+                        <select name="categoryType" required>
+                            <option value="">Please Select</option>
+                            <option value="GENERAL" th:selected="${student.categoryType == 'GENERAL'}">GENERAL</option>
+                            <option value="NT A" th:selected="${student.categoryType == 'NT A'}">NT A</option>
+                            <option value="NT B" th:selected="${student.categoryType == 'NT B'}">NT B</option>
+                            <option value="NT C" th:selected="${student.categoryType == 'NT C'}">NT C</option>
+                            <option value="NT D" th:selected="${student.categoryType == 'NT D'}">NT D</option>
+                            <option value="OBC" th:selected="${student.categoryType == 'OBC'}">OBC</option>
+                            <option value="SBC" th:selected="${student.categoryType == 'SBC'}">SBC</option>
+                            <option value="ST" th:selected="${student.categoryType == 'ST'}">ST</option>
+                            <option value="SC" th:selected="${student.categoryType == 'SC'}">SC</option>
+                            <option value="General EBC" th:selected="${student.categoryType == 'General EBC'}">General EBC</option>
+                            <option value="VJNT" th:selected="${student.categoryType == 'VJNT'}">VJNT</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Caste Category *</label>
+                        <select name="casteCategory" required>
+                            <option value="">Please Select</option>
+                            <option value="GENERAL" th:selected="${student.casteCategory == 'GENERAL'}">GENERAL</option>
+                            <option value="NT A" th:selected="${student.casteCategory == 'NT A'}">NT A</option>
+                            <option value="NT B" th:selected="${student.casteCategory == 'NT B'}">NT B</option>
+                            <option value="NT C" th:selected="${student.casteCategory == 'NT C'}">NT C</option>
+                            <option value="NT D" th:selected="${student.casteCategory == 'NT D'}">NT D</option>
+                            <option value="OBC" th:selected="${student.casteCategory == 'OBC'}">OBC</option>
+                            <option value="SBC" th:selected="${student.casteCategory == 'SBC'}">SBC</option>
+                            <option value="ST" th:selected="${student.casteCategory == 'ST'}">ST</option>
+                            <option value="SC" th:selected="${student.casteCategory == 'SC'}">SC</option>
+                            <option value="General EBC" th:selected="${student.casteCategory == 'General EBC'}">General EBC</option>
+                            <option value="VJNT" th:selected="${student.casteCategory == 'VJNT'}">VJNT</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Sub Caste</label><input type="text" name="subCaste" th:value="${student.subCaste}"></div>
+                    <div class="field"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Parent Information</h3>
+                <div class="grid-4">
+                    <div class="field"><label>Father Name *</label><input type="text" name="fatherName" th:value="${student.fatherName}" required></div>
+                    <div class="field">
+                        <label>Father Occupation *</label>
+                        <select name="fatherOccupation" required>
+                            <option value="">Please Select</option>
+                            <option value="Business" th:selected="${student.fatherOccupation == 'Business'}">Business</option>
+                            <option value="Private Job" th:selected="${student.fatherOccupation == 'Private Job'}">Private Job</option>
+                            <option value="Government Job" th:selected="${student.fatherOccupation == 'Government Job'}">Government Job</option>
+                            <option value="Farmer" th:selected="${student.fatherOccupation == 'Farmer'}">Farmer</option>
+                            <option value="Self Employed" th:selected="${student.fatherOccupation == 'Self Employed'}">Self Employed</option>
+                            <option value="Retired" th:selected="${student.fatherOccupation == 'Retired'}">Retired</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Mother Name *</label><input type="text" name="motherName" th:value="${student.motherName}" required></div>
+                    <div class="field"><label>Total Family Member *</label><input type="number" name="totalFamilyMember" th:value="${student.totalFamilyMember}" min="1" required></div>
+                    <div class="field"><label>Family Annual Income *</label><input type="number" name="familyAnnualIncome" th:value="${student.familyAnnualIncome}" step="0.01" min="0" required></div>
+                    <div class="field"><label>Parent Mobile *</label><input type="text" name="parentMobile" th:value="${student.parentMobile}" required></div>
+                    <div class="field"></div>
+                    <div class="field"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Other Information</h3>
+                <div class="grid-4">
+                    <div class="field"><label><input class="inline-check" type="checkbox" name="differentlyAbled" th:checked="${student.differentlyAbled}"> Is Differently Abled?</label></div>
+                    <div class="field"><label>Aadhaar Card No. *</label><input type="text" name="aadharNumber" th:value="${student.aadharNumber}" required></div>
+                    <div class="field"><label><input class="inline-check" type="checkbox" name="sportsPerson" th:checked="${student.sportsPerson}"> Are you a sports person?</label></div>
+                    <div class="field"><label>Sports Achievement *</label><input type="text" name="sportsAchievement" th:value="${student.sportsAchievement}" required></div>
+
+                    <div class="field"><label>Hobbies *</label><input type="text" name="hobbies" th:value="${student.hobbies}" required></div>
+                    <div class="field"><label>University Pre Adm Reg No. *</label><input type="text" name="universityPreAdmRegNo" th:value="${student.universityPreAdmRegNo}" required></div>
+                    <div class="field"><label>No of Attempt *</label><input type="number" name="noOfAttempt" th:value="${student.noOfAttempt}" min="0" required></div>
+                    <div class="field">
+                        <label>Inhouse *</label>
+                        <select name="inhouse" required>
+                            <option value="">Please Select</option>
+                            <option value="Yes" th:selected="${student.inhouse == 'Yes'}">Yes</option>
+                            <option value="No" th:selected="${student.inhouse == 'No'}">No</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Medium Of Instruction *</label>
+                        <select name="mediumOfInstruction" required>
+                            <option value="">Please Select</option>
+                            <option value="English" th:selected="${student.mediumOfInstruction == 'English'}">English</option>
+                            <option value="Hindi" th:selected="${student.mediumOfInstruction == 'Hindi'}">Hindi</option>
+                            <option value="Marathi" th:selected="${student.mediumOfInstruction == 'Marathi'}">Marathi</option>
+                            <option value="Marwadi" th:selected="${student.mediumOfInstruction == 'Marwadi'}">Marwadi</option>
+                            <option value="Other" th:selected="${student.mediumOfInstruction == 'Other'}">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Social Reservation *</label>
+                        <select name="socialReservation" required>
+                            <option value="">Please Select</option>
+                            <option value="GENERAL" th:selected="${student.socialReservation == 'GENERAL'}">GENERAL</option>
+                            <option value="OBC" th:selected="${student.socialReservation == 'OBC'}">OBC</option>
+                            <option value="SBC" th:selected="${student.socialReservation == 'SBC'}">SBC</option>
+                            <option value="ST" th:selected="${student.socialReservation == 'ST'}">ST</option>
+                            <option value="SC" th:selected="${student.socialReservation == 'SC'}">SC</option>
+                            <option value="EWS" th:selected="${student.socialReservation == 'EWS'}">EWS</option>
+                            <option value="VJNT" th:selected="${student.socialReservation == 'VJNT'}">VJNT</option>
+                            <option value="NOT APPLICABLE" th:selected="${student.socialReservation == 'NOT APPLICABLE'}">NOT APPLICABLE</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>ABC / APAR No. *</label><input type="text" name="academicBankOfCredits" th:value="${student.academicBankOfCredits}" required></div>
+                    <div class="field"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button type="button" class="btn btn-next" data-step-next>Save & Next</button>
+    </div>
+</section>
+</body>
+</html>

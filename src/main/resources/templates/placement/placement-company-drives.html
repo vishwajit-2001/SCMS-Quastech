@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Drives - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .layout{display:grid;gap:18px}
+        .grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px}
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .field{display:grid;gap:6px}.field.full{grid-column:1/-1}
+        .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .field input,.field textarea{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        .field textarea{min-height:94px;resize:vertical}
+        .btn{min-height:46px;padding:0 16px;border-radius:999px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+        .btn.primary{background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f;box-shadow:0 12px 24px rgba(200,146,42,.22)}
+        .drive{border:1px solid rgba(24,22,15,.08);border-radius:18px;background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:14px}
+        .drive-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+        .meta{margin-top:6px;color:#6b6457;font-size:13px;line-height:1.5}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .list{display:grid;gap:12px}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:24px;color:#6b6457;text-align:center;background:rgba(255,255,255,.78)}
+        @media (max-width:1100px){.grid,.form-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='company-drives')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Company Drives', subtitle='Create new drives, publish them, and manage deadline-based applications from the portal.')}"></div>
+        <main class="portal-page-body">
+            <section class="layout">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div><h2>Publish Drive</h2><p>Only these published details will appear to students.</p></div>
+                        <span class="portal-badge portal-badge--info" th:text="${placementDriveOpenCount} + ' open'">0 open</span>
+                    </div>
+                    <div class="panel-body">
+                        <form method="post" th:action="@{/placement-drives}">
+                            <div class="form-grid">
+                                <div class="field full"><label>Company Name</label><input type="text" name="companyName" placeholder="Company name" required></div>
+                                <div class="field"><label>Role</label><input type="text" name="jobTitle" placeholder="Embedded Developer" required></div>
+                                <div class="field"><label>Salary Range</label><input type="text" name="salaryRange" placeholder="3 to 6 LPA"></div>
+                                <div class="field"><label>Location</label><input type="text" name="location" placeholder="Baner, Pune" required></div>
+                                <div class="field"><label>Experience</label><input type="text" name="experience" placeholder="0 to 3 years"></div>
+                                <div class="field"><label>Drive Type</label><input type="text" name="driveType" placeholder="On campus / Off campus"></div>
+                                <div class="field full"><label>Skills Required</label><input type="text" name="skillsRequired" placeholder="Microcontrollers, Firmware Development, Embedded C"></div>
+                                <div class="field full"><label>Description</label><textarea name="description" placeholder="Short company announcement / drive details"></textarea></div>
+                                <div class="field"><label>Drive Date</label><input type="date" name="driveDate"></div>
+                                <div class="field"><label>Deadline Date</label><input type="date" name="applicationDeadlineDate" required></div>
+                                <div class="field"><label>Deadline Time</label><input type="time" name="applicationDeadlineTime" required></div>
+                                <div class="field"><label>Openings</label><input type="number" name="openings" min="1" value="1"></div>
+                                <div class="field full"><label><input type="checkbox" name="published" checked style="width:auto;min-height:auto;margin-right:8px;"> Publish immediately</label></div>
+                            </div>
+                            <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+                                <button class="btn primary" type="submit"><i class="fa-solid fa-paper-plane"></i> Publish drive</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-head">
+                        <div><h2>Published Drives</h2><p>Open or closed based on deadline time.</p></div>
+                        <a class="portal-link" th:href="@{/placement-company-drives}">Refresh</a>
+                    </div>
+                    <div class="panel-body">
+                        <div class="list" th:if="${!#lists.isEmpty(placementDrives)}">
+                            <article class="drive" th:each="drive : ${placementDrives}">
+                                <div class="drive-top">
+                                    <div>
+                                        <h3 th:text="${drive.companyName}">Company</h3>
+                                        <div class="meta" th:text="${drive.jobTitle} + ' | ' + ${drive.location}">Role</div>
+                                    </div>
+                                    <span class="portal-badge" th:classappend="${drive.applicationOpen} ? ' portal-badge--success' : ' portal-badge--warning'" th:text="${drive.applicationOpen ? 'Open' : 'Closed'}">Open</span>
+                                </div>
+                                <div class="pill-row">
+                                    <span class="pill" th:text="${drive.salaryRange != null ? drive.salaryRange : 'Salary hidden'}">Salary</span>
+                                    <span class="pill" th:text="${drive.experience != null ? drive.experience : 'Experience n/a'}">Experience</span>
+                                    <span class="pill" th:text="${drive.skillsRequired != null ? drive.skillsRequired : 'Skills n/a'}">Skills</span>
+                                    <span class="pill" th:text="${drive.applicationDeadline != null ? 'Deadline: ' + #temporals.format(drive.applicationDeadline, 'dd MMM yyyy, hh:mm a') : 'No deadline set'}">Deadline</span>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="empty" th:if="${#lists.isEmpty(placementDrives)}">
+                            <i class="fa-regular fa-building"></i>
+                            <h3 style="margin:10px 0 6px;">No drives posted</h3>
+                            <p>Publish the first drive using the form on this page.</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

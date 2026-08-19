@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="topbar(title, subtitle)" class="portal-header">
+    <div class="portal-header-copy">
+        <span class="portal-header-kicker">Teacher Workspace</span>
+        <div class="portal-header-title-row">
+            <h1 class="portal-header-title" th:text="${title}">Dashboard</h1>
+        </div>
+        <p class="portal-header-subtitle" th:text="${subtitle}">
+            Manage class events, student registrations, and academic tasks in one connected teacher space.
+        </p>
+    </div>
+
+    <div class="portal-header-actions">
+        <a th:href="@{/teacher-events}" class="portal-header-btn" aria-label="Open events">
+            <i class="fa-regular fa-calendar-check"></i>
+        </a>
+        <a th:href="@{/teacher-profile}" class="portal-user-pill">
+            <div class="portal-avatar" th:text="${teacherInitials} ?: 'TE'">TE</div>
+            <div class="portal-user-meta">
+                <span class="portal-user-name" th:text="${teacherName} ?: 'Teacher'">Teacher</span>
+            </div>
+        </a>
+    </div>
+</header>
+</body>
+</html>

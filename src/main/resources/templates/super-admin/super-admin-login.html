@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1320;
+            --card: #111a2e;
+            --panel: #f7f5ef;
+            --ink: #111827;
+            --muted: #667085;
+            --accent: #4c8bf5;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, sans-serif;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(76,139,245,.18), transparent 24%),
+                radial-gradient(circle at 80% 10%, rgba(255,193,7,.10), transparent 22%),
+                linear-gradient(180deg, #e8edf7 0%, #f7f4ec 100%);
+            color: var(--ink);
+        }
+        .shell {
+            width: min(1100px, calc(100% - 32px));
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+        .hero, .card {
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 24px 70px rgba(17, 24, 39, .16);
+        }
+        .hero {
+            padding: 34px;
+            background: linear-gradient(160deg, #0d1320, #1a2a4a 60%, #27499c);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 540px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.14);
+            width: fit-content;
+            font-size: 12px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+        h1 {
+            font-size: clamp(44px, 5vw, 64px);
+            line-height: .95;
+            margin: 18px 0 12px;
+        }
+        .hero p {
+            margin: 0;
+            max-width: 520px;
+            color: rgba(255,255,255,.76);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        .card {
+            background: rgba(255,255,255,.95);
+            backdrop-filter: blur(16px);
+            padding: 30px;
+            display: flex;
+            align-items: center;
+        }
+        .form-wrap {
+            width: 100%;
+        }
+        .form-head h2 {
+            margin: 0;
+            font-size: 30px;
+        }
+        .form-head p {
+            margin: 10px 0 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        .alert {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #fce8e8;
+            color: #a32626;
+            border: 1px solid #f1c2c2;
+        }
+        form {
+            display: grid;
+            gap: 14px;
+            margin-top: 22px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .14em;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(17, 24, 39, .12);
+            font: inherit;
+            background: #fff;
+            color: var(--ink);
+            outline: none;
+        }
+        input:focus {
+            border-color: rgba(76,139,245,.65);
+            box-shadow: 0 0 0 4px rgba(76,139,245,.12);
+        }
+        .submit {
+            margin-top: 6px;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4c8bf5, #2f6fed);
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .note {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        @media (max-width: 900px) {
+            .shell {
+                grid-template-columns: 1fr;
+            }
+            .hero {
+                min-height: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <section class="hero">
+        <div>
+            <div class="badge">Super Admin Access</div>
+            <h1>System Control Center</h1>
+            <p>Sign in only with the master super-admin account. Student, teacher, and institute accounts are not accepted here.</p>
+        </div>
+        <div class="note">Multi-college control plane for tenant setup, branding, and global oversight.</div>
+    </section>
+
+    <section class="card">
+        <div class="form-wrap">
+            <div class="form-head">
+                <h2>Super Admin Login</h2>
+                <p>Only the system super admin can use this page.</p>
+            </div>
+
+            <div th:if="${error}" class="alert" th:text="${error}"></div>
+
+            <form th:action="@{/superadmin}" method="post" autocomplete="on">
+                <div>
+                    <label for="saEmail">Email</label>
+                    <input id="saEmail" type="email" name="email" required>
+                </div>
+                <div>
+                    <label for="saPassword">Password</label>
+                    <input id="saPassword" type="password" name="password" required>
+                </div>
+                <button class="submit" type="submit">Login as Super Admin</button>
+            </form>
+
+            <div class="note">If you are a student or institute user, use the college portal on your admission page instead.</div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

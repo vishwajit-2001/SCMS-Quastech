@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Platform intelligence</div>
+                <div class="sa-title">Reports</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-grid-4">
+                <div class="sa-card" th:each="metric : ${reportCards}">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label" th:text="${metric.label}">Metric</div>
+                            <div class="sa-stat-value" style="font-size:20px" th:text="${metric.value}">Value</div>
+                        </div>
+                        <div class="sa-stat-icon info"><i class="fa fa-file-lines"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-grid-2">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Student distribution</h2>
+                            <p>College-wise student count chart</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-chart-wrap">
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Report scope</h2>
+                            <p>Data available for export and review</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-activity-list">
+                            <div class="sa-activity-item" th:each="college : ${colleges}">
+                                <div class="sa-activity-dot" th:classappend="' ' + ${college.statusTone}"></div>
+                                <div class="sa-activity-copy">
+                                    <div class="sa-activity-title" th:text="${college.collegeName}">College</div>
+                                    <div class="sa-activity-sub" th:text="${college.latestSummary}">Summary</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const labels = /*[[${chartLabels}]]*/ [];
+    const values = /*[[${chartValues}]]*/ [];
+    const ctx = document.getElementById('reportChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#0891b2', '#7c3aed']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

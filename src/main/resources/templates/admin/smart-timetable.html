@@ -1,0 +1,487 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Smart Timetable â€“ AI Campus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin/admin-common.css">
+  <style>
+    /* â”€â”€ Day tabs â”€â”€ */
+    .day-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+    .day-tab {
+      padding:8px 20px; border-radius:30px; font-size:13px; font-weight:600;
+      cursor:pointer; border:1px solid var(--light); background:var(--offwhite);
+      color:#888; transition:all .2s; font-family:var(--sans,Inter,sans-serif);
+    }
+    .day-tab:hover { border-color:var(--gold-br); color:var(--gold2); }
+    .day-tab.active { background:var(--gold); color:#fff; border-color:var(--gold); box-shadow:0 2px 12px rgba(201,151,42,.3); }
+    .day-tab.has-absent { position:relative; }
+    .day-tab.has-absent::after { content:''; position:absolute; top:4px; right:6px; width:7px; height:7px; border-radius:50%; background:#e03e3e; border:1.5px solid #fff; }
+
+    /* â”€â”€ Period grid â”€â”€ */
+    .period-grid { display:flex; flex-direction:column; gap:10px; }
+    .period-row {
+      display:grid; grid-template-columns:90px 1fr 1fr 100px 110px;
+      gap:10px; align-items:center;
+      background:var(--offwhite); border:1px solid var(--light);
+      border-radius:12px; padding:12px 16px; transition:all .2s;
+    }
+    .period-row:hover { border-color:var(--gold-br); }
+    .period-row.absent-row { border-color:#f0c0c0; background:#fff8f8; }
+    .period-row.shuffled-row { border-color:#c0e0c0; background:#f5fff5; animation: popIn .4s ease; }
+    @keyframes popIn { 0%{transform:scale(.97);opacity:.5} 100%{transform:scale(1);opacity:1} }
+
+    .period-time { font-size:12px; color:#a09080; font-weight:600; text-align:center; line-height:1.4; }
+    .subject-chip {
+      display:inline-flex; align-items:center; gap:7px;
+      background:var(--gold-bg2,rgba(201,151,42,.1)); color:var(--gold2,#b8902a);
+      border:1px solid var(--gold-br,rgba(201,151,42,.25));
+      border-radius:20px; padding:5px 13px; font-size:13px; font-weight:600;
+    }
+    .teacher-cell { font-size:13px; font-weight:600; display:flex; align-items:center; gap:7px; }
+    .teacher-cell .avatar { width:28px; height:28px; border-radius:50%; background:var(--black,#1a1814); color:var(--gold2,#b8902a); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .absent-badge { display:inline-flex; align-items:center; gap:5px; background:#fef2f2; color:#c0392b; border:1px solid #fcc; border-radius:20px; font-size:11px; font-weight:700; padding:4px 10px; }
+    .sub-badge { display:inline-flex; align-items:center; gap:5px; background:#f0fff4; color:#27ae60; border:1px solid #c3e6cb; border-radius:20px; font-size:11px; font-weight:700; padding:4px 10px; }
+    .room-chip { font-size:12px; color:#888; background:var(--light,#ede9e0); border-radius:8px; padding:4px 10px; text-align:center; }
+
+    /* â”€â”€ Absent control â”€â”€ */
+    .absent-panel {
+      background:var(--black,#1a1814); border:1px solid var(--gold-br,rgba(201,151,42,.2));
+      border-radius:16px; padding:20px 24px; margin-bottom:22px;
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    }
+    .absent-panel label { font-size:13px; color:rgba(255,255,255,.6); font-weight:500; flex-shrink:0; }
+    .absent-panel select {
+      background:#2a2622; color:#fff; border:1px solid rgba(201,151,42,.3);
+      border-radius:10px; padding:8px 14px; font-size:13px; font-family:var(--sans,Inter,sans-serif);
+      cursor:pointer; outline:none; min-width:200px;
+    }
+    .absent-panel select:focus { border-color:var(--gold,#c9972a); }
+    .btn-ai {
+      display:inline-flex; align-items:center; gap:8px;
+      background:linear-gradient(135deg,#c9972a,#e8b84b);
+      color:#fff; border:none; border-radius:10px; padding:9px 20px;
+      font-size:13px; font-weight:700; cursor:pointer; font-family:var(--sans,Inter,sans-serif);
+      box-shadow:0 2px 14px rgba(201,151,42,.35); transition:all .2s;
+    }
+    .btn-ai:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(201,151,42,.45); }
+    .btn-ai:active { transform:translateY(0); }
+    .ai-spark { font-size:15px; }
+
+    /* â”€â”€ AI shuffle log â”€â”€ */
+    .shuffle-log {
+      background:#f5fff5; border:1px solid #c3e6cb; border-radius:12px;
+      padding:14px 18px; margin-bottom:18px; font-size:13px; line-height:1.7;
+      display:none;
+    }
+    .shuffle-log.visible { display:block; animation:fadeIn .4s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+    .shuffle-log .log-title { font-weight:700; color:#1a7a3c; margin-bottom:6px; font-size:14px; }
+    .shuffle-log ul { margin:0; padding-left:18px; }
+    .shuffle-log li { color:#2d6a4f; margin-bottom:3px; }
+
+    /* â”€â”€ Stats bar â”€â”€ */
+    .stats-bar { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+    .stat-pill {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--offwhite); border:1px solid var(--light);
+      border-radius:30px; padding:8px 16px; font-size:13px; font-weight:600;
+    }
+    .stat-pill span { font-size:18px; font-weight:700; color:var(--gold2,#b8902a); }
+
+    /* â”€â”€ Week overview mini grid â”€â”€ */
+    .week-mini { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:24px; }
+    .week-day-card {
+      background:var(--offwhite); border:1px solid var(--light);
+      border-radius:10px; padding:10px 8px; text-align:center; cursor:pointer;
+      transition:all .2s; min-height:80px;
+    }
+    .week-day-card:hover, .week-day-card.active { border-color:var(--gold-br); background:var(--gold-bg2,rgba(201,151,42,.08)); }
+    .week-day-card .wd-name { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#a09080; font-weight:700; margin-bottom:6px; }
+    .week-day-card .wd-count { font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:var(--black,#1a1814); }
+    .week-day-card .wd-sub { font-size:10px; color:#b0a898; margin-top:2px; }
+    .week-day-card.absent-day { border-color:#fcc; background:#fff8f8; }
+    .week-day-card.absent-day .wd-count { color:#c0392b; }
+
+    /* â”€â”€ Responsive â”€â”€ */
+    @media(max-width:700px){
+      .period-row { grid-template-columns:1fr 1fr; }
+      .period-time,.room-chip { grid-column:span 2; }
+    }
+
+    /* â”€â”€ CSS vars fallback for standalone preview â”€â”€ */
+    :root{
+      --sans:'Inter',sans-serif;
+      --serif:'Inter',sans-serif;
+      --black:#1a1814;
+      --white:#fff;
+      --gold:#c9972a;
+      --gold2:#b8902a;
+      --gold-bg2:rgba(201,151,42,.10);
+      --gold-br:rgba(201,151,42,.25);
+      --green:#22c97a;
+      --blue:#3a8fd4;
+      --red:#e03e3e;
+      --offwhite:#f8f5f0;
+      --cream:#f3ede3;
+      --light:#e8e0d0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('view-timetable')}"></div>
+
+<div class="main">
+  <div class="header">
+    <div class="header-title"><i class="fa fa-robot"></i> Smart Timetable</div>
+    <div class="header-right">
+      <a href="/admin-notifications" class="header-btn"><i class="fa fa-bell"></i><span class="dot"></span></a>
+      <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+    </div>
+  </div>
+
+  <div class="content" style="padding-top:24px">
+
+    <!-- â”€â”€ AI ABSENT PANEL â”€â”€ -->
+    <div class="absent-panel">
+      <i class="fa fa-robot" style="color:var(--gold);font-size:20px;flex-shrink:0"></i>
+      <div style="flex:1;min-width:200px">
+        <div style="color:#fff;font-weight:700;font-size:15px;margin-bottom:3px">AI Timetable Shuffle</div>
+        <div style="color:rgba(255,255,255,.45);font-size:12px">Absent teacher mark karo -> AI automatically substitute assign karega</div>
+      </div>
+      <label>Select Teacher:</label>
+      <select id="absentTeacherSelect">
+        <option value="">Teacher Select Karo</option>
+        <!-- Thymeleaf loop (Spring Boot) -->
+        <option th:each="t : ${teachers}" th:value="${t.id}" th:text="${t.name}">Teacher Name</option>
+        <!-- Fallback demo options for static preview -->
+        <option value="1" th:if="${teachers == null or #lists.isEmpty(teachers)}">Rahul Sir (Java)</option>
+        <option value="2" th:if="${teachers == null or #lists.isEmpty(teachers)}">Amit Sir (DBMS)</option>
+        <option value="3" th:if="${teachers == null or #lists.isEmpty(teachers)}">Priya Ma'am (AI)</option>
+        <option value="4" th:if="${teachers == null or #lists.isEmpty(teachers)}">Sneha Ma'am (Networks)</option>
+      </select>
+      <select id="absentDaySelect">
+        <option value="">Day Select Karo</option>
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+      </select>
+      <button class="btn-ai" onclick="markAbsentAndShuffle()">
+        <span class="ai-spark"><i class="fa fa-wand-magic-sparkles"></i></span> AI Shuffle Karo
+      </button>
+    </div>
+
+    <!-- â”€â”€ AI SHUFFLE LOG â”€â”€ -->
+    <div class="shuffle-log" id="shuffleLog">
+      <div class="log-title">âœ… AI Timetable Shuffle Complete</div>
+      <ul id="shuffleLogList"></ul>
+    </div>
+
+    <!-- â”€â”€ STATS BAR â”€â”€ -->
+    <div class="stats-bar">
+      <div class="stat-pill"><span id="statPeriods">36</span> Total Periods/Week</div>
+      <div class="stat-pill"><span id="statTeachers">4</span> Teachers</div>
+      <div class="stat-pill"><span id="statAbsent" style="color:#c0392b">0</span> Absent Today</div>
+      <div class="stat-pill"><span id="statShuffled" style="color:#27ae60">0</span> Shuffled</div>
+    </div>
+
+    <!-- â”€â”€ WEEK OVERVIEW MINI GRID â”€â”€ -->
+    <div class="week-mini" id="weekMini"></div>
+
+    <!-- â”€â”€ DAY TABS â”€â”€ -->
+    <div class="day-tabs" id="dayTabs"></div>
+
+    <!-- â”€â”€ PERIOD TABLE â”€â”€ -->
+    <div class="box" style="padding:20px 24px">
+      <div class="box-title" id="periodBoxTitle" style="margin-bottom:16px">
+        <i class="fa fa-calendar" style="color:var(--gold)"></i> Monday â€” Periods
+      </div>
+      <div class="period-grid" id="periodGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // DATA â€” Week Timetable
+  // In production, ye data Thymeleaf se aayega (th:inline="javascript")
+  // ============================================================
+  const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  const TEACHERS_DB = [
+    { id:1, name:"Rahul Sir",   subject:"Java Programming",     initials:"RS" },
+    { id:2, name:"Amit Sir",    subject:"Database Management",  initials:"AS" },
+    { id:3, name:"Priya Ma'am", subject:"Artificial Intelligence", initials:"PM" },
+    { id:4, name:"Sneha Ma'am", subject:"Computer Networks",    initials:"SM" },
+    { id:5, name:"Vikram Sir",  subject:"Web Technologies",     initials:"VS" },
+  ];
+
+  // Full week timetable: each period has id, time, subject, teacherId, room, classId
+  const WEEK_DATA = {
+    Monday: [
+      { id:"M1", time:"09:00â€“10:00", subject:"Java Programming",       teacherId:1, room:"101", classId:"CLASS-1" },
+      { id:"M2", time:"10:00â€“11:00", subject:"Database Management",    teacherId:2, room:"102", classId:"CLASS-1" },
+      { id:"M3", time:"11:15â€“12:15", subject:"Artificial Intelligence",teacherId:3, room:"101", classId:"CLASS-1" },
+      { id:"M4", time:"13:00â€“14:00", subject:"Computer Networks",      teacherId:4, room:"Lab1",classId:"CLASS-1" },
+      { id:"M5", time:"14:00â€“15:00", subject:"Java Programming",       teacherId:1, room:"101", classId:"CLASS-2" },
+      { id:"M6", time:"15:00â€“16:00", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-2" },
+    ],
+    Tuesday: [
+      { id:"T1", time:"09:00â€“10:00", subject:"Artificial Intelligence",teacherId:3, room:"101", classId:"CLASS-1" },
+      { id:"T2", time:"10:00â€“11:00", subject:"Java Programming",       teacherId:1, room:"Lab2",classId:"CLASS-2" },
+      { id:"T3", time:"11:15â€“12:15", subject:"Computer Networks",      teacherId:4, room:"102", classId:"CLASS-1" },
+      { id:"T4", time:"13:00â€“14:00", subject:"Database Management",    teacherId:2, room:"101", classId:"CLASS-2" },
+      { id:"T5", time:"14:00â€“15:00", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-1" },
+      { id:"T6", time:"15:00â€“16:00", subject:"Java Programming",       teacherId:1, room:"101", classId:"CLASS-1" },
+    ],
+    Wednesday: [
+      { id:"W1", time:"09:00â€“10:00", subject:"Database Management",    teacherId:2, room:"101", classId:"CLASS-1" },
+      { id:"W2", time:"10:00â€“11:00", subject:"Computer Networks",      teacherId:4, room:"Lab1",classId:"CLASS-2" },
+      { id:"W3", time:"11:15â€“12:15", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-1" },
+      { id:"W4", time:"13:00â€“14:00", subject:"Artificial Intelligence",teacherId:3, room:"102", classId:"CLASS-1" },
+      { id:"W5", time:"14:00â€“15:00", subject:"Java Programming",       teacherId:1, room:"101", classId:"CLASS-2" },
+      { id:"W6", time:"15:00â€“16:00", subject:"Database Management",    teacherId:2, room:"101", classId:"CLASS-1" },
+    ],
+    Thursday: [
+      { id:"H1", time:"09:00â€“10:00", subject:"Computer Networks",      teacherId:4, room:"Lab1",classId:"CLASS-1" },
+      { id:"H2", time:"10:00â€“11:00", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-2" },
+      { id:"H3", time:"11:15â€“12:15", subject:"Java Programming",       teacherId:1, room:"101", classId:"CLASS-1" },
+      { id:"H4", time:"13:00â€“14:00", subject:"Database Management",    teacherId:2, room:"102", classId:"CLASS-1" },
+      { id:"H5", time:"14:00â€“15:00", subject:"Artificial Intelligence",teacherId:3, room:"101", classId:"CLASS-1" },
+      { id:"H6", time:"15:00â€“16:00", subject:"Computer Networks",      teacherId:4, room:"Lab1",classId:"CLASS-2" },
+    ],
+    Friday: [
+      { id:"F1", time:"09:00â€“10:00", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-1" },
+      { id:"F2", time:"10:00â€“11:00", subject:"Artificial Intelligence",teacherId:3, room:"101", classId:"CLASS-1" },
+      { id:"F3", time:"11:15â€“12:15", subject:"Database Management",    teacherId:2, room:"102", classId:"CLASS-2" },
+      { id:"F4", time:"13:00â€“14:00", subject:"Java Programming",       teacherId:1, room:"Lab2",classId:"CLASS-1" },
+      { id:"F5", time:"14:00â€“15:00", subject:"Computer Networks",      teacherId:4, room:"101", classId:"CLASS-1" },
+      { id:"F6", time:"15:00â€“16:00", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-2" },
+    ],
+    Saturday: [
+      { id:"S1", time:"09:00â€“10:00", subject:"Java Programming",       teacherId:1, room:"101", classId:"CLASS-1" },
+      { id:"S2", time:"10:00â€“11:00", subject:"Database Management",    teacherId:2, room:"102", classId:"CLASS-1" },
+      { id:"S3", time:"11:15â€“12:15", subject:"Computer Networks",      teacherId:4, room:"Lab1",classId:"CLASS-2" },
+      { id:"S4", time:"13:00â€“14:00", subject:"Web Technologies",       teacherId:5, room:"103", classId:"CLASS-1" },
+    ],
+  };
+
+  // â”€â”€ Live state: which teachers are absent on which days
+  const absentMap = {}; // { "Monday": [1,3], "Friday": [2] }
+  const shuffleMap = {}; // { periodId: { originalTeacherId, subTeacherId } }
+  let currentDay = "Monday";
+  let totalShuffled = 0;
+
+  // â”€â”€ Helpers
+  function getTeacher(id) { return TEACHERS_DB.find(t => t.id === id); }
+  function avatar(name) { return name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(); }
+
+  // â”€â”€ AI SHUFFLE ALGORITHM
+  // When teacher X is absent on dayY:
+  //   For each period of X on dayY â†’ find substitute from other teachers
+  //   who DON'T have a period at the SAME time on dayY (no conflict)
+  function findSubstitute(absentTeacherId, period, day) {
+    const dayPeriods = WEEK_DATA[day];
+    const busyAtTime = dayPeriods
+      .filter(p => p.time === period.time && p.teacherId !== absentTeacherId && p.id !== period.id)
+      .map(p => p.teacherId);
+
+    const alreadySubbing = Object.values(shuffleMap)
+      .filter(s => s.day === day && s.time === period.time)
+      .map(s => s.subTeacherId);
+
+    const available = TEACHERS_DB.filter(t =>
+      t.id !== absentTeacherId &&
+      !busyAtTime.includes(t.id) &&
+      !alreadySubbing.includes(t.id)
+    );
+
+    if (available.length === 0) return null;
+    // Prefer teacher with same subject, else pick one with lightest load
+    const sameSubject = available.find(t => t.subject === period.subject);
+    return sameSubject || available[0];
+  }
+
+  function markAbsentAndShuffle() {
+    const teacherId = parseInt(document.getElementById("absentTeacherSelect").value);
+    const day = document.getElementById("absentDaySelect").value;
+
+    if (!teacherId || !day) {
+      alert("Please select both a teacher and a day.");
+      return;
+    }
+
+    if (!absentMap[day]) absentMap[day] = [];
+    if (absentMap[day].includes(teacherId)) {
+      alert("This teacher is already marked absent on " + day);
+      return;
+    }
+    absentMap[day].push(teacherId);
+
+    const teacher = getTeacher(teacherId);
+    const dayPeriods = WEEK_DATA[day].filter(p => p.teacherId === teacherId);
+    const logEntries = [];
+
+    dayPeriods.forEach(period => {
+      const sub = findSubstitute(teacherId, period, day);
+      if (sub) {
+        shuffleMap[period.id] = {
+          day, time: period.time,
+          originalTeacherId: teacherId,
+          subTeacherId: sub.id
+        };
+        period._subTeacherId = sub.id;
+        totalShuffled++;
+        logEntries.push(`Period ${period.time} (${period.subject}) â†’ ${sub.name} ne le liya [${period.classId}]`);
+      } else {
+        logEntries.push(`âš ï¸ Period ${period.time} (${period.subject}) â†’ Koi substitute available nahi!`);
+      }
+    });
+
+    // Update stats
+    const absentCount = Object.values(absentMap).reduce((a,v)=>a+v.length,0);
+    document.getElementById("statAbsent").textContent = absentCount;
+    document.getElementById("statShuffled").textContent = totalShuffled;
+
+    // Show log
+    const log = document.getElementById("shuffleLog");
+    const logList = document.getElementById("shuffleLogList");
+    logList.innerHTML = logEntries.map(e => `<li>${e}</li>`).join("");
+    log.classList.add("visible");
+
+    // Re-render
+    renderWeekMini();
+    if (currentDay === day) renderDay(day);
+    else renderDay(day);
+    renderTabs();
+
+    // Auto select that day
+    currentDay = day;
+    renderDay(day);
+    renderTabs();
+  }
+
+  // â”€â”€ RENDER FUNCTIONS
+  function renderTabs() {
+    const container = document.getElementById("dayTabs");
+    container.innerHTML = DAYS.map(day => {
+      const isActive = day === currentDay;
+      const hasAbsent = absentMap[day] && absentMap[day].length > 0;
+      return `<button class="day-tab ${isActive ? "active" : ""} ${hasAbsent ? "has-absent" : ""}"
+                onclick="switchDay('${day}')">${day}</button>`;
+    }).join("");
+  }
+
+  function renderWeekMini() {
+    const container = document.getElementById("weekMini");
+    container.innerHTML = DAYS.map(day => {
+      const count = (WEEK_DATA[day] || []).length;
+      const hasAbsent = absentMap[day] && absentMap[day].length > 0;
+      const isActive = day === currentDay;
+      return `<div class="week-day-card ${hasAbsent ? "absent-day" : ""} ${isActive ? "active" : ""}"
+                 onclick="switchDay('${day}')">
+                <div class="wd-name">${day.slice(0,3)}</div>
+                <div class="wd-count">${count}</div>
+                <div class="wd-sub">${count} period${count!==1?"s":""}</div>
+                ${hasAbsent ? `<div style="font-size:10px;color:#c0392b;margin-top:4px">âš  Absent</div>` : ""}
+              </div>`;
+    }).join("");
+  }
+
+  function renderDay(day) {
+    currentDay = day;
+    const periods = WEEK_DATA[day] || [];
+    const grid = document.getElementById("periodGrid");
+    const title = document.getElementById("periodBoxTitle");
+    title.innerHTML = `<i class="fa fa-calendar" style="color:var(--gold)"></i> ${day} â€” ${periods.length} Periods`;
+
+    if (periods.length === 0) {
+      grid.innerHTML = `<div style="text-align:center;padding:32px;color:#b0a898">No periods scheduled for ${day}</div>`;
+      return;
+    }
+
+    grid.innerHTML = periods.map(period => {
+      const absentOnDay = absentMap[day] || [];
+      const isAbsent = absentOnDay.includes(period.teacherId) && !period._subTeacherId;
+      const isShuffled = !!shuffleMap[period.id];
+
+      let originalTeacher = getTeacher(period.teacherId);
+      let displayTeacher = originalTeacher;
+      let subInfo = "";
+
+      if (isShuffled) {
+        const sub = getTeacher(shuffleMap[period.id].subTeacherId);
+        displayTeacher = sub;
+        subInfo = `<div style="margin-top:5px">
+          <span style="font-size:11px;color:#a09080;text-decoration:line-through">${originalTeacher?.name || "â€”"}</span>
+          <span class="sub-badge" style="margin-left:6px"><i class="fa fa-exchange-alt" style="font-size:9px"></i> Substitute</span>
+        </div>`;
+      }
+
+      const rowClass = isAbsent ? "absent-row" : isShuffled ? "shuffled-row" : "";
+
+      return `<div class="period-row ${rowClass}">
+        <div class="period-time">
+          ${period.time.replace("â€“","<br>â€“<br>")}
+        </div>
+        <div>
+          <div class="subject-chip">
+            <i class="fa fa-book" style="font-size:11px"></i> ${period.subject}
+          </div>
+          <div style="font-size:11px;color:#b0a898;margin-top:4px">${period.classId}</div>
+        </div>
+        <div class="teacher-cell">
+          <div class="avatar">${displayTeacher ? avatar(displayTeacher.name) : "?"}</div>
+          <div>
+            <div>${displayTeacher?.name || "â€”"}</div>
+            ${subInfo}
+            ${isAbsent ? `<span class="absent-badge"><i class="fa fa-times-circle" style="font-size:9px"></i> ABSENT</span>` : ""}
+          </div>
+        </div>
+        <div class="room-chip"><i class="fa fa-door-open" style="font-size:10px;margin-right:4px"></i>${period.room}</div>
+        <div>
+          ${isShuffled
+            ? `<span class="sub-badge"><i class="fa fa-robot" style="font-size:9px"></i> AI Shuffled</span>`
+            : isAbsent
+            ? `<span class="absent-badge">No Sub Found</span>`
+            : `<span style="display:inline-flex;align-items:center;gap:5px;background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;border-radius:20px;font-size:11px;font-weight:700;padding:4px 10px">
+                 <i class="fa fa-check" style="font-size:9px"></i> Scheduled
+               </span>`}
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function switchDay(day) {
+    currentDay = day;
+    renderTabs();
+    renderWeekMini();
+    renderDay(day);
+  }
+
+  // â”€â”€ INIT
+  renderTabs();
+  renderWeekMini();
+  renderDay("Monday");
+
+  // Populate teacher select from static data if Thymeleaf not present
+  (function seedTeacherSelect() {
+    const sel = document.getElementById("absentTeacherSelect");
+    if (sel.options.length <= 1) {
+      TEACHERS_DB.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t.id;
+        opt.textContent = `${t.name} (${t.subject || 'Unassigned'})`;
+        sel.appendChild(opt);
+      });
+    }
+  })();
+</script>
+</body>
+</html>

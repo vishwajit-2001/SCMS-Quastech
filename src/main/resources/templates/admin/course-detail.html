@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Course Detail - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .hero-grid,.detail-grid,.subject-grid{display:grid;gap:22px}
+        .hero-grid{grid-template-columns:1.15fr .85fr;padding:28px 36px 0}
+        .detail-grid,.subject-grid{grid-template-columns:1fr 1.1fr}
+        .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+        .tab-link{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;border:1px solid var(--light);background:var(--offwhite);color:#6a6050;text-decoration:none;font-weight:700}
+        .tab-link.active{background:var(--black);color:var(--white);border-color:var(--black)}
+        .metric-card{background:var(--white);border:1px solid var(--light);border-radius:18px;padding:22px}
+        .metric-card.dark{background:var(--black);color:var(--white);border-color:var(--gold-br)}
+        .metric-label{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#a09080;font-weight:700}
+        .metric-card.dark .metric-label{color:rgba(255,255,255,.45)}
+        .metric-value{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1;margin-top:8px}
+        .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .info-tile{padding:14px 16px;border:1px solid var(--light);border-radius:16px;background:var(--offwhite)}
+        .info-key{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px}
+        .info-value{font-size:14px;font-weight:600;color:var(--black)}
+        .subject-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .subject-form-grid .full{grid-column:1/-1}
+        .status-line{font-size:12px;color:#8a7a6a;margin-top:8px;min-height:18px;display:flex;align-items:center;gap:8px}
+        .status-line.loading::before{content:'';width:12px;height:12px;border-radius:50%;border:2px solid rgba(75,73,172,.18);border-top-color:#4b49ac;animation:spin 0.8s linear infinite}
+        .filter-row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+        .registry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .registry-grid .full{grid-column:1/-1}
+        .badge-tag{display:inline-flex;align-items:center;padding:5px 11px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent}
+        .tag-core{background:#eef2ff;color:#4b49ac;border-color:#c7d2fe}
+        .tag-lab{background:rgba(34,197,94,.1);color:#15803d;border-color:rgba(34,197,94,.22)}
+        .tag-elective{background:rgba(245,158,11,.12);color:#b45309;border-color:rgba(245,158,11,.25)}
+        .tag-project{background:rgba(147,51,234,.12);color:#7e22ce;border-color:rgba(147,51,234,.24)}
+        .tag-custom{background:rgba(249,115,22,.12);color:#c2410c;border-color:rgba(249,115,22,.24)}
+        .empty-state{padding:34px 16px;text-align:center;color:#8a7a6a}
+        .empty-state strong{display:block;color:var(--black);margin-bottom:8px}
+        .modal-shell{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(13,12,10,.58);backdrop-filter:blur(8px);z-index:700}
+        .modal-shell.open{display:flex}
+        .modal-card{width:min(760px,100%);max-height:88vh;overflow:auto;background:var(--white);border:1px solid var(--gold-br);border-radius:24px;box-shadow:0 28px 70px rgba(13,12,10,.32)}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:20px 22px;background:linear-gradient(135deg,var(--black),#191512);border-bottom:1px solid var(--gold-br)}
+        .modal-head h3{color:var(--white);font:700 26px var(--serif)}
+        .modal-head p{color:rgba(255,255,255,.58);margin-top:4px;font-size:13px}
+        .modal-close{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+        .modal-body{padding:22px}
+        .modal-note{padding:12px 14px;border-radius:14px;background:#f8f7ff;border:1px solid #ddd6fe;color:#6d28d9;font-size:12px;margin-bottom:14px}
+        .action-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+        .toast-stack{position:fixed;top:18px;right:18px;z-index:900;display:grid;gap:10px}
+        .toast{min-width:260px;max-width:360px;padding:14px 16px;border-radius:16px;box-shadow:0 16px 40px rgba(15,23,42,.16);border:1px solid var(--light);background:var(--white);font-size:13px;font-weight:600}
+        .toast.success{border-color:rgba(34,197,94,.2);color:#166534}
+        .toast.error{border-color:rgba(239,68,68,.2);color:#b91c1c}
+        .toast.info{border-color:rgba(75,73,172,.2);color:#4338ca}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @media (max-width:1100px){.hero-grid,.detail-grid,.subject-grid{grid-template-columns:1fr}.info-grid,.subject-form-grid,.registry-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('courses')}"></div>
+
+<div class="toast-stack">
+    <div class="toast success" th:if="${param.success != null}" th:text="${param.success[0]}"></div>
+    <div class="toast error" th:if="${param.error != null}" th:text="${param.error[0]}"></div>
+    <div class="toast info" th:if="${param.info != null}" th:text="${param.info[0]}"></div>
+</div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title" th:text="${course.code + ' Course Detail'}">Course Detail</div>
+        <div class="header-right">
+            <a href="/admin-courses" class="btn-dark"><i class="fa fa-arrow-left"></i> Back to Courses</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="hero-grid">
+        <div class="metric-card">
+            <div class="metric-label">Course</div>
+            <div class="metric-value" th:text="${course.name}">Master of Computer Applications</div>
+            <div style="margin-top:8px;color:#8a7a6a;font-size:13px" th:text="${course.code + ' · ' + (course.status != null ? course.status : 'Active')}">MCA · Active</div>
+        </div>
+        <div class="metric-card dark">
+            <div class="metric-label">Subject Registry</div>
+            <div class="metric-value" th:text="${totalSubjectMasters}">0</div>
+            <div style="margin-top:8px;font-size:13px;color:rgba(255,255,255,.66)" th:text="${activeBatchCount + ' active batch(es) linked'}">0 active batch(es) linked</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="tabs">
+            <a th:href="@{/admin-courses/{id}(id=${course.id},tab='info')}" class="tab-link" th:classappend="${activeTab == 'info'} ? ' active' : ''"><i class="fa fa-circle-info"></i> Course Info</a>
+            <a th:href="@{/admin-subject-registry(courseId=${course.id})}" class="tab-link"><i class="fa fa-book-open"></i> Subject Registry</a>
+        </div>
+
+        <div th:if="${activeTab == 'info'}" class="detail-grid">
+            <div class="box">
+                <div class="box-title"><i class="fa fa-book" style="color:var(--gold)"></i> Course Info</div>
+                <div class="info-grid">
+                    <div class="info-tile"><div class="info-key">Course Name</div><div class="info-value" th:text="${course.name}">Course Name</div></div>
+                    <div class="info-tile"><div class="info-key">Course Code</div><div class="info-value" th:text="${course.code}">MCA</div></div>
+                    <div class="info-tile"><div class="info-key">Duration</div><div class="info-value" th:text="${course.durationYears != null ? course.durationYears + ' Year(s)' : '-'}">2 Year(s)</div></div>
+                    <div class="info-tile"><div class="info-key">Total Semesters</div><div class="info-value" th:text="${course.totalSemesters != null ? course.totalSemesters : '-'}">4</div></div>
+                    <div class="info-tile"><div class="info-key">Status</div><div class="info-value" th:text="${course.status != null ? course.status : 'Active'}">Active</div></div>
+                    <div class="info-tile"><div class="info-key">Department</div><div class="info-value" th:text="${course.department != null ? course.department : '-'}">Computer Applications</div></div>
+                </div>
+                <div class="action-row">
+                    <button type="button" class="btn-gold" onclick="openCourseModal()"><i class="fa fa-pen-to-square"></i> Edit Course</button>
+                    <a th:href="@{/admin-subject-registry(courseId=${course.id})}" class="btn-outline"><i class="fa fa-book-open"></i> Open Subject Registry</a>
+                    <button type="button" class="btn-red" onclick="openCourseDeleteModal()"><i class="fa fa-trash"></i> Delete Course</button>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${activeTab == 'subjects'}" class="subject-grid">
+            <div class="box">
+                <div class="box-title"><i class="fa fa-plus-circle" style="color:var(--gold)"></i> Add Subject to Registry</div>
+                <form th:action="@{/admin-courses/{id}/subject-master(id=${course.id})}" method="post" id="subjectMasterForm">
+                    <div class="registry-grid">
+                        <div class="form-group full">
+                            <label class="form-label">Subject Name *</label>
+                            <input class="form-input" type="text" name="name" id="masterName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject Code *</label>
+                            <input class="form-input" type="text" name="code" id="masterCode" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Academic Year *</label>
+                            <select class="form-select" name="yearLabel" id="masterYearLabel" required>
+                                <option value="">Select year</option>
+                                <option th:each="year : ${registryYearLabels}" th:value="${year}" th:text="${year}">FY</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Semester Number *</label>
+                            <select class="form-select" name="semesterNumber" id="masterSemester" required>
+                                <option value="">Select semester</option>
+                                <option th:each="sem : ${semesterOptions}" th:value="${sem}" th:text="${'Sem ' + sem}">Sem 1</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Credits</label>
+                            <input class="form-input" type="number" step="0.01" min="0" name="credits" value="4">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject Type *</label>
+                            <select class="form-select" name="category" required>
+                                <option value="COMPULSORY (CORE)">COMPULSORY (CORE)</option>
+                                <option value="ELECTIVE">ELECTIVE</option>
+                                <option value="LAB / PRACTICAL">LAB / PRACTICAL</option>
+                                <option value="PROJECT">PROJECT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="status-line" id="masterCodeStatus">Subject code must be unique within the same course and semester.</div>
+                    <div class="action-row">
+                        <button class="btn-gold" type="submit"><i class="fa fa-save"></i> Save Subject</button>
+                        <button class="btn-outline" type="reset"><i class="fa fa-rotate-right"></i> Reset</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="box">
+                <div class="box-title"><i class="fa fa-table" style="color:var(--gold)"></i> Subject Registry List</div>
+                <div class="filter-row">
+                    <div style="font-size:12px;color:#8a7a6a">Semester-based registry for all active batches of this course. Teacher assignment is managed separately.</div>
+                    <select class="form-select" id="semesterFilter" style="max-width:220px">
+                        <option value="">All Semesters</option>
+                        <option th:each="sem : ${semesterOptions}" th:value="${sem}" th:text="${'Sem ' + sem}" th:selected="${semesterFilter != null and semesterFilter == sem}">Sem 1</option>
+                    </select>
+                </div>
+                <div style="overflow-x:auto">
+                    <table id="subjectMasterTable">
+                        <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Year</th>
+                            <th>Semester</th>
+                            <th>Credits</th>
+                            <th>Assignment</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="subjectMaster : ${subjectMasters}"
+                            th:attr="data-semester=${subjectMaster.semesterNumber},
+                                     data-id=${subjectMaster.id},
+                                     data-name=${subjectMaster.name},
+                                     data-code=${subjectMaster.code},
+                                     data-year=${subjectMaster.yearLabel},
+                                     data-credits=${subjectMaster.credits},
+                                     data-category=${subjectMaster.category},
+                                     data-status=${subjectMaster.status},
+                                     data-usage=${subjectUsageCounts[subjectMaster.id] != null ? subjectUsageCounts[subjectMaster.id] : 0}">
+                            <td th:text="${subjectMaster.code}">MCA101</td>
+                            <td th:text="${subjectMaster.name}">Subject</td>
+                            <td th:text="${subjectMaster.yearLabel != null ? subjectMaster.yearLabel : '-'}">FY</td>
+                            <td th:text="${'Sem ' + subjectMaster.semesterNumber}">Sem 1</td>
+                            <td th:text="${subjectMaster.credits != null ? subjectMaster.credits : 4}">4</td>
+                            <td th:text="${'Use Manager (' + (subjectUsageCounts[subjectMaster.id] != null ? subjectUsageCounts[subjectMaster.id] : 0) + ' batch(es))'}">Use Manager</td>
+                            <td>
+                                <span class="badge-tag"
+                                      th:classappend="${subjectMaster.category == 'LAB / PRACTICAL'} ? ' tag-lab' :
+                                                      (${subjectMaster.category == 'ELECTIVE'} ? ' tag-elective' :
+                                                      (${subjectMaster.category == 'PROJECT'} ? ' tag-project' : ' tag-core'))"
+                                      th:text="${subjectMaster.category}">COMPULSORY (CORE)</span>
+                            </td>
+                            <td th:text="${subjectMaster.status != null ? #strings.capitalize(subjectMaster.status) : 'Active'}">Active</td>
+                            <td>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                    <button type="button" class="btn-outline" onclick="openSubjectViewModal(this)"><i class="fa fa-eye"></i> Open</button>
+                                    <button type="button" class="btn-dark" onclick="openSubjectEditModal(this)"><i class="fa fa-pen-to-square"></i> Edit</button>
+                                    <button type="button" class="btn-red" onclick="confirmDeleteSubjectMaster(this)"><i class="fa fa-trash"></i> Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${subjectMasters == null or #lists.isEmpty(subjectMasters)}">
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <strong>No subjects added yet.</strong>
+                                    Add subjects above to build the Subject Registry for this course.
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="courseModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3>Edit Course</h3><p>Update course details without changing the overall layout.</p></div>
+            <button type="button" class="modal-close" onclick="closeCourseModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form th:action="@{/admin-courses/{id}/update(id=${course.id})}" method="post">
+                <div class="subject-form-grid">
+                    <div class="form-group full"><label class="form-label">Course Name *</label><input class="form-input" type="text" name="name" th:value="${course.name}" required></div>
+                    <div class="form-group"><label class="form-label">Code *</label><input class="form-input" type="text" name="code" th:value="${course.code}" required></div>
+                    <div class="form-group"><label class="form-label">Status</label><select class="form-select" name="status"><option value="Active" th:selected="${course.status == null or course.status == 'Active'}">Active</option><option value="Inactive" th:selected="${course.status == 'Inactive'}">Inactive</option></select></div>
+                    <div class="form-group"><label class="form-label">Duration (Years)</label><input class="form-input" type="number" min="1" max="10" name="durationYears" th:value="${course.durationYears}"></div>
+                    <div class="form-group"><label class="form-label">Total Semesters</label><input class="form-input" type="number" min="1" max="20" name="totalSemesters" th:value="${course.totalSemesters}"></div>
+                    <div class="form-group"><label class="form-label">Department</label><input class="form-input" type="text" name="department" th:value="${course.department}"></div>
+                    <div class="form-group"><label class="form-label">Course Type</label><input class="form-input" type="text" name="courseType" th:value="${course.courseType}" placeholder="Undergraduate / Postgraduate"></div>
+                </div>
+                <div class="action-row">
+                    <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn-outline" onclick="closeCourseModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="subjectEditModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3>Edit Subject Registry</h3><p>Update the semester subject and keep linked batch copies aligned.</p></div>
+            <button type="button" class="modal-close" onclick="closeSubjectEditModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-note">Changes here sync into the current active batch subjects for this course and semester.</div>
+            <form th:action="@{/admin-courses/{id}/subject-master(id=${course.id})}" method="post" id="subjectEditForm">
+                <input type="hidden" name="id" id="editSubjectId">
+                <div class="registry-grid">
+                    <div class="form-group full"><label class="form-label">Subject Name *</label><input class="form-input" type="text" name="name" id="editSubjectName" required></div>
+                    <div class="form-group"><label class="form-label">Subject Code *</label><input class="form-input" type="text" name="code" id="editSubjectCode" required></div>
+                    <div class="form-group"><label class="form-label">Academic Year *</label><select class="form-select" name="yearLabel" id="editSubjectYearLabel" required><option th:each="year : ${registryYearLabels}" th:value="${year}" th:text="${year}">FY</option></select></div>
+                    <div class="form-group"><label class="form-label">Semester Number *</label><select class="form-select" name="semesterNumber" id="editSubjectSemester" required><option th:each="sem : ${semesterOptions}" th:value="${sem}" th:text="${'Sem ' + sem}">Sem 1</option></select></div>
+                    <div class="form-group"><label class="form-label">Credits</label><input class="form-input" type="number" step="0.01" min="0" name="credits" id="editSubjectCredits"></div>
+                    <div class="form-group"><label class="form-label">Subject Type</label><select class="form-select" name="category" id="editSubjectCategory"><option value="COMPULSORY (CORE)">COMPULSORY (CORE)</option><option value="ELECTIVE">ELECTIVE</option><option value="LAB / PRACTICAL">LAB / PRACTICAL</option><option value="PROJECT">PROJECT</option></select></div>
+                    <div class="form-group"><label class="form-label">Status</label><select class="form-select" name="status" id="editSubjectStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+                </div>
+                <div class="status-line" id="editCodeStatus">Subject code must stay unique within this course and semester.</div>
+                <div class="action-row">
+                    <button type="submit" class="btn-gold"><i class="fa fa-save"></i> Save Changes</button>
+                    <button type="button" class="btn-outline" onclick="closeSubjectEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-shell" id="subjectViewModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3 id="viewSubjectTitle">Subject Details</h3><p>Read-only registry details and linked batch usage.</p></div>
+            <button type="button" class="modal-close" onclick="closeSubjectViewModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-tile"><div class="info-key">Code</div><div class="info-value" id="viewSubjectCode">-</div></div>
+                <div class="info-tile"><div class="info-key">Name</div><div class="info-value" id="viewSubjectName">-</div></div>
+                <div class="info-tile"><div class="info-key">Year</div><div class="info-value" id="viewSubjectYear">-</div></div>
+                <div class="info-tile"><div class="info-key">Semester</div><div class="info-value" id="viewSubjectSemester">-</div></div>
+                <div class="info-tile"><div class="info-key">Credits</div><div class="info-value" id="viewSubjectCredits">-</div></div>
+                <div class="info-tile"><div class="info-key">Type</div><div class="info-value" id="viewSubjectCategory">-</div></div>
+                <div class="info-tile"><div class="info-key">Status</div><div class="info-value" id="viewSubjectStatus">-</div></div>
+                <div class="info-tile"><div class="info-key">Linked Batches</div><div class="info-value" id="viewSubjectUsage">0</div></div>
+            </div>
+            <div class="action-row">
+                <button type="button" class="btn-outline" onclick="closeSubjectViewModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form th:action="@{/admin-courses/{courseId}/subject-master/{subjectMasterId}/delete(courseId=${course.id},subjectMasterId=0)}" method="post" id="deleteSubjectMasterForm" style="display:none"></form>
+<form th:action="@{/admin-courses/{id}/delete(id=${course.id})}" method="post" id="deleteCourseForm" style="display:none"></form>
+
+<div class="modal-shell" id="deleteConfirmModal" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <div><h3 id="deleteConfirmTitle">Confirm Delete</h3><p id="deleteConfirmSub">This action will refresh linked records.</p></div>
+            <button type="button" class="modal-close" onclick="closeDeleteConfirmModal()"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-note" id="deleteConfirmText">Are you sure?</div>
+            <div class="action-row">
+                <button type="button" class="btn-outline" onclick="closeDeleteConfirmModal()">Cancel</button>
+                <button type="button" class="btn-red" onclick="submitDeleteConfirm()"><i class="fa fa-trash"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const courseId = /*[[${course.id}]]*/ 0;
+    const deleteForm = document.getElementById('deleteSubjectMasterForm');
+    const deleteCourseForm = document.getElementById('deleteCourseForm');
+    let pendingDeleteForm = null;
+    const masterCodeInput = document.getElementById('masterCode');
+    const masterSemesterInput = document.getElementById('masterSemester');
+    const masterCodeStatus = document.getElementById('masterCodeStatus');
+    const editCodeInput = document.getElementById('editSubjectCode');
+    const editSemesterInput = document.getElementById('editSubjectSemester');
+    const editCodeStatus = document.getElementById('editCodeStatus');
+    let addCodeTimer;
+    let editCodeTimer;
+
+    function openCourseModal() { document.getElementById('courseModal').classList.add('open'); }
+    function closeCourseModal() { document.getElementById('courseModal').classList.remove('open'); }
+    function closeSubjectEditModal() { document.getElementById('subjectEditModal').classList.remove('open'); }
+    function closeSubjectViewModal() { document.getElementById('subjectViewModal').classList.remove('open'); }
+    function closeDeleteConfirmModal() { document.getElementById('deleteConfirmModal').classList.remove('open'); pendingDeleteForm = null; }
+    function submitDeleteConfirm() { if (pendingDeleteForm) pendingDeleteForm.submit(); }
+
+    function openSubjectViewModal(button) {
+        const row = button.closest('tr');
+        document.getElementById('viewSubjectTitle').textContent = `${row.dataset.code || 'Subject'} Details`;
+        document.getElementById('viewSubjectCode').textContent = row.dataset.code || '-';
+        document.getElementById('viewSubjectName').textContent = row.dataset.name || '-';
+        document.getElementById('viewSubjectYear').textContent = row.dataset.year || '-';
+        document.getElementById('viewSubjectSemester').textContent = row.dataset.semester ? `Sem ${row.dataset.semester}` : '-';
+        document.getElementById('viewSubjectCredits').textContent = row.dataset.credits || '4';
+        document.getElementById('viewSubjectCategory').textContent = row.dataset.category || 'COMPULSORY (CORE)';
+        document.getElementById('viewSubjectStatus').textContent = row.dataset.status || 'active';
+        document.getElementById('viewSubjectUsage').textContent = `${row.dataset.usage || 0} batch(es)`;
+        document.getElementById('subjectViewModal').classList.add('open');
+    }
+
+    function openSubjectEditModal(button) {
+        const row = button.closest('tr');
+        document.getElementById('editSubjectId').value = row.dataset.id || '';
+        document.getElementById('editSubjectName').value = row.dataset.name || '';
+        document.getElementById('editSubjectCode').value = row.dataset.code || '';
+        document.getElementById('editSubjectYearLabel').value = row.dataset.year || '';
+        document.getElementById('editSubjectSemester').value = row.dataset.semester || '';
+        document.getElementById('editSubjectCredits').value = row.dataset.credits || '4';
+        document.getElementById('editSubjectCategory').value = row.dataset.category || 'COMPULSORY (CORE)';
+        document.getElementById('editSubjectStatus').value = row.dataset.status || 'active';
+        editCodeStatus.textContent = 'Changes will sync with linked batch subjects.';
+        editCodeStatus.classList.remove('loading');
+        document.getElementById('subjectEditModal').classList.add('open');
+    }
+
+    function confirmDeleteSubjectMaster(button) {
+        const row = button.closest('tr');
+        const usageCount = Number(row.dataset.usage || 0);
+        const message = usageCount > 0
+            ? `This subject is used in ${usageCount} active batch(es). Deleting it from Subject Registry will remove the linked batch subject copies as well. Do you want to continue?`
+            : 'Are you sure you want to delete this subject?';
+        deleteForm.action = `/admin-courses/${courseId}/subject-master/${row.dataset.id}/delete`;
+        pendingDeleteForm = deleteForm;
+        document.getElementById('deleteConfirmTitle').textContent = 'Delete Subject?';
+        document.getElementById('deleteConfirmSub').textContent = 'Linked batch subject copies will be refreshed.';
+        document.getElementById('deleteConfirmText').textContent = message;
+        document.getElementById('deleteConfirmModal').classList.add('open');
+    }
+
+    function openCourseDeleteModal() {
+        pendingDeleteForm = deleteCourseForm;
+        document.getElementById('deleteConfirmTitle').textContent = 'Delete Course?';
+        document.getElementById('deleteConfirmSub').textContent = 'Related batches, subjects and academic structure rows will be removed safely.';
+        document.getElementById('deleteConfirmText').textContent = 'Delete this course? This removes related batches, subject registry rows, batch subject copies and academic structure mappings.';
+        document.getElementById('deleteConfirmModal').classList.add('open');
+    }
+
+    function applySemesterFilter() {
+        const semester = document.getElementById('semesterFilter')?.value || '';
+        document.querySelectorAll('#subjectMasterTable tbody tr[data-semester]').forEach(row => {
+            row.style.display = !semester || row.dataset.semester === semester ? '' : 'none';
+        });
+    }
+
+    async function checkCode(input, semesterInput, statusEl, excludeId = '') {
+        const code = input.value.trim();
+        const semesterNumber = semesterInput.value;
+        if (!code || !semesterNumber) {
+            statusEl.textContent = 'Choose semester and subject code to check availability.';
+            statusEl.classList.remove('loading');
+            return;
+        }
+        statusEl.textContent = 'Checking subject code...';
+        statusEl.classList.add('loading');
+        const params = new URLSearchParams({ code, semesterNumber });
+        if (excludeId) params.set('excludeId', excludeId);
+        try {
+            const response = await fetch(`/admin-courses/${courseId}/subjects/check-code?${params.toString()}`, { credentials: 'same-origin' });
+            const payload = await response.json();
+            statusEl.textContent = payload.message || 'Validation complete.';
+        } catch (error) {
+            statusEl.textContent = 'Unable to validate subject code right now.';
+        } finally {
+            statusEl.classList.remove('loading');
+        }
+    }
+
+    document.getElementById('semesterFilter')?.addEventListener('change', applySemesterFilter);
+    applySemesterFilter();
+
+    [masterCodeInput, masterSemesterInput].forEach(element => element?.addEventListener('input', () => {
+        window.clearTimeout(addCodeTimer);
+        addCodeTimer = window.setTimeout(() => checkCode(masterCodeInput, masterSemesterInput, masterCodeStatus), 300);
+    }));
+
+    [editCodeInput, editSemesterInput].forEach(element => element?.addEventListener('input', () => {
+        window.clearTimeout(editCodeTimer);
+        editCodeTimer = window.setTimeout(() => checkCode(editCodeInput, editSemesterInput, editCodeStatus, document.getElementById('editSubjectId').value), 300);
+    }));
+
+    document.querySelectorAll('.modal-shell').forEach(modal => {
+        modal.addEventListener('click', event => {
+            if (event.target === modal && modal.id !== 'applyExistingModal') {
+                modal.classList.remove('open');
+            }
+        });
+    });
+</script>
+</body>
+</html>

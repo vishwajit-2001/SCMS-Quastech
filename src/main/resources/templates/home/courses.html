@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Courses — Student Campus</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/home/home.css"/>
+
+    <style>
+
+        :root{
+        --cream:#f9f7f2;
+        --gold:#c9a24a;
+        --border:#e8e0d0;
+        --dark:#1c1a16;
+        --mid:#6b6457;
+        --black:#0f0e0c;
+        --white:#fff;
+        }
+
+        body{
+        font-family:'Jost',sans-serif;
+        background:var(--cream);
+        margin:0;
+        }
+
+        /* HERO */
+
+        .page-hero{
+        padding:140px 40px 60px;
+        background:var(--cream);
+        }
+
+        .hero-inner{
+        max-width:1180px;
+        margin:auto;
+        text-align:center;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        }
+
+        .hero-eyebrow{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:18px;
+        }
+
+        .eyebrow-line{
+        width:30px;
+        height:2px;
+        background:var(--gold);
+        }
+
+        .eyebrow-text{
+        font-size:11px;
+        letter-spacing:4px;
+        color:var(--gold);
+        text-transform:uppercase;
+        }
+
+        .hero-heading{
+        font-family:'Cormorant Garamond',serif;
+        font-size:82px;
+        line-height:.9;
+        margin-bottom:20px;
+        }
+
+        .hero-heading em{
+        color:var(--gold);
+        font-style:italic;
+        }
+
+        .hero-sub{
+        max-width:600px;
+        color:var(--mid);
+        line-height:1.8;
+        margin:auto;
+        }
+
+        .hero-rule{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:16px;
+        margin-top:40px;
+        width:100%;
+        }
+
+        .rule-line{
+        height:1px;
+        flex:1;
+        background:linear-gradient(90deg,var(--gold),transparent);
+        }
+
+        .rule-count{
+        font-family:'Cormorant Garamond',serif;
+        font-size:13px;
+        color:#8a806b;
+        }
+
+        /* FILTER */
+
+        .filter-row{
+        margin-top:28px;
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        }
+
+        .filter-pill{
+        padding:8px 18px;
+        border-radius:100px;
+        border:1px solid var(--border);
+        background:white;
+        font-size:12px;
+        cursor:pointer;
+        }
+
+        .filter-pill.active{
+        background:var(--gold);
+        color:white;
+        border-color:var(--gold);
+        }
+
+        /* COURSES */
+
+        .courses-section{
+        padding:60px 40px 100px;
+        }
+
+        .courses-grid{
+        max-width:1180px;
+        margin:auto;
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:26px;
+        }
+
+        /* CARD */
+
+        .course-card{
+        background:white;
+        border-radius:20px;
+        border:1px solid var(--border);
+        display:flex;
+        flex-direction:column;
+        transition:.3s;
+        }
+
+        .course-card:hover{
+        transform:translateY(-6px);
+        box-shadow:0 10px 40px rgba(0,0,0,.08);
+        }
+
+        .card-icon-strip{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:25px 25px 0;
+        }
+
+        .card-icon{
+        font-size:22px;
+        }
+
+        .card-tag{
+        font-size:10px;
+        letter-spacing:2px;
+        color:var(--gold);
+        text-transform:uppercase;
+        }
+
+        .card-body{
+        padding:20px 25px;
+        flex:1;
+        }
+
+        .card-title{
+        font-family:'Cormorant Garamond',serif;
+        font-size:24px;
+        margin-bottom:10px;
+        }
+
+        .card-desc{
+        font-size:14px;
+        color:var(--mid);
+        margin-bottom:20px;
+        }
+
+        .card-divider{
+        height:1px;
+        background:var(--border);
+        margin:16px 0;
+        }
+
+        .card-details{
+        list-style:none;
+        padding:0;
+        margin:0 0 18px;
+        }
+
+        .card-details li{
+        font-size:13px;
+        margin-bottom:6px;
+        }
+
+        .card-benefits{
+        list-style:none;
+        padding:0;
+        margin:0;
+        }
+
+        .card-benefits li{
+        font-size:13px;
+        margin-bottom:6px;
+        }
+
+        .card-footer{
+        padding:20px;
+        }
+
+        .card-btn{
+        display:block;
+        text-align:center;
+        padding:12px;
+        background:black;
+        color:white;
+        border-radius:10px;
+        text-decoration:none;
+        font-size:13px;
+        }
+
+        .card-btn:hover{
+        background:var(--gold);
+        color:black;
+        }
+
+        /* FEATURED */
+
+        .course-card.featured{
+        background:#0f0e0c;
+        color:white;
+        }
+
+        .course-card.featured .card-desc{
+        color:#bfb8a8;
+        }
+
+        .course-card.featured .card-divider{
+        background:#2a2926;
+        }
+
+        .course-card.featured .card-btn{
+        background:linear-gradient(135deg,#c9a24a,#e2b96a);
+        color:black;
+        }
+
+        /* CTA */
+
+        .enroll-section{
+        background:#0f0e0c;
+        padding:80px 40px;
+        text-align:center;
+        }
+
+        .enroll-heading{
+        font-family:'Cormorant Garamond',serif;
+        font-size:46px;
+        color:white;
+        }
+
+        .enroll-heading em{
+        color:#e2b96a;
+        }
+
+        .enroll-text{
+        color:#aaa;
+        margin:20px auto 40px;
+        max-width:450px;
+        }
+
+        .enroll-btn{
+        padding:14px 36px;
+        border-radius:100px;
+        background:linear-gradient(135deg,#c9a24a,#e2b96a);
+        color:black;
+        text-decoration:none;
+        font-weight:600;
+        }
+
+    </style>
+
+</head>
+
+<body>
+<!-- =========================
+NAVBAR (GLOBAL)
+========================= -->
+
+<div th:replace="~{home/fragments/navbar :: homeNavbar}"></div>
+
+<div th:replace="~{home/fragments/navbar :: loginModal}"></div>
+
+<div th:replace="~{home/fragments/navbar :: loginScript}"></div>
+
+
+
+<!-- HERO -->
+
+<section class="page-hero">
+
+    <div class="hero-inner">
+
+        <div class="hero-eyebrow">
+            <span class="eyebrow-line"></span>
+            <span class="eyebrow-text">Academic Programs</span>
+        </div>
+
+        <h1 class="hero-heading">
+            Explore<br>
+            <em>Programs</em>
+        </h1>
+
+        <p class="hero-sub">
+            Choose the right program to shape your future career.
+            Industry-aligned curriculum designed with leading academics
+            and real-world employers.
+        </p>
+
+        <div class="hero-rule">
+            <div class="rule-line"></div>
+            <div class="rule-count">6 Programs Available</div>
+        </div>
+
+        <div class="filter-row">
+            <button class="filter-pill active" onclick="filterCourses('all',this)">All Programs</button>
+            <button class="filter-pill" onclick="filterCourses('tech',this)">Technology</button>
+            <button class="filter-pill" onclick="filterCourses('data',this)">Data & AI</button>
+            <button class="filter-pill" onclick="filterCourses('business',this)">Business</button>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- COURSES -->
+
+<section class="courses-section">
+
+    <div class="courses-grid">
+
+        <!-- COMPUTER SCIENCE -->
+
+        <article class="course-card " data-category="tech">
+
+            <div class="card-icon-strip">
+                <div class="card-icon">💻</div>
+                <span class="card-tag">Featured</span>
+            </div>
+
+            <div class="card-body">
+
+                <h2 class="card-title">Computer Science</h2>
+
+                <p class="card-desc">
+                    Master programming, algorithms, artificial intelligence
+                    and system design.
+                </p>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-details">
+                    <li>Duration: 3 Years</li>
+                    <li>Instructor: Prof. Sharma</li>
+                    <li>Certificate: B.Sc / M.Sc</li>
+                </ul>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-benefits">
+                    <li>Industry ready software skills</li>
+                    <li>Real world projects</li>
+                    <li>Top company placements</li>
+                </ul>
+
+            </div>
+
+            <div class="card-footer">
+                <a href="/contact" class="card-btn">Contact For Enrollment</a>
+            </div>
+
+        </article>
+
+        <!--Artificial Intelligence -->
+
+        <article class="course-card" data-category="data">
+
+            <div class="card-icon-strip">
+                <div class="card-icon">🤖</div>
+                <span class="card-tag">AI</span>
+            </div>
+
+            <div class="card-body">
+
+                <h2 class="card-title">Artificial Intelligence</h2>
+
+                <p class="card-desc">
+                    Learn deep learning, NLP and generative AI technologies.
+                </p>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-details">
+                    <li>Duration: 2 Years</li>
+                    <li>Instructor: Dr. Patil</li>
+                    <li>Certificate: M.Tech AI</li>
+                </ul>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-benefits">
+                    <li>Deep learning models</li>
+                    <li>AI research projects</li>
+                    <li>ML engineer careers</li>
+                </ul>
+
+            </div>
+
+            <div class="card-footer">
+                <a href="/contact" class="card-btn">Contact For Enrollment</a>
+            </div>
+
+        </article>
+
+        <!--Business Analytics-->
+
+        <article class="course-card" data-category="business">
+
+            <div class="card-icon-strip">
+                <div class="card-icon">📈</div>
+                <span class="card-tag">Business</span>
+            </div>
+
+            <div class="card-body">
+
+                <h2 class="card-title">Business Analytics</h2>
+
+                <p class="card-desc">
+                    Use data to drive strategic business decisions.
+                </p>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-details">
+                    <li>Duration: 18 Months</li>
+                    <li>Instructor: Prof. Joshi</li>
+                    <li>Certificate: MBA Analytics</li>
+                </ul>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-benefits">
+                    <li>Business intelligence tools</li>
+                    <li>Strategy consulting</li>
+                    <li>Corporate leadership roles</li>
+                </ul>
+
+            </div>
+
+            <div class="card-footer">
+                <a href="/contact" class="card-btn">Contact For Enrollment</a>
+            </div>
+
+        </article>
+
+        <!--CYBER SECURITY-->
+
+        <article class="course-card" data-category="tech">
+
+            <div class="card-icon-strip">
+                <div class="card-icon">🔐</div>
+                <span class="card-tag">Security</span>
+            </div>
+
+            <div class="card-body">
+
+                <h2 class="card-title">Cyber Security</h2>
+
+                <p class="card-desc">
+                    Protect systems, networks and data from cyber attacks.
+                </p>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-details">
+                    <li>Duration: 2 Years</li>
+                    <li>Instructor: Prof. Kulkarni</li>
+                    <li>Certificate: M.Sc Cyber Security</li>
+                </ul>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-benefits">
+                    <li>Ethical hacking</li>
+                    <li>Pen testing skills</li>
+                    <li>Security analyst career</li>
+                </ul>
+
+            </div>
+
+            <div class="card-footer">
+                <a href="/contact" class="card-btn">Contact For Enrollment</a>
+            </div>
+
+        </article>
+
+        <!-- IT -->
+
+        <article class="course-card" data-category="tech">
+
+            <div class="card-icon-strip">
+                <div class="card-icon">🌐</div>
+                <span class="card-tag">Technology</span>
+            </div>
+
+            <div class="card-body">
+
+                <h2 class="card-title">Information Technology</h2>
+
+                <p class="card-desc">
+                    Study networking, cloud computing
+                    and enterprise IT systems.
+                </p>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-details">
+                    <li>Duration: 3 Years</li>
+                    <li>Instructor: Prof. Desai</li>
+                    <li>Certificate: B.Sc IT</li>
+                </ul>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-benefits">
+                    <li>Cloud & DevOps skills</li>
+                    <li>Network architecture</li>
+                    <li>Enterprise projects</li>
+                </ul>
+
+            </div>
+
+            <div class="card-footer">
+                <a href="/contact" class="card-btn">Contact For Enrollment</a>
+            </div>
+
+        </article>
+
+        <!-- DATA SCIENCE -->
+
+        <article class="course-card" data-category="data">
+
+            <div class="card-icon-strip">
+                <div class="card-icon">📊</div>
+                <span class="card-tag">Data</span>
+            </div>
+
+            <div class="card-body">
+
+                <h2 class="card-title">Data Science</h2>
+
+                <p class="card-desc">
+                    Machine learning, analytics
+                    and predictive modelling.
+                </p>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-details">
+                    <li>Duration: 2 Years</li>
+                    <li>Instructor: Dr. Mehta</li>
+                    <li>Certificate: M.Sc Data Science</li>
+                </ul>
+
+                <div class="card-divider"></div>
+
+                <ul class="card-benefits">
+                    <li>Python & SQL skills</li>
+                    <li>Industry data projects</li>
+                    <li>Analytics careers</li>
+                </ul>
+
+            </div>
+
+            <div class="card-footer">
+                <a href="/contact" class="card-btn">Contact For Enrollment</a>
+            </div>
+
+        </article>
+
+    </div>
+
+</section>
+
+<!-- CTA -->
+
+<section class="enroll-section">
+
+    <h2 class="enroll-heading">
+        Interested in <em>enrolling?</em>
+    </h2>
+
+    <p class="enroll-text">
+        If you want to enroll in any course
+        please contact our admissions team.
+    </p>
+
+    <a href="/contact" class="enroll-btn">
+        Contact Admissions
+    </a>
+
+</section>
+
+<script>
+
+    function filterCourses(category,btn){
+
+    document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.course-card').forEach(card=>{
+
+    if(category==='all'||card.dataset.category===category){
+    card.style.display='';
+    }else{
+    card.style.display='none';
+    }
+
+    });
+
+    }
+
+</script>
+
+</body>
+</html>

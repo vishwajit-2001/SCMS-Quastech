@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="topbar(title)" class="portal-header">
+    <div class="portal-header-copy">
+        <span class="portal-header-kicker">Student Workspace</span>
+        <div class="portal-header-title-row">
+            <h1 class="portal-header-title" th:text="${title}">Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="portal-header-actions">
+        <a th:href="@{/timetable}" class="portal-header-btn" aria-label="Open timetable">
+            <i class="fa-regular fa-calendar"></i>
+        </a>
+        <a th:href="@{/notifications}" class="portal-header-btn" aria-label="Open notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span class="portal-header-btn-badge" th:text="${notificationCount} ?: 0">0</span>
+        </a>
+        <a th:href="@{/student-profile}" class="portal-user-pill">
+            <div class="portal-avatar" th:text="${studentInitials} ?: 'ST'">ST</div>
+            <div class="portal-user-meta">
+                <span class="portal-user-name" th:text="${studentName} ?: 'Student'">Student</span>
+                <span class="portal-user-role" th:text="${studentCourse} ?: 'Student'">Student</span>
+            </div>
+        </a>
+    </div>
+</header>
+</body>
+</html>

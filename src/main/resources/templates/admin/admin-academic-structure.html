@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Academic Structure - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        .structure-shell { padding: 26px 36px 34px; display: grid; gap: 22px; width: 100%; }
+        .structure-grid { display:grid; grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.4fr); gap:22px; align-items: start; }
+        .structure-panel {
+            border-radius: 26px;
+            border: 1px solid rgba(75,73,172,0.12);
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,248,255,0.98) 100%);
+            box-shadow: 0 24px 50px rgba(31,41,55,0.08);
+            overflow: hidden;
+            min-width: 0;
+        }
+        .structure-panel-head {
+            padding: 24px 26px 14px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            border-bottom: 1px solid rgba(75,73,172,0.1);
+        }
+        .structure-panel-title {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #3138a0;
+        }
+        .structure-panel-title i {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            display:grid;
+            place-items:center;
+            background: rgba(75,73,172,0.08);
+            color: #4b49ac;
+        }
+        .structure-panel-body { padding: 22px 26px 26px; }
+        .structure-form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:16px; }
+        .structure-field { display:grid; gap:8px; }
+        .structure-field--full { grid-column: 1 / -1; }
+        .structure-field label {
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #6f78ab;
+        }
+        .structure-field select,
+        .structure-field input {
+            width: 100%;
+            min-height: 52px;
+            border-radius: 16px;
+            border: 1px solid rgba(75,73,172,0.16);
+            background: #f7f8ff;
+            color: #20263c;
+            padding: 0 15px;
+            font: inherit;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+        .structure-field select:focus,
+        .structure-field input:focus {
+            outline: none;
+            border-color: rgba(75,73,172,0.36);
+            box-shadow: 0 0 0 4px rgba(75,73,172,0.10);
+            transform: translateY(-1px);
+        }
+        .structure-chip-row { display:flex; flex-wrap:wrap; gap:10px; }
+        .structure-chip {
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(75,73,172,0.08);
+            color: #4b49ac;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .structure-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
+        .structure-btn,
+        .structure-btn-secondary {
+            min-height: 48px;
+            border-radius: 999px;
+            padding: 0 20px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            border: 0;
+            text-decoration:none;
+            cursor:pointer;
+            font: inherit;
+            font-weight: 800;
+            transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+        }
+        .structure-btn {
+            color: #fff;
+            background: linear-gradient(135deg, #4b49ac 0%, #7978e9 100%);
+            box-shadow: 0 18px 32px rgba(75,73,172,0.22);
+        }
+        .structure-btn-secondary {
+            color: #4b49ac;
+            background: #fff;
+            border: 1px solid rgba(75,73,172,0.16);
+        }
+        .structure-btn:hover,
+        .structure-btn-secondary:hover { transform: translateY(-1px); }
+        .structure-toolbar {
+            display:flex;
+            flex-wrap: wrap;
+            gap:12px;
+            margin-bottom: 18px;
+            width: 100%;
+        }
+        .structure-toolbar > * { flex: 1 1 150px; min-width: 0; }
+        .structure-toolbar > #structureSearch { flex: 1.8 1 260px; }
+        .structure-toolbar > #structureReset { flex: 0 0 auto; min-width: 126px; }
+        .structure-toolbar input,
+        .structure-toolbar select {
+            width: 100%;
+            min-height: 52px;
+            border-radius: 16px;
+            border: 1px solid rgba(75,73,172,0.16);
+            background: #f7f8ff;
+            color: #20263c;
+            padding: 0 15px;
+            font: inherit;
+            appearance: none;
+            -webkit-appearance: none;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+        .structure-toolbar input::placeholder {
+            color: #7f88ad;
+        }
+        .structure-toolbar input:focus,
+        .structure-toolbar select:focus {
+            outline: none;
+            border-color: rgba(75,73,172,0.36);
+            box-shadow: 0 0 0 4px rgba(75,73,172,0.10);
+            transform: translateY(-1px);
+        }
+        .structure-table-wrap {
+            overflow:auto;
+            border-radius: 18px;
+            border: 1px solid rgba(75,73,172,0.10);
+            width: 100%;
+        }
+        .structure-table {
+            width:100%;
+            min-width: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+        }
+        .structure-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            text-align:left;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, #4b49ac 0%, #6461d4 100%);
+            color: #fff;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .structure-table tbody td {
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(75,73,172,0.08);
+            color: #34405f;
+            vertical-align: middle;
+            word-break: break-word;
+        }
+        .structure-table tbody tr:hover { background: rgba(75,73,172,0.03); }
+        .structure-row-actions {
+            display:flex;
+            gap:8px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+        .structure-icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(75,73,172,0.14);
+            background: #fff;
+            color: #4b49ac;
+            display:inline-grid;
+            place-items:center;
+            cursor:pointer;
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+        .structure-icon-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(75,73,172,0.32);
+            box-shadow: 0 10px 20px rgba(31,41,55,0.08);
+        }
+        .structure-icon-btn--danger {
+            color: #d94848;
+            border-color: rgba(217,72,72,0.2);
+        }
+        .structure-pill {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: rgba(75,73,172,0.08);
+            color: #4b49ac;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .structure-pill--soft {
+            background: rgba(121,120,233,0.10);
+            color: #5b59be;
+        }
+        .structure-empty {
+            padding: 34px 18px;
+            text-align:center;
+            color: #8a92b7;
+        }
+        .structure-empty i {
+            font-size: 28px;
+            color: #7978e9;
+            margin-bottom: 10px;
+        }
+        .structure-empty h3 {
+            font-size: 18px;
+            color: #2f3560;
+            margin-bottom: 8px;
+        }
+        .structure-toast-stack {
+            position: fixed;
+            right: 20px;
+            top: 84px;
+            z-index: 500;
+            display:grid;
+            gap:10px;
+        }
+        .structure-toast {
+            min-width: 260px;
+            max-width: 360px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(75,73,172,0.12);
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 18px 36px rgba(31,41,55,0.12);
+            color: #26314f;
+            animation: fadeUp .25s ease both;
+        }
+        .structure-toast--error {
+            border-color: rgba(232,64,64,0.18);
+            background: #fff6f6;
+            color: #a72c2c;
+        }
+        .structure-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 800;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding: 24px;
+            background: rgba(18,23,43,0.42);
+            backdrop-filter: blur(3px);
+        }
+        .structure-modal.is-visible { display:flex; }
+        .structure-modal-card {
+            width: min(440px, 100%);
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 26px 70px rgba(18,23,43,0.24);
+            border: 1px solid rgba(75,73,172,0.12);
+            padding: 22px;
+        }
+        .structure-modal-card h3 {
+            margin: 0 0 8px;
+            color: #222943;
+            font-size: 20px;
+        }
+        .structure-modal-card p {
+            margin: 0;
+            color: #6f789e;
+            line-height: 1.5;
+        }
+        .structure-modal-actions {
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            margin-top: 22px;
+        }
+        .structure-btn-danger {
+            min-height: 44px;
+            border-radius: 999px;
+            border: 0;
+            padding: 0 18px;
+            background: #d94848;
+            color: #fff;
+            font: inherit;
+            font-weight: 800;
+            cursor:pointer;
+        }
+        .structure-loading {
+            position: absolute;
+            inset: 0;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: blur(2px);
+            z-index: 10;
+        }
+        .structure-loading.is-visible { display:flex; }
+        .structure-spinner {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 4px solid rgba(75,73,172,0.12);
+            border-top-color: #4b49ac;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 1380px) {
+            .structure-grid { grid-template-columns: minmax(340px, 0.95fr) minmax(0, 1.25fr); }
+        }
+        @media (max-width: 1280px) {
+            .structure-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 960px) {
+            .structure-shell { padding: 20px 16px 24px; }
+            .structure-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 680px) {
+            .structure-form-grid { grid-template-columns: 1fr; }
+            .structure-panel-head { padding: 18px 18px 12px; }
+            .structure-panel-body { padding: 18px; }
+            .structure-actions { flex-direction: column; }
+            .structure-btn,
+            .structure-btn-secondary { width: 100%; }
+            .structure-toolbar { flex-direction: column; }
+            .structure-toolbar > * { flex: 1 1 auto; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('academic-structure')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">Academic Structure</div>
+        <div class="header-right">
+            <a href="/admin-subject-registry" class="btn-dark"><i class="fa fa-book-open"></i> Subject Registry</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="structure-toast-stack">
+        <div class="structure-toast"
+             th:if="${param.success}"
+             th:text="${param.success}">Success</div>
+        <div class="structure-toast structure-toast--error"
+             th:if="${param.error}"
+             th:text="${param.error}">Error</div>
+        <div class="structure-toast"
+             th:if="${param.info}"
+             th:text="${param.info}">Info</div>
+        <div class="structure-toast structure-toast--error"
+             th:if="${error}"
+             th:text="${error}">Error</div>
+    </div>
+
+    <div class="structure-shell">
+        <section class="structure-grid">
+            <article class="structure-panel">
+                <div class="structure-panel-head">
+                    <div class="structure-panel-title">
+                        <i class="fa fa-sitemap"></i>
+                        <span>Dynamic Structure Builder</span>
+                    </div>
+                </div>
+                <div class="structure-panel-body">
+                    <form action="/admin-academic-structure" method="post" id="structureForm">
+                        <div class="structure-form-grid">
+                            <div class="structure-field structure-field--full">
+                                <label for="structureCourseId">Course</label>
+                                <select name="courseId" id="structureCourseId" required>
+                                    <option value="">Select course</option>
+                                    <option th:each="course : ${courses}"
+                                            th:value="${course.id}"
+                                            th:attr="data-code=${course.code},data-name=${course.name},data-semesters=${course.totalSemesters}"
+                                            th:text="${course.code + ' - ' + course.name}">Course</option>
+                                </select>
+                            </div>
+                            <div class="structure-field structure-field--full">
+                                <label for="structureBatchId">Batch</label>
+                                <select name="batchId" id="structureBatchId" required>
+                                    <option value="">Select batch</option>
+                                    <option th:each="batch : ${batches}"
+                                            th:value="${batch.id}"
+                                            th:attr="data-course-id=${batch.course.id},data-start-year=${batch.startYear},data-end-year=${batch.endYear}"
+                                            th:text="${batch.displayName}">Batch</option>
+                                </select>
+                            </div>
+                            <div class="structure-field">
+                                <label for="structureAcademicYear">Academic Year</label>
+                                <select id="structureAcademicYear" disabled>
+                                    <option value="">Choose course and batch</option>
+                                </select>
+                            </div>
+                            <div class="structure-field">
+                                <label for="structureYear">Year Type</label>
+                                <select name="year" id="structureYear" required>
+                                    <option value="">Select year type</option>
+                                </select>
+                            </div>
+                            <div class="structure-field structure-field--full">
+                                <label for="structureSemester">Semester</label>
+                                <select name="semester" id="structureSemester" required>
+                                    <option value="">Select semester</option>
+                                </select>
+                            </div>
+                            <div class="structure-field structure-field--full">
+                                <label for="structureSection">Section</label>
+                                <input name="section" id="structureSection" placeholder="Enter section, e.g. A" maxlength="10" required>
+                            </div>
+                        </div>
+
+                        <div class="structure-actions">
+                            <button class="structure-btn" type="submit" id="structureSubmitBtn">
+                                <i class="fa fa-floppy-disk"></i>
+                                <span>Save Structure Row</span>
+                            </button>
+                            <button class="structure-btn-secondary" type="button" id="structureCancelEdit" hidden>
+                                <i class="fa fa-xmark"></i>
+                                Cancel Edit
+                            </button>
+                            <a class="structure-btn-secondary" href="/admin-courses">
+                                <i class="fa fa-book"></i>
+                                Open Courses
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="structure-chip-row" id="structurePreviewChips" style="margin-top:16px;"></div>
+                </div>
+            </article>
+
+            <article class="structure-panel" style="position:relative;">
+                <div class="structure-loading" id="structureLoading">
+                    <div class="structure-spinner" aria-hidden="true"></div>
+                </div>
+                <div class="structure-panel-head">
+                    <div class="structure-panel-title">
+                        <i class="fa fa-table-cells-large"></i>
+                        <span>Structure Matrix</span>
+                    </div>
+                    <div style="font-size:13px;color:#7c85aa;">Search, filter, and verify semester mapping in one place.</div>
+                </div>
+                <div class="structure-panel-body">
+                    <div class="structure-toolbar">
+                        <input id="structureSearch" type="search" placeholder="Search course, batch, year, semester">
+                        <select id="structureCourseFilter">
+                            <option value="">All Courses</option>
+                            <option th:each="course : ${courses}" th:value="${course.code}" th:text="${course.code}">Course</option>
+                        </select>
+                        <select id="structureBatchFilter">
+                            <option value="">All Batches</option>
+                            <option th:each="batch : ${batches}" th:value="${batch.displayName}" th:text="${batch.displayName}">Batch</option>
+                        </select>
+                        <select id="structureAcademicYearFilter">
+                            <option value="">All Academic Years</option>
+                            <option th:each="year : ${structureAcademicYearOptions}" th:value="${year}" th:text="${year}">2026-27</option>
+                        </select>
+                        <select id="structureYearFilter">
+                            <option value="">All Year Types</option>
+                            <option th:each="year : ${structureYearOptions}" th:value="${year}" th:text="${year}">FY</option>
+                        </select>
+                        <button class="structure-btn-secondary" type="button" id="structureReset">
+                            <i class="fa fa-rotate-right"></i>
+                            Reset
+                        </button>
+                    </div>
+
+                    <div class="structure-table-wrap" th:if="${!#lists.isEmpty(structureRows)}">
+                        <table class="structure-table" id="structureTable">
+                            <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Batch</th>
+                                <th>Academic Year</th>
+                                <th>Year Type</th>
+                                <th>Semester</th>
+                                <th>Section</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${structureRows}"
+                                th:attr="data-id=${row.structureId},data-course-id=${row.courseId},data-batch-id=${row.batchId},data-course=${row.courseCode},data-batch=${row.batchName},data-academic-year=${row.academicYear},data-year=${row.yearLabel},data-semester=${row.semesterNumber},data-section=${row.section}">
+                                <td>
+                                    <div style="display:grid;gap:4px;">
+                                        <strong th:text="${row.courseCode}">MCA</strong>
+                                        <span style="font-size:12px;color:#8590b5;" th:text="${row.courseName}">Master of Computer Applications</span>
+                                    </div>
+                                </td>
+                                <td th:text="${row.batchName}">MCA (26-28)</td>
+                                <td>
+                                    <span class="structure-pill structure-pill--soft" th:text="${row.academicYear}">2026-27</span>
+                                </td>
+                                <td>
+                                    <div style="display:grid;gap:4px;">
+                                        <strong th:text="${row.yearLabel}">FY</strong>
+                                        <span style="font-size:12px;color:#8590b5;" th:text="${row.yearDisplay}">FYMCA</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="structure-pill" th:text="${row.semesterLabel}">Sem 1</span>
+                                </td>
+                                <td th:text="${row.section}">A</td>
+                                <td>
+                                    <div class="structure-row-actions">
+                                        <button class="structure-icon-btn structure-edit-row" type="button" title="Edit row">
+                                            <i class="fa fa-pen"></i>
+                                        </button>
+                                        <button class="structure-icon-btn structure-icon-btn--danger structure-delete-row" type="button" title="Delete row">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="structure-empty" th:if="${#lists.isEmpty(structureRows)}">
+                        <i class="fa fa-diagram-project"></i>
+                        <h3>No academic structure rows yet</h3>
+                        <p>Create a batch and the matrix will auto-generate the valid year and semester combinations.</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </div>
+</div>
+
+<div class="structure-modal" id="deleteStructureModal" aria-hidden="true">
+    <div class="structure-modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteStructureTitle">
+        <h3 id="deleteStructureTitle">Delete structure row?</h3>
+        <p id="deleteStructureText">This will remove the selected semester mapping and refresh the matrix.</p>
+        <form method="post" id="deleteStructureForm">
+            <div class="structure-modal-actions">
+                <button class="structure-btn-secondary" type="button" id="cancelDeleteStructure">Cancel</button>
+                <button class="structure-btn-danger" type="submit">Delete Row</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const structureForm = document.getElementById('structureForm');
+    const courseSelect = document.getElementById('structureCourseId');
+    const batchSelect = document.getElementById('structureBatchId');
+    const academicYearSelect = document.getElementById('structureAcademicYear');
+    const yearSelect = document.getElementById('structureYear');
+    const semesterSelect = document.getElementById('structureSemester');
+    const sectionInput = document.getElementById('structureSection');
+    const previewChips = document.getElementById('structurePreviewChips');
+    const loadingMask = document.getElementById('structureLoading');
+    const tableRows = Array.from(document.querySelectorAll('#structureTable tbody tr'));
+    const submitBtn = document.getElementById('structureSubmitBtn');
+    const cancelEditBtn = document.getElementById('structureCancelEdit');
+    const deleteModal = document.getElementById('deleteStructureModal');
+    const deleteForm = document.getElementById('deleteStructureForm');
+    const deleteText = document.getElementById('deleteStructureText');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteStructure');
+
+    const searchEl = document.getElementById('structureSearch');
+    const courseFilterEl = document.getElementById('structureCourseFilter');
+    const batchFilterEl = document.getElementById('structureBatchFilter');
+    const academicYearFilterEl = document.getElementById('structureAcademicYearFilter');
+    const yearFilterEl = document.getElementById('structureYearFilter');
+    const resetBtn = document.getElementById('structureReset');
+
+    let currentOptions = { rows: [], semesterMap: {} };
+    let pendingEdit = null;
+
+    function fillSelect(select, items, placeholder, valueMapper) {
+        select.innerHTML = '';
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = placeholder;
+        select.appendChild(placeholderOption);
+        items.forEach(item => {
+            const mapped = valueMapper ? valueMapper(item) : { value: item, label: item };
+            const option = document.createElement('option');
+            option.value = mapped.value;
+            option.textContent = mapped.label;
+            select.appendChild(option);
+        });
+    }
+
+    function filterBatchOptions() {
+        const courseId = courseSelect.value;
+        Array.from(batchSelect.options).forEach((option, index) => {
+            if (index === 0) {
+                option.hidden = false;
+                return;
+            }
+            option.hidden = !!courseId && option.dataset.courseId !== courseId;
+        });
+        if (batchSelect.selectedOptions[0]?.hidden) {
+            batchSelect.value = '';
+        }
+    }
+
+    function updatePreviewChips(rows) {
+        previewChips.innerHTML = '';
+        rows.slice(0, 4).forEach(row => {
+            const chip = document.createElement('div');
+            chip.className = 'structure-chip';
+            chip.innerHTML = `<i class="fa fa-arrows-split-up-and-left"></i><span>${row.academicYear} · ${row.yearDisplay} · ${row.semesterLabel}</span>`;
+            previewChips.appendChild(chip);
+        });
+    }
+
+    async function loadStructureOptions() {
+        const courseId = courseSelect.value;
+        const batchId = batchSelect.value;
+        if (!courseId || !batchId) {
+            fillSelect(academicYearSelect, [], 'Choose course and batch');
+            fillSelect(yearSelect, [], 'Select year type');
+            fillSelect(semesterSelect, [], 'Select semester');
+            previewChips.innerHTML = '';
+            return;
+        }
+
+        loadingMask.classList.add('is-visible');
+        try {
+            const params = new URLSearchParams({ courseId, batchId });
+            const response = await fetch(`/admin-academic-structure/options?${params.toString()}`);
+            const data = await response.json();
+            if (!data.ok) {
+                throw new Error(data.message || 'Unable to load structure options');
+            }
+
+            currentOptions = data;
+            fillSelect(academicYearSelect, data.academicYears, 'Academic year', item => ({ value: item, label: item }));
+            fillSelect(yearSelect, data.yearLabels, 'Select year type', item => ({ value: item, label: item }));
+            fillSelect(semesterSelect, [], 'Select semester');
+            academicYearSelect.value = data.academicYears[0] || '';
+            yearSelect.value = pendingEdit?.year || data.yearLabels[0] || '';
+            syncSemesterOptions();
+            if (pendingEdit?.semester) {
+                semesterSelect.value = pendingEdit.semester;
+            }
+            updatePreviewChips(data.rows || []);
+        } catch (error) {
+            previewChips.innerHTML = `<div class="structure-chip" style="background:rgba(232,64,64,0.08);color:#c13d3d;"><i class="fa fa-circle-exclamation"></i><span>${error.message}</span></div>`;
+        } finally {
+            loadingMask.classList.remove('is-visible');
+        }
+    }
+
+    function syncSemesterOptions() {
+        const yearLabel = yearSelect.value;
+        const semesterOptions = currentOptions.semesterMap?.[yearLabel] || [];
+        fillSelect(semesterSelect, semesterOptions, 'Select semester', value => ({ value, label: `Sem ${value}` }));
+
+        const match = (currentOptions.rows || []).find(row => row.yearLabel === yearLabel);
+        academicYearSelect.value = match?.academicYear || '';
+    }
+
+    function applyTableFilters() {
+        const search = searchEl.value.trim().toLowerCase();
+        const course = courseFilterEl.value;
+        const batch = batchFilterEl.value;
+        const academicYear = academicYearFilterEl.value;
+        const year = yearFilterEl.value;
+
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const visible = (!search || text.includes(search))
+                && (!course || row.dataset.course === course)
+                && (!batch || row.dataset.batch === batch)
+                && (!academicYear || row.dataset.academicYear === academicYear)
+                && (!year || row.dataset.year === year);
+            row.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function resetFilters() {
+        searchEl.value = '';
+        courseFilterEl.value = '';
+        batchFilterEl.value = '';
+        academicYearFilterEl.value = '';
+        yearFilterEl.value = '';
+        applyTableFilters();
+    }
+
+    async function startEdit(row) {
+        const id = row.dataset.id;
+        pendingEdit = {
+            year: row.dataset.year,
+            semester: row.dataset.semester
+        };
+        structureForm.action = `/admin-academic-structure/${id}/edit`;
+        courseSelect.value = row.dataset.courseId || '';
+        filterBatchOptions();
+        batchSelect.value = row.dataset.batchId || '';
+        sectionInput.value = row.dataset.section || '';
+        submitBtn.querySelector('span').textContent = 'Update Structure Row';
+        cancelEditBtn.hidden = false;
+        await loadStructureOptions();
+        yearSelect.value = pendingEdit.year || '';
+        syncSemesterOptions();
+        semesterSelect.value = pendingEdit.semester || '';
+        structureForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetEditState() {
+        pendingEdit = null;
+        structureForm.action = '/admin-academic-structure';
+        structureForm.reset();
+        sectionInput.value = '';
+        submitBtn.querySelector('span').textContent = 'Save Structure Row';
+        cancelEditBtn.hidden = true;
+        filterBatchOptions();
+        loadStructureOptions();
+    }
+
+    function openDeleteModal(row) {
+        const id = row.dataset.id;
+        const label = `${row.dataset.course || ''} · ${row.dataset.batch || ''} · ${row.dataset.year || ''} · Sem ${row.dataset.semester || ''} · Sec ${row.dataset.section || ''}`;
+        deleteForm.action = `/admin-academic-structure/${id}/delete`;
+        deleteText.textContent = `Delete ${label}? Linked students and timetable references will be refreshed immediately.`;
+        deleteModal.classList.add('is-visible');
+        deleteModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.remove('is-visible');
+        deleteModal.setAttribute('aria-hidden', 'true');
+        deleteForm.removeAttribute('action');
+    }
+
+    document.querySelectorAll('.structure-toast').forEach(toast => {
+        window.setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-6px)';
+            window.setTimeout(() => toast.remove(), 250);
+        }, 3200);
+    });
+
+    filterBatchOptions();
+    courseSelect.addEventListener('change', () => {
+        filterBatchOptions();
+        batchSelect.value = '';
+        pendingEdit = null;
+        loadStructureOptions();
+    });
+    batchSelect.addEventListener('change', loadStructureOptions);
+    yearSelect.addEventListener('change', syncSemesterOptions);
+    cancelEditBtn?.addEventListener('click', resetEditState);
+    document.querySelectorAll('.structure-edit-row').forEach(button => {
+        button.addEventListener('click', () => startEdit(button.closest('tr')));
+    });
+    document.querySelectorAll('.structure-delete-row').forEach(button => {
+        button.addEventListener('click', () => openDeleteModal(button.closest('tr')));
+    });
+    cancelDeleteBtn?.addEventListener('click', closeDeleteModal);
+    deleteModal?.addEventListener('click', event => {
+        if (event.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && deleteModal?.classList.contains('is-visible')) {
+            closeDeleteModal();
+        }
+    });
+
+    [searchEl, courseFilterEl, batchFilterEl, academicYearFilterEl, yearFilterEl]
+        .forEach(element => element?.addEventListener(element.tagName === 'INPUT' ? 'input' : 'change', applyTableFilters));
+    resetBtn?.addEventListener('click', resetFilters);
+</script>
+</body>
+</html>

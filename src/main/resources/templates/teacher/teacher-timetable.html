@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Timetable - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <link rel="stylesheet" href="/css/teacher/teacher-portal.css">
+    <style>
+        .teacher-timetable-shell {
+            display: grid;
+            gap: 18px;
+        }
+        .teacher-surface {
+            border: 1px solid rgba(10, 94, 96, 0.10);
+            border-radius: 22px;
+            background: rgba(255,255,255,.95);
+            overflow: hidden;
+        }
+        .teacher-surface-head {
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:center;
+            padding:18px 20px 0;
+        }
+        .teacher-surface-title {
+            font-family: var(--serif);
+            font-size: 24px;
+            font-weight: 700;
+            color:#082c31;
+        }
+        .teacher-surface-sub {
+            color:#5b6d70;
+            font-size:13px;
+            margin-top:4px;
+        }
+        .teacher-board-wrap { overflow-x:auto; padding: 18px 20px 22px; }
+        .teacher-board {
+            width:100%;
+            min-width:1100px;
+            border-collapse:separate;
+            border-spacing:0;
+        }
+        .teacher-board th,
+        .teacher-board td {
+            border-right:1px solid rgba(10,94,96,.10);
+            border-top:1px solid rgba(10,94,96,.10);
+            vertical-align:top;
+        }
+        .teacher-board th {
+            background: linear-gradient(135deg, #062c31, #10444a);
+            color:#fff;
+            padding:14px 12px;
+            text-transform:uppercase;
+            letter-spacing:1px;
+            font-size:12px;
+        }
+        .teacher-board th.time-head {
+            min-width:140px;
+            background: linear-gradient(135deg, #10b39b, #ffd166);
+            color:#082c31;
+        }
+        .teacher-board td.time-cell {
+            background: linear-gradient(180deg, rgba(16,179,155,.08), #fff);
+            color:#0b5b5d;
+            text-align:center;
+            padding:12px 8px;
+            font-weight:700;
+        }
+        .teacher-time-main { font-size:19px; font-family:var(--serif); line-height:1; }
+        .teacher-time-sub { font-size:11px; color:#6c7e80; margin-top:4px; }
+        .teacher-slot {
+            padding:10px;
+            background:#fff;
+            min-height:84px;
+        }
+        .teacher-slot-card {
+            border-radius:16px;
+            padding:12px 12px 10px;
+            border:1px solid rgba(16,179,155,.16);
+            background: linear-gradient(180deg, rgba(247,255,252,.95), rgba(255,255,255,.98));
+            box-shadow:0 8px 20px rgba(9,94,96,.04);
+            display:grid;
+            gap:6px;
+        }
+        .teacher-slot-card::before {
+            content:'';
+            height:4px;
+            border-radius:999px;
+            background: linear-gradient(90deg,#10b39b,#ffd166);
+        }
+        .teacher-subject { font-size:14px; font-weight:800; color:#122028; }
+        .teacher-meta { font-size:11px; color:#5b6d70; font-weight:700; display:flex; gap:8px; flex-wrap:wrap; }
+        .teacher-chip {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:4px 9px;
+            border-radius:999px;
+            background: rgba(16,179,155,.12);
+            color:#0b5b5d;
+            font-size:10px;
+            font-weight:800;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+        }
+        .teacher-empty {
+            border:1px dashed rgba(16,179,155,.16);
+            border-radius:14px;
+            min-height:58px;
+            display:grid;
+            place-items:center;
+            color:#a0b1b1;
+            background: rgba(255,255,255,.5);
+        }
+        @media (max-width: 1100px) {
+            .teacher-board { min-width: 900px; }
+        }
+    </style>
+</head>
+<body class="student-layout-page teacher-layout-page">
+<div class="student-shell">
+    <div th:replace="~{teacher/components/sidebar :: sidebar(activePage='timetable')}"></div>
+
+    <div class="main-content">
+        <div th:replace="~{teacher/components/topbar :: topbar(title='My Timetable', subtitle='Your weekly teaching schedule from admin timetable entries.')}"></div>
+
+        <main class="portal-page-body teacher-timetable-shell">
+            <section class="teacher-kpi-grid">
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Weekly Sessions</p><h3 class="teacher-kpi-value" th:text="${teacherWeeklyCount} ?: 0">0</h3><p class="teacher-kpi-meta">Planned lectures and labs</p></article>
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Today's Sessions</p><h3 class="teacher-kpi-value" th:text="${teacherTodayCount} ?: 0">0</h3><p class="teacher-kpi-meta" th:text="${teacherTodayLabel} ?: 'Today'">Today</p></article>
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Primary Subject</p><h3 class="teacher-kpi-value" th:text="${teacherSubject} ?: 'General'">Subject</h3><p class="teacher-kpi-meta">Current teaching area</p></article>
+                <article class="teacher-kpi-card"><p class="teacher-kpi-label">Section Scope</p><h3 class="teacher-kpi-value" th:text="${teacherClassLabel} ?: 'Not assigned'">Section Scope</h3><p class="teacher-kpi-meta" th:text="${teacherRoomLabel} ?: 'Room not assigned'">Room</p></article>
+            </section>
+
+            <section class="teacher-surface">
+                <div class="teacher-surface-head">
+                    <div>
+                        <h2 class="teacher-surface-title">Weekly Teaching Board</h2>
+                        <p class="teacher-surface-sub">This is pulled from your assigned timetable entries only.</p>
+                    </div>
+                    <span class="portal-badge portal-badge--info">Monday to Saturday</span>
+                </div>
+                <div class="teacher-board-wrap" th:if="${teacherWeeklyTimetableRows != null and !#lists.isEmpty(teacherWeeklyTimetableRows)}">
+                    <table class="teacher-board">
+                        <thead>
+                        <tr>
+                            <th class="time-head">Time</th>
+                            <th th:each="day : ${workingDayNames}" th:text="${day}">Monday</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="row : ${teacherWeeklyTimetableRows}">
+                            <td class="time-cell">
+                                <div class="teacher-time-main" th:text="${row.startTime}">09:00</div>
+                                <div class="teacher-time-sub" th:text="${row.endTime}">10:00</div>
+                            </td>
+                            <td th:each="day : ${workingDayNames}" class="teacher-slot" th:with="slot=${row.getSlotForDay(day)}">
+                                <div th:if="${slot != null}" class="teacher-slot-card">
+                                    <strong class="teacher-subject" th:text="${slot.subject}">Subject</strong>
+                                    <div class="teacher-meta">
+                                    <span th:text="${slot.classLabel}">Section Scope</span>
+                                        <span th:text="${slot.room}">Room</span>
+                                    </div>
+                                    <span class="teacher-chip" th:text="${slot.subjectClass}">Lecture</span>
+                                </div>
+                                <div th:if="${slot == null}" class="teacher-empty">--</div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="portal-empty-state" th:if="${teacherWeeklyTimetableRows == null or #lists.isEmpty(teacherWeeklyTimetableRows)}">
+                    <i class="fa-regular fa-calendar-xmark"></i>
+                    <h3>No timetable assigned to you yet.</h3>
+                    <p>No timetable assigned to you yet.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

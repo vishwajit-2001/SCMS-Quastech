@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>View Timetable - AI Campus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin/admin-common.css">
+  <style>
+    :root{
+      --paper:#f8f8ff;--paper2:#eef2ff;--ink:#4b49ac;--gold:#4b49ac;--gold2:#7978e9;
+      --gold-soft:rgba(75,73,172,.10);--line:#e4e8ff;--muted:#6b7280;
+    }
+    body{background:var(--paper);color:#1f2937}
+    .main{background:radial-gradient(circle at top left, rgba(75,73,172,.06), transparent 28%),linear-gradient(180deg,var(--paper),var(--paper2))}
+    .header{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .header-title{font-family:var(--serif);font-size:24px;font-weight:700}
+    .content{padding:22px 26px 32px;display:flex;flex-direction:column;gap:18px}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .summary-card{background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:18px;padding:18px 18px;display:flex;align-items:center;gap:14px;min-height:84px;box-shadow:0 6px 22px rgba(31,41,55,.05)}
+    .summary-ico{width:42px;height:42px;border-radius:12px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--gold)}
+    .summary-num{font-family:var(--sans);font-size:30px;font-weight:700;color:var(--gold2);line-height:1;font-style:normal;font-variant-numeric:tabular-nums}
+    .summary-lbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
+    .scope-box{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.92);padding:16px 18px;box-shadow:0 10px 28px rgba(31,41,55,.05)}
+    .scope-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .scope-title{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink)}
+    .scope-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+    .scope-row .form-group{margin:0;min-width:160px;flex:1}
+    .scope-row .form-label{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+    .scope-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .scope-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.86);color:#6b7280}
+    .scope-badge--gold{background:rgba(75,73,172,.12);border-color:rgba(75,73,172,.16);color:var(--gold2)}
+    .board-wrap{overflow-x:auto}
+    .board-table{width:100%;min-width:1120px;border-collapse:separate;border-spacing:0}
+    .board-table th{background:var(--ink);color:#fff;padding:15px 12px;font:700 12px var(--sans);text-transform:uppercase;letter-spacing:1px;border-right:1px solid rgba(255,255,255,.06);white-space:nowrap}
+    .board-table th.time-head{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#fff;min-width:140px}
+    .board-table td{border-top:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;padding:10px;background:#fff}
+    .board-time{background:linear-gradient(180deg,#eef2ff,#fff);font-weight:700;color:#4b49ac;text-align:center;min-width:140px}
+    .board-time-main{font-size:20px;font-family:var(--serif);line-height:1}
+    .board-time-sub{font-size:11px;color:#8d7b66;font-weight:700;margin-top:4px}
+    .board-slot{min-height:84px}
+    .board-card{border-radius:14px;padding:11px 12px;border:1px solid transparent;background:linear-gradient(180deg,#f8f8ff,#ffffff);position:relative;overflow:hidden}
+    .board-card::before{content:'';position:absolute;left:0;top:0;height:100%;width:4px;background:var(--gold);opacity:.9}
+    .board-card.break{background:linear-gradient(180deg,rgba(123,92,255,.12),rgba(123,92,255,.06));border-style:dashed;border-color:rgba(123,92,255,.24)}
+    .board-card.break::before{background:#7978e9}
+    .board-card.live{outline:2px solid rgba(75,73,172,.8);box-shadow:0 0 0 4px rgba(75,73,172,.10)}
+    .board-subject{font-size:14px;font-weight:800;line-height:1.25;color:#2b2620}
+    .board-card.break .board-subject{color:#4b49ac;letter-spacing:.6px;text-transform:uppercase}
+    .board-scope{font-size:11px;line-height:1.35;color:#6b7280;font-weight:700;margin-top:5px}
+    .board-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:7px;font-size:11px;color:#6b7280;font-weight:700}
+    .board-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+    .board-chip.break{background:rgba(75,73,172,.12);color:#4b49ac}
+    .board-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .board-actions .btn-outline,.board-actions .btn-red{padding:6px 10px;font-size:11px}
+    .filters-box{border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.92);padding:16px 18px;box-shadow:0 10px 28px rgba(31,41,55,.05)}
+    .filter-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+    .filter-row .form-group{margin:0;min-width:180px;flex:1}
+    .filter-row .form-label{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+    .filter-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .day-tabs{display:flex;gap:8px;flex-wrap:wrap;padding:18px 20px 0}
+    .day-tab{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#6b7280;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s}
+    .day-tab:hover{border-color:var(--gold2);color:var(--gold2)}
+    .day-tab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+    .day-panels{padding:18px 20px 20px}
+    .day-panel{display:none}
+    .day-panel.active{display:block}
+    .timetable{display:flex;flex-direction:column;gap:12px}
+    .period{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:stretch}
+    .time-slot{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding-right:4px}
+    .time-start{font-size:14px;font-weight:700;color:var(--ink)}
+    .time-end{font-size:11px;color:#8d7b66;margin-top:2px}
+    .period-card{border-radius:16px;padding:16px 18px;border:1px solid var(--line);display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;background:#fff;box-shadow:0 8px 22px rgba(31,41,55,.04)}
+    .period-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--gold)}
+    .period-card.break{background:linear-gradient(180deg,rgba(75,73,172,.07),rgba(75,73,172,.03));border-style:dashed;border-color:rgba(75,73,172,.18)}
+    .period-card.break::before{background:var(--gold2)}
+    .period-card.live{outline:2px solid rgba(75,73,172,.25);box-shadow:0 0 0 4px rgba(75,73,172,.08)}
+    .period-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--gold-soft);color:var(--gold2)}
+    .period-info{flex:1}
+    .period-subject{font-size:15px;font-weight:800;color:#222}
+    .period-meta{font-size:12px;color:#6b7280;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap}
+    .period-room{font-size:11px;font-weight:700;letter-spacing:.4px;padding:4px 10px;border-radius:999px;background:var(--gold-soft);border:1px solid var(--line);color:var(--gold2);flex-shrink:0}
+    .period-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;background:rgba(75,73,172,.12);color:var(--gold2)}
+    .empty-state{padding:22px 18px;border:1px dashed var(--line);border-radius:16px;background:rgba(255,255,255,.86);color:#8a7a6a;font-size:13px}
+    .grid-box{border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.92);overflow:hidden;box-shadow:0 14px 34px rgba(31,41,55,.05)}
+    .grid-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,var(--paper))}
+    .grid-title{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:23px;font-weight:700;color:#111827}
+    .grid-sub{font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap}
+    .grid-wrap{overflow-x:auto}
+    .tt-table{width:100%;min-width:1180px;border-collapse:separate;border-spacing:0}
+    .tt-table th{background:var(--ink);color:#fff;padding:15px 12px;font:700 12px var(--sans);text-transform:uppercase;letter-spacing:1px;border-right:1px solid rgba(255,255,255,.06);white-space:nowrap}
+    .tt-table th.time-head{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#fff;min-width:140px}
+    .tt-table td{border-top:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;padding:10px;background:#fff}
+    .time-cell{background:linear-gradient(180deg,#eef2ff,#fff);font-weight:700;color:#4b49ac;text-align:center;min-width:140px}
+    .time-main{font-size:20px;font-family:var(--serif);line-height:1}
+    .time-sub{font-size:11px;color:#8d7b66;font-weight:700;margin-top:4px}
+    .slot-cell{min-height:84px}
+    .card-stack{display:flex;flex-direction:column;gap:8px}
+    .tt-card{border-radius:14px;padding:11px 12px;border:1px solid transparent;background:linear-gradient(180deg,#f8f8ff,#ffffff);position:relative;overflow:hidden}
+    .tt-card::before{content:'';position:absolute;left:0;top:0;height:100%;width:4px;background:var(--gold);opacity:.9}
+    .tt-card.break{background:linear-gradient(180deg,rgba(123,92,255,.12),rgba(123,92,255,.06));border-style:dashed;border-color:rgba(123,92,255,.24)}
+    .tt-card.break::before{background:#7978e9}
+    .tt-card.live{outline:2px solid rgba(75,73,172,.8);box-shadow:0 0 0 4px rgba(75,73,172,.10)}
+    .tt-subject{font-size:14px;font-weight:800;line-height:1.25;color:#2b2620}
+    .tt-card.break .tt-subject{color:#4b49ac;letter-spacing:.6px;text-transform:uppercase}
+    .tt-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:7px;font-size:11px;color:#6b7280;font-weight:700}
+    .tt-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+    .tt-chip.break{background:rgba(75,73,172,.12);color:#4b49ac}
+    .empty-slot{min-height:58px;border:1px dashed #d9dffb;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#b8c0ee;font-size:12px;background:rgba(255,255,255,.7)}
+    .badge-strip{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.86);color:#6b7280}
+    .badge--dark{background:var(--ink);color:#fff;border-color:rgba(255,255,255,.08)}
+    .badge--gold{background:rgba(75,73,172,.12);color:#4b49ac;border-color:rgba(75,73,172,.16)}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#4b49ac;box-shadow:0 0 0 4px rgba(75,73,172,.12)}
+    @media (max-width: 1100px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media print{.sidebar,.header,.no-print{display:none !important}.main{margin-left:0 !important}.content{padding:0 !important}.grid-box{border:none;box-shadow:none}.tt-table{min-width:100%}}
+  </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('view-timetable')}"></div>
+
+<div class="main">
+    <div class="header no-print">
+    <div class="header-title">Timetable</div>
+    <div class="top-actions">
+      <a th:href="@{/add-timetable(batchId=${selectedBatchId}, classId=${selectedClassId}, course=${selectedCourse}, academicYear=${selectedAcademicYear}, semester=${selectedSemester})}" class="btn-gold"><i class="fa fa-plus"></i> Add Entry</a>
+      <a th:href="@{/view-timetable/export/pdf(batchId=${selectedBatchId}, classId=${selectedClassId}, course=${selectedCourse}, academicYear=${selectedAcademicYear}, semester=${selectedSemester}, printMode=true)}" class="btn-dark"><i class="fa fa-file-pdf"></i> Export PDF</a>
+      <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+    </div>
+  </div>
+
+    <div class="content">
+    <div class="summary-grid no-print">
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-calendar-days"></i></div><div><div class="summary-num" th:text="${totalEntries} ?: 0">0</div><div class="summary-lbl">Total Entries</div></div></div>
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-book"></i></div><div><div class="summary-num" th:text="${registeredSubjectsCount} ?: 0">0</div><div class="summary-lbl">Registered Subjects</div></div></div>
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-chalkboard-user"></i></div><div><div class="summary-num" th:text="${totalTeachers} ?: 0">0</div><div class="summary-lbl">Teachers</div></div></div>
+      <div class="summary-card"><div class="summary-ico"><i class="fa fa-school"></i></div><div><div class="summary-num" th:text="${totalClasses} ?: 0">0</div><div class="summary-lbl">Classes</div></div></div>
+    </div>
+
+    <div class="scope-box no-print">
+      <div class="scope-head">
+        <div class="scope-title"><i class="fa fa-layer-group" style="color:var(--gold)"></i> Timetable Scope</div>
+        <div class="scope-badges">
+          <span class="scope-badge scope-badge--gold" th:text="${selectedClassLabel != null ? selectedClassLabel : 'All sections'}">All sections</span>
+          <span class="scope-badge" th:text="${selectedBatch != null ? selectedBatch.displayName : 'All Batches'}">All Batches</span>
+          <span class="scope-badge scope-badge--gold" th:text="${selectedAcademicYear != null ? selectedAcademicYear : 'All Years'}">All Years</span>
+          <span class="scope-badge" th:text="${selectedSemesterLabel != null ? selectedSemesterLabel : 'All Semesters'}">All Semesters</span>
+        </div>
+      </div>
+      <form class="scope-row" method="get" action="/view-timetable">
+        <input type="hidden" name="classId" th:value="${selectedClassId}">
+        <div class="form-group">
+          <label class="form-label">Batch</label>
+          <select class="form-select" name="batchId">
+            <option value="">All Batches</option>
+            <option th:each="b : ${batches}" th:value="${b.id}" th:text="${b.displayName}" th:selected="${selectedBatchId != null and selectedBatchId == b.id}">Batch</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Course</label>
+          <select class="form-select" name="course">
+            <option value="">All Courses</option>
+            <option th:each="c : ${courses}" th:value="${c}" th:text="${c}" th:selected="${selectedCourse != null and #strings.equalsIgnoreCase(selectedCourse, c)}">Course</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Academic Year</label>
+          <select class="form-select" name="academicYear">
+            <option value="">All Years</option>
+            <option th:each="y : ${academicYears}" th:value="${y}" th:text="${y}" th:selected="${selectedAcademicYear != null and #strings.equalsIgnoreCase(selectedAcademicYear, y)}">2025-26</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Semester</label>
+          <select class="form-select" name="semester">
+            <option value="">All Semesters</option>
+            <option th:each="sem : ${semesters}" th:value="${#strings.substring(sem, 4)}" th:text="${sem}" th:selected="${selectedSemester != null and selectedSemester == T(java.lang.Integer).valueOf(#strings.substring(sem, 4))}">Sem 1</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Section</label>
+          <select class="form-select" name="classId">
+            <option value="">All Sections</option>
+            <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.name}" th:selected="${selectedClassId != null and selectedClassId == c.id}">Class</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn-gold"><i class="fa fa-filter"></i> Apply</button>
+          <a href="/view-timetable" class="btn-outline"><i class="fa fa-rotate-right"></i> Reset</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid-box">
+      <div class="grid-head">
+        <div class="grid-title"><i class="fa fa-calendar-days" style="color:var(--gold)"></i> Weekly Timetable</div>
+        <div class="badge-strip no-print">
+          <span class="badge badge--dark">Mon to Sat</span>
+          <span class="badge badge--gold"><span class="live-dot"></span> Student-style board</span>
+        </div>
+      </div>
+
+      <div class="board-wrap" th:if="${timeRows != null and !#lists.isEmpty(timeRows)}">
+        <table class="board-table">
+          <thead>
+          <tr>
+            <th class="time-head">Time</th>
+            <th th:each="day : ${dayColumns}" th:text="${day.day}">Monday</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="row : ${timeRows}">
+            <td class="board-time"><div class="board-time-main" th:text="${row.slot.start}">09:00</div><div class="board-time-sub" th:text="${row.slot.end != null ? row.slot.end : ''}">10:00</div></td>
+            <td th:each="cell : ${row.cells}" class="board-slot">
+              <div th:with="entries=${cell.entries}">
+                <div th:if="${entries == null or #lists.isEmpty(entries)}" class="empty-slot">
+                  <span>--</span>
+                </div>
+                <div th:each="entry : ${entries}"
+                     th:class="${'board-card ' + (entry.entryType != null and entry.entryType.equalsIgnoreCase('BREAK') ? 'break' : '')}"
+                     th:attr="data-id=${entry.id},data-day=${entry.day},data-start=${entry.startTime},data-end=${entry.endTime}">
+                  <strong class="board-subject" th:text="${entry.subject != null and !#strings.isEmpty(entry.subject) ? entry.subject : (entry.subjectRef != null ? entry.subjectRef.name : 'Subject')}">Subject</strong>
+                  <div class="board-scope" th:text="${entry.classRoom != null ? ((entry.classRoom.course != null ? entry.classRoom.course : 'Course') + ' / ' + (entry.classRoom.batchName != null ? entry.classRoom.batchName : (entry.classRoom.batch != null ? entry.classRoom.batch : 'Batch')) + ' / ' + (entry.classRoom.academicYear != null ? entry.classRoom.academicYear : (entry.classRoom.year != null ? entry.classRoom.year : 'Academic Year')) + ' / Sem ' + (entry.classRoom.semester != null ? entry.classRoom.semester : '-') + ' / ' + (entry.classRoom.section != null ? entry.classRoom.section : 'All Sections')) : (entry.course != null ? (entry.course.name + ' / ' + (entry.batch != null ? entry.batch.displayName : 'Batch') + ' / ' + (entry.academicYear != null ? entry.academicYear : 'Academic Year') + ' / Sem ' + (entry.semesterNumber != null ? entry.semesterNumber : '-') + ' / ' + (entry.section != null ? entry.section : 'All Sections')) : 'Academic scope')}">Academic scope</div>
+                  <div class="board-meta" th:if="${entry.entryType == null or !entry.entryType.equalsIgnoreCase('BREAK')}">
+                    <span th:text="${entry.teacher != null ? entry.teacher.name : 'Teacher not assigned'}">Teacher</span>
+                    <span th:text="${entry.classRoom != null ? entry.classRoom.name : 'General'}">Section</span>
+                  </div>
+                  <div class="board-meta" th:if="${entry.entryType != null and entry.entryType.equalsIgnoreCase('BREAK')}">
+                    <span class="board-chip break">Break</span>
+                  </div>
+                  <div class="board-actions no-print">
+                    <a th:href="@{/add-timetable(editId=${entry.id}, classId=${selectedClassId}, batchId=${selectedBatchId}, course=${selectedCourse}, academicYear=${selectedAcademicYear}, semester=${selectedSemester})}" class="btn-outline"><i class="fa fa-pen"></i> Edit</a>
+                    <a th:href="@{/delete-timetable/{id}(id=${entry.id})}" class="btn-red" onclick="return confirm('Delete this timetable entry?')"><i class="fa fa-trash"></i> Delete</a>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" th:if="${timeRows == null or #lists.isEmpty(timeRows)}">
+        No timetable entries found for the selected scope.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (window.location.pathname.endsWith('/export/pdf') || new URLSearchParams(window.location.search).get('printMode') === 'true') { window.addEventListener('load', () => setTimeout(() => window.print(), 300)); }
+</script>
+</body>
+</html>
+

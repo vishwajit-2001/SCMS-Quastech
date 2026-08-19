@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+
+<div class="sa-shell" id="saShell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Centralized multi-college ERP</div>
+                <div class="sa-title">Super Admin Dashboard</div>
+            </div>
+
+            <div class="sa-topbar-actions">
+                <button class="sa-btn ghost sa-mobile-toggle" type="button" onclick="toggleNav()">
+                    <i class="fa fa-bars"></i> Menu
+                </button>
+                <div class="sa-search">
+                    <i class="fa fa-search"></i>
+                    <input type="text" id="quickSearch" placeholder="Search colleges, admins, codes...">
+                </div>
+                <a class="sa-btn soft" href="/super-admin/colleges"><i class="fa fa-school"></i> Colleges</a>
+                <a class="sa-btn primary" href="/super-admin/settings"><i class="fa fa-gear"></i> Settings</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-hero">
+                <div class="sa-hero-banner">
+                    <div class="sa-badge info" style="margin-bottom:14px"><i class="fa fa-network-wired"></i> Multi-tenant control plane</div>
+                    <h1>One command center for every college in the ERP.</h1>
+                    <p>
+                        Monitor college setup, admin onboarding, and tenant isolation from one secure layer.
+                        This dashboard is designed to behave like a centralized ERP suite instead of a CRUD admin panel.
+                    </p>
+                    <div class="sa-hero-actions">
+                        <a class="sa-btn primary" href="/super-admin/colleges"><i class="fa fa-school"></i> Manage Colleges</a>
+                        <a class="sa-btn ghost" href="/super-admin/admins"><i class="fa fa-user-tie"></i> College Admins</a>
+                        <a class="sa-btn ghost" href="/super-admin/reports"><i class="fa fa-chart-line"></i> Open Reports</a>
+                        <a class="sa-btn ghost" href="/super-admin/notifications"><i class="fa fa-bell"></i> Notifications</a>
+                    </div>
+                </div>
+
+                <div class="sa-mini-grid">
+                    <div class="sa-mini-card">
+                        <h3>Platform health</h3>
+                        <p th:text="'All systems active across ' + ${totalColleges} + ' colleges'">All systems active across 0 colleges</p>
+                    </div>
+                    <div class="sa-mini-card">
+                        <h3>Pending setup</h3>
+                        <p th:text="${setupPendingColleges} + ' colleges still need configuration'">0 colleges still need configuration</p>
+                    </div>
+                    <div class="sa-mini-card">
+                        <h3>College admins</h3>
+                        <p th:text="${totalAdmins} + ' admin accounts are linked'">0 admin accounts are linked</p>
+                    </div>
+                    <div class="sa-mini-card">
+                        <h3>Access model</h3>
+                        <p>Super admin manages colleges; college admins manage their own institution.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-grid-4">
+                <div class="sa-card">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label">Total Colleges</div>
+                            <div class="sa-stat-value" th:text="${totalColleges}">0</div>
+                            <div class="sa-stat-sub">Connected tenant institutions</div>
+                        </div>
+                        <div class="sa-stat-icon info"><i class="fa fa-school"></i></div>
+                    </div>
+                </div>
+                <div class="sa-card">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label">Active Colleges</div>
+                            <div class="sa-stat-value" th:text="${activeColleges}">0</div>
+                            <div class="sa-stat-sub">Currently live institutions</div>
+                        </div>
+                        <div class="sa-stat-icon success"><i class="fa fa-circle-check"></i></div>
+                    </div>
+                </div>
+                <div class="sa-card">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label">Setup Pending</div>
+                            <div class="sa-stat-value" th:text="${setupPendingColleges}">0</div>
+                            <div class="sa-stat-sub">Colleges awaiting setup</div>
+                        </div>
+                        <div class="sa-stat-icon warning"><i class="fa fa-clock"></i></div>
+                    </div>
+                </div>
+                <div class="sa-card">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label">College Admins</div>
+                            <div class="sa-stat-value" th:text="${totalAdmins}">0</div>
+                            <div class="sa-stat-sub">Linked college admin accounts</div>
+                        </div>
+                        <div class="sa-stat-icon danger"><i class="fa fa-user-tie"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-grid-2">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>College status analytics</h2>
+                            <p>Health snapshot for each college tenant</p>
+                        </div>
+                        <span class="sa-badge primary"><i class="fa fa-chart-column"></i> Live data</span>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-chart-wrap">
+                            <canvas id="collegeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Recent activity</h2>
+                            <p>Recent operational signals from the platform</p>
+                        </div>
+                        <span class="sa-badge info"><i class="fa fa-bolt"></i> Live feed</span>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-activity-list">
+                            <div class="sa-activity-item" th:if="${#lists.isEmpty(recentActivities)}">
+                                <div class="sa-activity-dot"></div>
+                                <div class="sa-activity-copy">
+                                    <div class="sa-activity-title">No recent activity</div>
+                                    <div class="sa-activity-sub">Create or manage colleges to populate the feed.</div>
+                                </div>
+                            </div>
+                            <div class="sa-activity-item" th:each="activity : ${recentActivities}">
+                                <div class="sa-activity-dot" th:classappend="' ' + ${activity.tone}"></div>
+                                <div class="sa-activity-copy">
+                                    <div class="sa-activity-title" th:text="${activity.title}">College</div>
+                                    <div class="sa-activity-sub" th:text="${activity.subtitle}">Status</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>College registry</h2>
+                        <p>Search, filter, and manage all colleges from one control view</p>
+                    </div>
+                    <div class="sa-toolbar-right">
+                        <a class="sa-btn ghost" href="/super-admin/colleges"><i class="fa fa-list"></i> Open college module</a>
+                        <a class="sa-btn success" href="/super-admin/notifications"><i class="fa fa-bell"></i> Notifications</a>
+                    </div>
+                </div>
+
+                <div class="sa-panel-body">
+                    <form class="sa-toolbar" method="get" action="/super-admin-dashboard">
+                        <div class="sa-toolbar-left">
+                            <div class="sa-search" style="min-width:260px">
+                                <i class="fa fa-filter"></i>
+                                <input type="text" name="q" placeholder="Search colleges or admins..." th:value="${query}">
+                            </div>
+                            <div class="field" style="min-width:180px">
+                                <select name="status">
+                                    <option value="All">All Statuses</option>
+                                    <option th:each="opt : ${statusOptions}" th:value="${opt}" th:text="${opt}" th:selected="${statusFilter == opt}"></option>
+                                </select>
+                            </div>
+                            <div class="field" style="min-width:180px">
+                                <select name="sort">
+                                    <option th:each="opt : ${sortOptions}" th:value="${opt}" th:text="${'Sort: ' + opt}" th:selected="${sort == opt}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="sa-toolbar-right">
+                            <button class="sa-btn primary" type="submit"><i class="fa fa-magnifying-glass"></i> Apply</button>
+                            <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-rotate-right"></i> Reset</a>
+                        </div>
+                    </form>
+
+                    <div class="sa-table-wrap" style="margin-top:18px">
+                        <table class="sa-table" id="collegeRegistryTable">
+                            <thead>
+                            <tr>
+                                <th>College</th>
+                                <th>Status</th>
+                                <th>Admin</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(collegesPage)}">
+                                <td colspan="4" class="sa-empty">No colleges found.</td>
+                            </tr>
+                            <tr th:each="college : ${collegesPage}">
+                                <td>
+                                    <div style="font-weight:800" th:text="${college.collegeName}">College</div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:4px">
+                                        Code: <span th:text="${college.collegeCode}">C-001</span> ·
+                                        <span th:text="${college.adminEmail}">admin@example.com</span>
+                                    </div>
+                                </td>
+                                <td><span class="sa-badge" th:classappend="' ' + ${college.statusTone}" th:text="${college.status}">Active</span></td>
+                                <td>
+                                    <div style="font-weight:800" th:text="${college.adminName}">Admin</div>
+                                    <div style="font-size:12px;color:var(--sa-muted);margin-top:4px">ID <span th:text="${college.collegeId}">1</span></div>
+                                </td>
+                                <td>
+                                    <div class="sa-quick-actions">
+                                        <a class="sa-action view" th:href="@{'/super-admin/colleges/' + ${college.collegeId}}"><i class="fa fa-eye"></i> View</a>
+                                        <a class="sa-action edit" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/edit'}"><i class="fa fa-pen"></i> Edit</a>
+                                        <a class="sa-action manage" th:href="@{'/super-admin/colleges/' + ${college.collegeId} + '/manage'}"><i class="fa fa-sitemap"></i> Manage</a>
+                                        <form th:action="@{'/super-admin/colleges/' + ${college.collegeId} + '/delete'}" method="post" style="display:inline" onsubmit="return confirm('Delete this college and its linked data?');">
+                                            <button class="sa-action delete" type="submit"><i class="fa fa-trash"></i> Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sa-pagination" th:if="${pageSlice.totalPages > 1}">
+                        <div style="color:var(--sa-muted);font-size:13px">
+                            Showing <strong th:text="${pageSlice.items.size()}">0</strong>
+                            of <strong th:text="${pageSlice.totalItems}">0</strong> colleges
+                        </div>
+                        <div class="sa-pages">
+                            <a class="sa-page" th:if="${pageSlice.hasPrev}" th:href="@{/super-admin-dashboard(page=${pageSlice.currentPage - 1}, size=${pageSlice.size}, q=${query}, status=${statusFilter}, sort=${sort})}">Prev</a>
+                            <a class="sa-page" th:each="pageNo : ${pageSlice.pageNumbers}" th:href="@{/super-admin-dashboard(page=${pageNo}, size=${pageSlice.size}, q=${query}, status=${statusFilter}, sort=${sort})}" th:classappend="${pageNo == pageSlice.currentPage} ? ' active' : ''" th:text="${pageNo}">1</a>
+                            <a class="sa-page" th:if="${pageSlice.hasNext}" th:href="@{/super-admin-dashboard(page=${pageSlice.currentPage + 1}, size=${pageSlice.size}, q=${query}, status=${statusFilter}, sort=${sort})}">Next</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-grid-2">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Notifications</h2>
+                            <p>System-wide alerts and college onboarding signals</p>
+                        </div>
+                        <a class="sa-btn ghost" href="/super-admin/notifications"><i class="fa fa-bell"></i> Open feed</a>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-activity-list">
+                            <div class="sa-activity-item" th:each="notification : ${notifications}">
+                                <div class="sa-activity-dot" th:classappend="' ' + ${notification.tone}"></div>
+                                <div class="sa-activity-copy">
+                                    <div class="sa-activity-title" th:text="${notification.title}">Notification</div>
+                                    <div class="sa-activity-sub" th:text="${notification.subtitle}">Detail</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Quick controls</h2>
+                            <p>High-level entry points for the ERP control plane</p>
+                        </div>
+                    </div>
+                    <div class="sa-panel-body">
+                        <div class="sa-grid-2">
+                            <a class="sa-card" href="/super-admin/colleges" style="text-decoration:none">
+                                <div class="sa-stat">
+                                    <div>
+                                    <div class="sa-stat-label">College module</div>
+                                    <div class="sa-stat-sub">Govern tenants and admins</div>
+                                </div>
+                                <div class="sa-stat-icon info"><i class="fa fa-school"></i></div>
+                            </div>
+                        </a>
+                            <a class="sa-card" href="/super-admin/admins" style="text-decoration:none">
+                                <div class="sa-stat">
+                                    <div>
+                                        <div class="sa-stat-label">Admins module</div>
+                                        <div class="sa-stat-sub">Create and manage college admins</div>
+                                    </div>
+                                    <div class="sa-stat-icon warning"><i class="fa fa-user-tie"></i></div>
+                                </div>
+                            </a>
+                            <a class="sa-card" href="/super-admin/communications" style="text-decoration:none">
+                                <div class="sa-stat">
+                                    <div>
+                                        <div class="sa-stat-label">Communication</div>
+                                        <div class="sa-stat-sub">Message college admins centrally</div>
+                                    </div>
+                                    <div class="sa-stat-icon success"><i class="fa fa-comments"></i></div>
+                                </div>
+                            </a>
+                            <a class="sa-card" href="/super-admin/reports" style="text-decoration:none">
+                                <div class="sa-stat">
+                                    <div>
+                                        <div class="sa-stat-label">Reports module</div>
+                                        <div class="sa-stat-sub">Usage and system reporting</div>
+                                    </div>
+                                    <div class="sa-stat-icon success"><i class="fa fa-chart-line"></i></div>
+                                </div>
+                            </a>
+                            <a class="sa-card" href="/super-admin/audit-logs" style="text-decoration:none">
+                                <div class="sa-stat">
+                                    <div>
+                                        <div class="sa-stat-label">Audit logs</div>
+                                        <div class="sa-stat-sub">Track every college action</div>
+                                    </div>
+                                    <div class="sa-stat-icon danger"><i class="fa fa-clipboard-list"></i></div>
+                                </div>
+                            </a>
+                            <a class="sa-card" href="/super-admin/settings" style="text-decoration:none">
+                                <div class="sa-stat">
+                                    <div>
+                                        <div class="sa-stat-label">Settings module</div>
+                                        <div class="sa-stat-sub">Configure system defaults</div>
+                                    </div>
+                                    <div class="sa-stat-icon danger"><i class="fa fa-gear"></i></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    function toggleNav() {
+        document.getElementById('saShell').classList.toggle('nav-open');
+    }
+
+    const chartLabels = /*[[${chartLabels}]]*/ [];
+    const chartValues = /*[[${chartValues}]]*/ [];
+    const ctx = document.getElementById('collegeChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'College status',
+                    data: chartValues,
+                    backgroundColor: ['#16a34a', '#d97706', '#dc2626', '#2563eb']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    const table = document.getElementById('collegeRegistryTable');
+    const search = document.getElementById('quickSearch');
+    if (table && search) {
+        search.addEventListener('input', function () {
+            const value = this.value.toLowerCase();
+            [...table.tBodies[0].rows].forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

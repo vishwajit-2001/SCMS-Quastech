@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .field{display:grid;gap:6px;margin-bottom:12px}
+        .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .field input,.field textarea{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        .field textarea{min-height:110px;resize:vertical}
+        .feed{display:grid;gap:12px}
+        .item{border-radius:18px;border:1px solid rgba(24,22,15,.08);background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:16px}
+        .item h3{margin:0 0 6px}
+        .item p{margin:0;color:#6b6457;font-size:13px;line-height:1.5}
+        .btn{min-height:42px;padding:0 14px;border-radius:999px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+        .btn.primary{background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='announcements')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Announcements', subtitle='Publish placement notifications, drive updates, and communication to students.')}"></div>
+        <main class="portal-page-body">
+            <section class="panel" style="margin-bottom:18px;">
+                <div class="panel-head">
+                    <div><h2>New Announcement</h2><p>Broadcast a placement update to students.</p></div>
+                    <span class="portal-badge portal-badge--info">Compose</span>
+                </div>
+                <div class="panel-body">
+                    <div class="field"><label>Title</label><input type="text" placeholder="Placement drive update"></div>
+                    <div class="field"><label>Message</label><textarea placeholder="Write the announcement details here"></textarea></div>
+                    <div style="display:flex;justify-content:flex-end;">
+                        <button class="btn primary" type="button"><i class="fa-solid fa-paper-plane"></i> Publish Announcement</button>
+                    </div>
+                </div>
+            </section>
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Recent Updates</h2><p>Latest placement announcements and drive notices.</p></div>
+                    <span class="portal-badge portal-badge--neutral">Feed</span>
+                </div>
+                <div class="panel-body">
+                    <div class="feed">
+                        <article class="item">
+                            <h3>Embedded Developer Drive Published</h3>
+                            <p>Students can now apply before the deadline using the placement portal only.</p>
+                        </article>
+                        <article class="item">
+                            <h3>Applications Close After Deadline</h3>
+                            <p>The apply button will be disabled automatically once the deadline time passes.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

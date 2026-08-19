@@ -1,0 +1,425 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Profile - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        /* â”€â”€ Profile Hero â”€â”€ */
+        .profile-hero {
+            background: var(--black);
+            border: 1px solid var(--gold-br);
+            border-radius: 18px;
+            padding: 32px 36px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease both;
+        }
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 240px; height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,151,42,0.12), transparent);
+        }
+        .ph-avatar-wrap { position: relative; flex-shrink: 0; z-index: 1; }
+        .ph-avatar {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+            border: 3px solid var(--gold-br);
+            box-shadow: 0 0 28px rgba(201,151,42,0.35);
+        }
+        .ph-info { flex: 1; z-index: 1; }
+        .ph-name  { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .ph-role  { font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 10px; }
+        .ph-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ph-badge { padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: var(--gold-bg2); color: var(--gold2); border: 1px solid var(--gold-br); }
+        .ph-badge.green { background: rgba(34,201,122,0.12); color: var(--green); border-color: rgba(34,201,122,0.25); }
+
+        /* â”€â”€ Info Grid â”€â”€ */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .info-item { display: flex; flex-direction: column; gap: 4px; }
+        .info-item.full { grid-column: 1 / -1; }
+        .info-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); font-weight: 700; }
+        .info-value {
+            font-size: 13.5px; font-weight: 600; color: var(--black);
+            padding: 10px 14px;
+            background: var(--offwhite);
+            border: 1px solid var(--light);
+            border-radius: 10px;
+        }
+
+        /* â”€â”€ Section title â”€â”€ */
+        .section-title {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--gold); font-weight: 700;
+            margin-bottom: 14px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--gold-br);
+        }
+
+        /* â”€â”€ Alert Banners â”€â”€ */
+        .alert-error {
+            background: rgba(232,64,64,0.10);
+            border: 1px solid rgba(232,64,64,0.30);
+            color: #e84040;
+            padding: 11px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .alert-success {
+            background: rgba(34,201,122,0.10);
+            border: 1px solid rgba(34,201,122,0.28);
+            color: var(--green);
+            padding: 11px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* â”€â”€ Read-only notice â”€â”€ */
+        .readonly-notice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(201,151,42,0.07);
+            border: 1px solid var(--gold-br);
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 12.5px;
+            color: var(--gold);
+            font-weight: 600;
+        }
+        .readonly-notice i { font-size: 15px; }
+    </style>
+</head>
+<body>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     SIDEBAR
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('profile')}"></div>
+
+<div class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-title">Admin Profile</div>
+        <div class="header-right">
+            <a href="/admin-notifications" class="header-btn">
+                <i class="fa fa-bell"></i><span class="dot"></span>
+            </a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <!-- PROFILE HERO -->
+    <div class="profile-hero">
+        <div class="ph-avatar-wrap">
+            <div class="ph-avatar"><i class="fa fa-gear"></i></div>
+        </div>
+        <div class="ph-info">
+            <div class="ph-name" th:text="${adminName} ?: 'Admin'">Admin</div>
+            <div class="ph-role">Super Administrator - AI Campus</div>
+            <div class="ph-badges">
+                    <span class="ph-badge">
+                        <i class="fa fa-id-badge"></i> Admin ID: <span th:text="'ADM00' + (${adminId} ?: '1')">ADM001</span>
+                    </span>
+                <span class="ph-badge"><i class="fa fa-shield-halved"></i> Super Admin</span>
+                <span class="ph-badge green"><i class="fa fa-circle-check"></i> Active</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="cards" style="padding-top:28px">
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-users"></i></div>
+            <h3>Total Students</h3>
+            <p th:text="${totalStudents} ?: '0'">0</p>
+            <div class="card-sub">Registered</div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-chalkboard-teacher"></i></div>
+            <h3>Total Teachers</h3>
+            <p th:text="${totalTeachers} ?: '0'">0</p>
+            <div class="card-sub">Faculty</div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-gear"></i></div>
+            <h3>Role</h3>
+            <p style="font-size:20px" th:text="${adminRole} ?: 'Admin'">Admin</p>
+            <div class="card-sub">Super Admin</div>
+        </div>
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-circle-check"></i></div>
+            <h3>Status</h3>
+            <p style="font-size:20px">Active</p>
+            <div class="card-sub">System online</div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- INFO + SYSTEM STATS -->
+        <div class="row-2">
+
+            <!-- ACCOUNT INFORMATION (Read-Only) -->
+            <div class="box" style="animation-delay:0.08s">
+                <div class="box-title">Account Information</div>
+
+                <!-- Read-only notice -->
+                <div class="readonly-notice">
+                    <i class="fa fa-lock"></i>
+                    Profile information is read-only. Only password can be changed.
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Admin ID</div>
+                        <div class="info-value" th:text="'ADM00' + (${adminId} ?: '1')">ADM001</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Role</div>
+                        <div class="info-value" th:text="${adminRole} ?: 'Super Administrator'">Super Administrator</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Name</div>
+                        <div class="info-value" th:text="${adminName} ?: '-'">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value" style="color:var(--green);font-weight:700"><i class="fa fa-circle-check"></i> Active</div>
+                    </div>
+                    <div class="info-item full">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" th:text="${adminEmail} ?: '-'">-</div>
+                    </div>
+                    <div class="info-item full">
+                        <div class="info-label">College / Institute</div>
+                        <div class="info-value" th:text="${collegeName} ?: 'AI Campus Institute'">AI Campus Institute</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYSTEM OVERVIEW -->
+            <div class="box" style="animation-delay:0.10s">
+                <div class="box-title">System Overview</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div style="background:var(--offwhite);border:1px solid var(--light);border-radius:12px;padding:18px;text-align:center">
+                        <div style="font-family:var(--serif);font-size:32px;font-weight:700;color:var(--gold)"
+                             th:text="${totalStudents} ?: '0'">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#a09080;margin-top:4px">Students</div>
+                    </div>
+                    <div style="background:var(--black);border:1px solid var(--gold-br);border-radius:12px;padding:18px;text-align:center">
+                        <div style="font-family:var(--serif);font-size:32px;font-weight:700;color:var(--white)"
+                             th:text="${totalTeachers} ?: '0'">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.30);margin-top:4px">Teachers</div>
+                    </div>
+                    <div style="background:var(--offwhite);border:1px solid var(--light);border-radius:12px;padding:18px;text-align:center">
+                        <div style="font-family:var(--serif);font-size:32px;font-weight:700;color:var(--green)"
+                             th:text="${totalCourses} ?: '0'">0</div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#a09080;margin-top:4px">Courses</div>
+                    </div>
+                    <div style="background:var(--black);border:1px solid var(--gold-br);border-radius:12px;padding:18px;text-align:center">
+                        <div style="font-family:var(--serif);font-size:32px;font-weight:700;color:var(--gold2)"><i class="fa fa-circle-check"></i></div>
+                        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.30);margin-top:4px">System OK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHANGE PASSWORD (only editable section) -->
+        <div class="row-2">
+            <div class="box" style="animation-delay:0.12s;grid-column:1/-1;max-width:600px">
+                <div class="box-title">Change Password</div>
+                <div class="section-title">Security - Update Your Password</div>
+
+                <!-- Error Message -->
+                <div class="alert-error" th:if="${passError}">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <span th:text="${passError}"></span>
+                </div>
+
+                <!-- Success Message -->
+                <div class="alert-success" th:if="${param.success}">
+                    <i class="fa fa-check-circle"></i>
+                    <span th:text="${param.success}"></span>
+                </div>
+
+                <!-- Password Change Form -->
+                <form action="/change-admin-password" method="post">
+
+                    <div class="form-group" style="margin-bottom:16px">
+                        <label class="form-label">Current Password</label>
+                        <input type="password"
+                               name="currentPassword"
+                               class="form-input"
+                               placeholder="Enter your current password"
+                               required
+                               autocomplete="current-password">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:16px">
+                        <label class="form-label">New Password</label>
+                        <input type="password"
+                               name="newPassword"
+                               id="newPass"
+                               class="form-input"
+                               placeholder="Minimum 8 characters"
+                               required
+                               autocomplete="new-password"
+                               oninput="checkStrength(this.value)">
+
+                        <!-- Strength meter -->
+                        <div style="margin-top:8px">
+                            <div style="height:5px;border-radius:20px;background:var(--light);overflow:hidden">
+                                <div id="strengthBar"
+                                     style="height:5px;border-radius:20px;width:0%;transition:all 0.4s ease">
+                                </div>
+                            </div>
+                            <div id="strengthLabel"
+                                 style="font-size:11px;font-weight:600;margin-top:5px;color:#b0a898">
+                                Enter a password
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:24px">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password"
+                               name="confirmPassword"
+                               id="confirmPass"
+                               class="form-input"
+                               placeholder="Re-enter new password"
+                               required
+                               autocomplete="new-password"
+                               oninput="checkMatch()">
+                        <div id="matchLabel"
+                             style="font-size:11px;font-weight:600;margin-top:5px;color:transparent">
+                            &nbsp;
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;align-items:center">
+                        <button type="submit" class="btn-gold">
+                            <i class="fa fa-lock"></i> Update Password
+                        </button>
+                        <button type="reset" class="btn-outline" onclick="resetUI()">
+                            <i class="fa fa-times"></i> Clear
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Session Info -->
+                <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--light)">
+                    <div class="section-title">Session Info</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;
+                                    background:var(--offwhite);border:1px solid var(--light);border-radius:10px">
+                            <span style="font-size:13px;font-weight:600">Logged in as</span>
+                            <span style="font-size:12px;color:var(--gold);font-weight:700"
+                                  th:text="${adminEmail} ?: '-'">-</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;
+                                    background:var(--offwhite);border:1px solid var(--light);border-radius:10px">
+                            <span style="font-size:13px;font-weight:600">Account Status</span>
+                            <span class="badge badge-green">Active</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;
+                                    background:var(--offwhite);border:1px solid var(--light);border-radius:10px">
+                            <span style="font-size:13px;font-weight:600">Admin ID</span>
+                            <span style="font-size:12px;color:var(--gold);font-weight:700"
+                                  th:text="'ADM00' + (${adminId} ?: '1')">ADM001</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- END CHANGE PASSWORD -->
+
+    </div>
+</div>
+
+<script>
+    /* â”€â”€ Password Strength Meter â”€â”€ */
+    function checkStrength(val) {
+        const bar   = document.getElementById('strengthBar');
+        const label = document.getElementById('strengthLabel');
+        let score = 0;
+        if (val.length >= 6)              score++;
+        if (val.length >= 10)             score++;
+        if (/[A-Z]/.test(val))            score++;
+        if (/[0-9]/.test(val))            score++;
+        if (/[^A-Za-z0-9]/.test(val))     score++;
+
+        const levels = [
+            { w: '20%',  c: '#e84040', t: 'Very Weak'   },
+            { w: '40%',  c: '#f0a020', t: 'Weak'        },
+            { w: '60%',  c: '#f0cc72', t: 'Fair'        },
+            { w: '80%',  c: '#4a9af0', t: 'Strong'      },
+            { w: '100%', c: '#22c97a', t: 'Very Strong' }
+        ];
+        const lvl = levels[Math.min(score, 4)];
+
+        bar.style.width      = val.length === 0 ? '0%' : lvl.w;
+        bar.style.background = lvl.c;
+        label.textContent    = val.length === 0 ? 'Enter a password' : lvl.t;
+        label.style.color    = val.length === 0 ? '#b0a898' : lvl.c;
+
+        checkMatch(); // re-check match whenever new pass changes
+    }
+
+    /* â”€â”€ Confirm Password Match Check â”€â”€ */
+    function checkMatch() {
+        const newPass     = document.getElementById('newPass').value;
+        const confirmPass = document.getElementById('confirmPass').value;
+        const matchLabel  = document.getElementById('matchLabel');
+
+        if (confirmPass.length === 0) {
+            matchLabel.textContent = '\u00A0';
+            matchLabel.style.color = 'transparent';
+            return;
+        }
+        if (newPass === confirmPass) {
+            matchLabel.textContent = 'âœ… Passwords match';
+            matchLabel.style.color = '#22c97a';
+        } else {
+            matchLabel.textContent = 'âŒ Passwords do not match';
+            matchLabel.style.color = '#e84040';
+        }
+    }
+
+    /* â”€â”€ Reset UI on Clear â”€â”€ */
+    function resetUI() {
+        const bar   = document.getElementById('strengthBar');
+        const label = document.getElementById('strengthLabel');
+        const match = document.getElementById('matchLabel');
+        bar.style.width   = '0%';
+        label.textContent = 'Enter a password';
+        label.style.color = '#b0a898';
+        match.textContent = '\u00A0';
+        match.style.color = 'transparent';
+    }
+</script>
+</body>
+</html>
+

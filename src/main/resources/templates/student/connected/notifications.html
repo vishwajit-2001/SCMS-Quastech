@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Notifications - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='notifications')}"></div>
+
+    <div class="main">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Notifications')}"></div>
+
+        <main class="portal-page-body">
+            <section class="portal-summary-grid">
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Total Alerts</p>
+                    <h2 class="portal-summary-value" th:text="${notificationCount}">0</h2>
+                    <div class="portal-summary-meta">Generated from your live student record</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Academic Scope</p>
+                    <h2 class="portal-summary-value" th:text="${studentClassLabel}">Academic scope not assigned</h2>
+                    <div class="portal-summary-meta">Admin semester mapping</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Today's Classes</p>
+                    <h2 class="portal-summary-value" th:text="${todayScheduleCount}">0</h2>
+                    <div class="portal-summary-meta" th:text="${todayLabel}">Today</div>
+                </article>
+                <article class="portal-summary-card">
+                    <p class="portal-summary-label">Fee Status</p>
+                    <h2 class="portal-summary-value" th:text="${feesDueStatus}">Pending</h2>
+                    <div class="portal-summary-meta" th:text="${feesPendingFormatted} + ' pending'">Rs 0 pending</div>
+                </article>
+            </section>
+
+            <section class="portal-surface" th:if="${!#lists.isEmpty(placementInterviewNotifications)}" style="margin-bottom:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Placement Interview Alerts</h2>
+                    <span class="portal-badge portal-badge--success" th:text="|${placementInterviewNotificationCount} scheduled|">0 scheduled</span>
+                </div>
+                <div class="portal-list portal-list--alerts">
+                    <article class="portal-alert portal-alert--success"
+                             th:each="notification : ${placementInterviewNotifications}">
+                        <div class="portal-alert-icon">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <div class="portal-alert-copy">
+                            <div class="portal-alert-head">
+                                <h3 class="portal-alert-title" th:text="${notification.title}">Interview scheduled</h3>
+                                <span class="portal-badge portal-badge--success" th:text="${notification.source}">Placement</span>
+                            </div>
+                            <p th:text="${notification.description}">Interview description</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="portal-surface">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Student Notifications</h2>
+                    <span class="portal-badge portal-badge--neutral">Student updates</span>
+                </div>
+
+                <div class="portal-list portal-list--alerts" th:if="${!#lists.isEmpty(studentNotifications)}">
+                    <a class="portal-alert portal-alert--interactive"
+                       th:each="notification : ${studentNotifications}"
+                       th:href="${notification.targetUrl}"
+                       th:classappend="${notification.tone == 'warning'} ? ' portal-alert--warning' : (${notification.tone == 'success'} ? ' portal-alert--success' : ' portal-alert--info')">
+                        <div class="portal-alert-icon">
+                            <i th:class="${notification.iconClass}"></i>
+                        </div>
+                        <div class="portal-alert-copy">
+                            <div class="portal-alert-head">
+                                <h3 class="portal-alert-title" th:text="${notification.title}">Notification title</h3>
+                                <span class="portal-badge"
+                                      th:classappend="${notification.tone == 'warning'} ? ' portal-badge--warning' : (${notification.tone == 'success'} ? ' portal-badge--success' : ' portal-badge--info')"
+                                      th:text="${notification.source}">Source</span>
+                            </div>
+                            <p th:text="${notification.description}">Notification description</p>
+                        </div>
+                        <div class="portal-alert-trail"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    </a>
+                </div>
+
+                <div class="portal-empty-state" th:if="${#lists.isEmpty(studentNotifications)}">
+                    <i class="fa-solid fa-bell-slash"></i>
+                    <h3>No notifications right now</h3>
+                    <p>Your dashboard will show account, class, fees, exam, and timetable updates here as your record changes.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+</body>
+</html>

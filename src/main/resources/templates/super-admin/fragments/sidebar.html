@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="sidebar(active, superAdminName, superAdminEmail)">
+    <div class="sa-sidebar">
+        <div class="sa-brand">
+            <div class="sa-brand-mark"><i class="fa fa-shield-halved"></i></div>
+            <div class="sa-brand-copy">
+                <div class="sa-brand-title">ERP Control Center</div>
+                <div class="sa-brand-subtitle">Super Admin</div>
+            </div>
+        </div>
+
+        <div class="sa-nav">
+            <div class="sa-nav-label">Overview</div>
+            <a href="/super-admin-dashboard" th:classappend="${active == 'dashboard'} ? ' active' : ''"><i class="fa fa-gauge-high"></i> Dashboard</a>
+            <a href="/super-admin/colleges" th:classappend="${active == 'colleges'} ? ' active' : ''"><i class="fa fa-school"></i> Colleges</a>
+            <a href="/super-admin/admins" th:classappend="${active == 'admins'} ? ' active' : ''"><i class="fa fa-user-tie"></i> College Admins</a>
+            <a href="/super-admin/notifications" th:classappend="${active == 'notifications'} ? ' active' : ''"><i class="fa fa-bell"></i> Notifications</a>
+            <a href="/super-admin/communications" th:classappend="${active == 'communications'} ? ' active' : ''"><i class="fa fa-comments"></i> Contact Requests</a>
+
+            <div class="sa-nav-label">Management</div>
+            <a href="/super-admin/reports" th:classappend="${active == 'reports'} ? ' active' : ''"><i class="fa fa-chart-line"></i> Reports</a>
+            <a href="/super-admin/audit-logs" th:classappend="${active == 'audit'} ? ' active' : ''"><i class="fa fa-clipboard-list"></i> Audit Logs</a>
+            <a href="/super-admin/settings" th:classappend="${active == 'settings'} ? ' active' : ''"><i class="fa fa-gear"></i> Settings</a>
+
+            <div class="sa-nav-label">Quick Links</div>
+            <a href="/super-admin/logout"><i class="fa fa-right-from-bracket"></i> Logout</a>
+        </div>
+
+        <div class="sa-sidebar-footer">
+            <div class="sa-user-card">
+                <div class="sa-user-avatar"><span th:text="${#strings.substring(superAdminName,0,1)} ?: 'S'">S</span></div>
+                <div class="sa-user-copy">
+                    <div class="sa-user-name" th:text="${superAdminName} ?: 'Super Admin'">Super Admin</div>
+                    <div class="sa-user-role" th:text="${superAdminEmail} ?: 'superadmin@scms.local'">superadmin@scms.local</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

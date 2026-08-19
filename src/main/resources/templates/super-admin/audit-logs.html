@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Governance trail</div>
+                <div class="sa-title">Audit Logs</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-panel">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Activity trace</h2>
+                        <p>Every super-admin college action is written here for traceability.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div class="sa-activity-list">
+                        <div class="sa-activity-item" th:if="${#lists.isEmpty(auditLogs)}">
+                            <div class="sa-activity-dot"></div>
+                            <div class="sa-activity-copy">
+                                <div class="sa-activity-title">No audit logs yet</div>
+                                <div class="sa-activity-sub">Once you create or edit colleges, the trail appears here.</div>
+                            </div>
+                        </div>
+                        <div class="sa-activity-item" th:each="log : ${auditLogs}">
+                            <div class="sa-activity-dot info"></div>
+                            <div class="sa-activity-copy">
+                                <div class="sa-activity-title">
+                                    <span th:text="${log.actionType}">ACTION</span> · <span th:text="${log.entityName}">Entity</span>
+                                </div>
+                                <div class="sa-activity-sub">
+                                    by <span th:text="${log.actorEmail}">admin@example.com</span> · <span th:text="${log.createdAtLabel}">Now</span>
+                                </div>
+                                <div style="margin-top:6px;color:#334155;font-size:13px" th:text="${log.details}">Details</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

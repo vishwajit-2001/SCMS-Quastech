@@ -1,0 +1,1379 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Students - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        /* â”€â”€ Search Bar â”€â”€ */
+        .search-bar {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--offwhite); border: 1px solid var(--light);
+            border-radius: 50px; padding: 9px 18px; width: 280px; transition: all 0.2s;
+        }
+        .search-bar:focus-within { border-color: var(--gold-br); background: var(--cream); box-shadow: 0 0 0 3px rgba(201,151,42,0.08); }
+        .search-bar i { color: #a09080; font-size: 13px; }
+        .search-bar input { border: none; background: transparent; outline: none; font-family: var(--sans); font-size: 13.5px; color: var(--black); width: 100%; }
+        .search-bar input::placeholder { color: #c0b8a8; }
+
+        /* â”€â”€ Filter Tabs Wrapper â”€â”€ */
+        .filter-section {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* â”€â”€ Course Tabs â”€â”€ */
+        .course-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .course-tabs .tab-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #a09080;
+            margin-right: 4px;
+            align-self: center;
+        }
+        .course-tabs a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--sans);
+            text-decoration: none;
+            border: 1.5px solid var(--light);
+            background: var(--offwhite);
+            color: #7a6a5a;
+            transition: all 0.18s;
+        }
+        .course-tabs a:hover {
+            border-color: var(--gold-br);
+            background: var(--gold-bg2);
+            color: var(--gold);
+        }
+        .course-tabs a.active {
+            background: var(--black);
+            color: #fff;
+            border-color: var(--black);
+        }
+        .course-tabs a .tab-count {
+            background: rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 1px 7px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .course-tabs a:not(.active) .tab-count {
+            background: var(--gold-bg2);
+            color: var(--gold);
+        }
+
+        /* â”€â”€ Semester Sub-tabs â”€â”€ */
+        .batch-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--offwhite);
+            border: 1px solid var(--light);
+            border-radius: 12px;
+        }
+        .batch-tabs .tab-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #a09080;
+            margin-right: 4px;
+            align-self: center;
+        }
+        .batch-tabs a {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 12.5px;
+            font-weight: 600;
+            font-family: var(--sans);
+            text-decoration: none;
+            border: 1.5px solid var(--light);
+            background: #fff;
+            color: #7a6a5a;
+            transition: all 0.18s;
+        }
+        .batch-tabs a:hover {
+            border-color: var(--gold-br);
+            color: var(--gold);
+        }
+        .batch-tabs a.active {
+            background: var(--gold);
+            color: #fff;
+            border-color: var(--gold);
+        }
+
+        /* â”€â”€ Active filter info bar â”€â”€ */
+        .filter-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            color: #8a7a6a;
+            padding: 6px 0 2px 2px;
+        }
+        .filter-info .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--gold-bg2);
+            border: 1px solid var(--gold-br);
+            color: var(--gold);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .filter-info a.clear-link {
+            color: #c0a080;
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+        .filter-info a.clear-link:hover { color: var(--gold); }
+
+        .row-actions {
+            display: inline-flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-view {
+            padding: 8px 18px;
+            background: rgba(74,154,240,0.08);
+            color: var(--blue);
+            border: 1px solid rgba(74,154,240,0.25);
+            border-radius: 50px;
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-view:hover {
+            background: rgba(74,154,240,0.16);
+            border-color: rgba(74,154,240,0.45);
+        }
+        .student-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13,12,10,0.58);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            padding: 20px;
+        }
+        .student-modal.open { display: flex; }
+        .student-modal-card {
+            width: min(920px, 100%);
+            max-height: min(86vh, 900px);
+            overflow: auto;
+            background: var(--white);
+            border: 1px solid var(--gold-br);
+            border-radius: 24px;
+            box-shadow: 0 28px 70px rgba(13,12,10,0.32);
+            position: relative;
+        }
+        .student-modal-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: center;
+            padding: 20px 22px;
+            background: linear-gradient(135deg, var(--black), #191512);
+            border-bottom: 1px solid var(--gold-br);
+        }
+        .student-modal-head h3 {
+            color: var(--white);
+            font-family: var(--serif);
+            font-size: 26px;
+        }
+        .student-modal-head p {
+            color: rgba(255,255,255,0.55);
+            margin-top: 4px;
+            font-size: 13px;
+        }
+        .student-modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: var(--white);
+            cursor: pointer;
+        }
+        .student-modal-body {
+            padding: 22px;
+        }
+        .student-modal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .student-modal-pill {
+            border: 1px solid var(--light);
+            background: var(--offwhite);
+            color: #6a6050;
+        }
+        .student-modal-pill.active {
+            background: var(--black);
+            color: var(--white);
+            border-color: var(--gold-br);
+        }
+        .student-modal-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .student-modal-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--black);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .student-modal-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .student-modal-name {
+            font-family: var(--serif);
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .student-modal-sub {
+            color: #8a7a6a;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .student-modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .student-modal-item {
+            background: var(--offwhite);
+            border: 1px solid var(--light);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+        .student-modal-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .student-modal-value {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--black);
+            word-break: break-word;
+        }
+        .student-modal-edit {
+            display: none;
+        }
+        .student-modal-edit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .student-modal-field {
+            display: grid;
+            gap: 6px;
+        }
+        .student-modal-field.full {
+            grid-column: 1 / -1;
+        }
+        .student-modal-field label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+        .student-modal-field input,
+        .student-modal-field select {
+            width: 100%;
+            padding: 11px 13px;
+            border-radius: 10px;
+            border: 1px solid var(--light);
+            background: var(--offwhite);
+            font: inherit;
+            color: var(--black);
+        }
+        .student-modal-save-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .import-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13,12,10,0.58);
+            backdrop-filter: blur(8px);
+            z-index: 700;
+            padding: 20px;
+        }
+        .import-modal.open { display: flex; }
+        .import-modal-card {
+            width: min(1100px, 100%);
+            max-height: min(90vh, 920px);
+            overflow: auto;
+            background: var(--white);
+            border: 1px solid var(--gold-br);
+            border-radius: 24px;
+            box-shadow: 0 28px 70px rgba(13,12,10,0.32);
+        }
+        .import-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 22px;
+            background: linear-gradient(135deg, var(--black), #191512);
+            border-bottom: 1px solid var(--gold-br);
+        }
+        .import-modal-head h3 {
+            color: var(--white);
+            font-family: var(--serif);
+            font-size: 26px;
+        }
+        .import-modal-head p {
+            color: rgba(255,255,255,0.55);
+            margin-top: 4px;
+            font-size: 13px;
+        }
+        .import-modal-body { padding: 22px; }
+        .import-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 18px;
+        }
+        .import-panel {
+            border: 1px solid var(--light);
+            border-radius: 18px;
+            background: var(--offwhite);
+            padding: 16px;
+        }
+        .import-step {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .import-dropzone {
+            border: 1.5px dashed var(--gold-br);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #fff, #faf7f0);
+            padding: 24px 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .import-dropzone.dragover {
+            border-color: var(--gold);
+            background: var(--gold-bg2);
+        }
+        .import-dropzone i {
+            font-size: 28px;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        .import-dropzone strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .import-dropzone p {
+            color: #8a7a6a;
+            font-size: 12.5px;
+            line-height: 1.5;
+        }
+        .import-note {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #8a7a6a;
+            line-height: 1.5;
+        }
+        .import-status {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            display: none;
+        }
+        .import-status.show { display: block; }
+        .import-status.info { background: #eef2ff; color: #4b49ac; border: 1px solid rgba(75,73,172,0.16); }
+        .import-status.success { background: rgba(34,201,122,0.10); color: var(--green); border: 1px solid rgba(34,201,122,0.22); }
+        .import-status.error { background: rgba(232,64,64,0.08); color: var(--red); border: 1px solid rgba(232,64,64,0.18); }
+        .import-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .import-summary-card {
+            border: 1px solid var(--light);
+            border-radius: 14px;
+            background: var(--offwhite);
+            padding: 14px 16px;
+        }
+        .import-summary-card .label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .import-summary-card .value {
+            font-size: 24px;
+            font-family: var(--serif);
+            font-weight: 700;
+        }
+        .import-preview-wrap {
+            border: 1px solid var(--light);
+            border-radius: 18px;
+            overflow: hidden;
+            background: var(--white);
+        }
+        .import-preview-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: var(--offwhite);
+            border-bottom: 1px solid var(--light);
+        }
+        .import-preview-head h4 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .import-preview {
+            max-height: 420px;
+            overflow: auto;
+        }
+        .import-preview table {
+            min-width: 1200px;
+        }
+        .row-valid { background: rgba(34,201,122,0.07); }
+        .row-error { background: rgba(232,64,64,0.07); }
+        .error-text { color: var(--red); font-weight: 600; }
+        .success-text { color: var(--green); font-weight: 600; }
+        .import-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .import-actions-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+            .student-modal-grid { grid-template-columns: 1fr; }
+            .student-modal-edit-grid { grid-template-columns: 1fr; }
+            .import-grid { grid-template-columns: 1fr; }
+            .import-summary { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('students')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">All Students</div>
+        <div class="header-right">
+            <div class="search-bar">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" th:value="${search}" placeholder="Search by name, enrollment, PRN, roll no">
+            </div>
+            <a href="/add-student" class="btn-gold"><i class="fa fa-user-plus"></i> Add Student</a>
+            <button type="button" class="btn-dark" onclick="openStudentImportModal()"><i class="fa fa-file-arrow-up"></i> Import Students</button>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="alert alert-success" th:if="${studentSuccess != null}" style="margin: 0 36px 10px">
+        <i class="fa fa-check-circle"></i>
+        <span th:text="${studentSuccess}"></span>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon"><i class="fa fa-users"></i></div>
+            <h3>Total Students</h3>
+            <p th:text="${totalStudents}">0</p>
+            <div class="card-trend trend-up">All registered</div>
+        </div>
+        <div class="card" th:each="summary : ${courseSummaries}">
+            <div class="card-icon"><i th:class="'fa ' + ${summary.iconClass}"></i></div>
+            <h3 th:text="${summary.code + ' Students'}">Course Students</h3>
+            <p th:text="${summary.count}">0</p>
+            <div class="card-trend" th:classappend="${summary.trendClass}">
+                <a th:href="@{/admin-students(course=${summary.code})}" style="color:inherit;text-decoration:none;"
+                   th:text="${'View ' + summary.code}">View Course</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="box" style="animation-delay:0.08s">
+            <div class="box-title"><i class="fa fa-users" style="color:var(--gold)"></i> Student List</div>
+
+            <!-- â•â•â•â• FILTER SECTION â•â•â•â• -->
+            <div class="filter-section">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <select class="form-select" id="studentCourseSelect" style="max-width:220px">
+                        <option value="">All Courses</option>
+                        <option th:each="summary : ${courseSummaries}"
+                                th:value="${summary.code}"
+                                th:text="${summary.code}"
+                                th:selected="${selectedCourse == summary.code}">
+                            Course
+                        </option>
+                    </select>
+                    <select class="form-select" id="studentBatchSelect" style="max-width:260px">
+                        <option value="">All Batches</option>
+                        <option th:each="batch : ${batches}"
+                                th:value="${batch.id}"
+                                th:text="${batch.displayName}"
+                                th:selected="${selectedBatchId != null and selectedBatchId == batch.id}"
+                                th:attr="data-course=${batch.course != null ? batch.course.code : ''}">
+                            Batch
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Course Tabs -->
+                <div class="course-tabs">
+                    <span class="tab-label">Course:</span>
+
+                    <a th:href="@{/admin-students}"
+                       th:classappend="${selectedCourse == null} ? ' active' : ''">
+                        All
+                        <span class="tab-count" th:text="${totalStudents}">0</span>
+                    </a>
+
+                    <a th:each="summary : ${courseSummaries}"
+                       th:href="@{/admin-students(course=${summary.code})}"
+                       th:classappend="${selectedCourse == summary.code} ? ' active' : ''">
+                        <span th:text="${summary.code}">Course</span>
+                        <span class="tab-count" th:text="${summary.count}">0</span>
+                    </a>
+                </div>
+
+                <!-- Batch Sub-tabs - only show when a course is selected -->
+                <div class="batch-tabs">
+                    <span class="tab-label">Batch:</span>
+
+                    <a th:href="@{/admin-students(course=${selectedCourse})}"
+                       th:classappend="${selectedBatchId == null} ? ' active' : ''">
+                        All Batches
+                    </a>
+
+                    <a th:each="batch : ${batches}"
+                       th:if="${selectedCourse == null or (batch.course != null and batch.course.code != null and #strings.equalsIgnoreCase(batch.course.code, selectedCourse))}"
+                       th:href="@{/admin-students(course=${selectedCourse}, batchId=${batch.id})}"
+                       th:classappend="${selectedBatchId != null and selectedBatchId == batch.id} ? ' active' : ''">
+                        <span th:text="${batch.displayName}">Batch</span>
+                        <span class="tab-count" th:text="${batchCounts[batch.id] != null ? batchCounts[batch.id] : 0}">0</span>
+                    </a>
+                </div>
+
+                <!-- Active Filter Info -->
+                <div class="filter-info" th:if="${selectedCourse != null or selectedBatchId != null}">
+                    <i class="fa fa-filter" style="font-size:11px"></i>
+                    Showing:
+                    <span class="chip" th:if="${selectedCourse != null}" th:text="${selectedCourse}">Course</span>
+                    <span class="chip" th:if="${selectedBatch != null}" th:text="${selectedBatch.displayName}">Batch</span>
+                    - <span th:text="${students.size()}">0</span> student(s) found
+                    <a href="/admin-students" class="clear-link"><i class="fa fa-times-circle"></i> Clear filters</a>
+                </div>
+
+            </div>
+            <!-- â•â•â•â• END FILTER SECTION â•â•â•â• -->
+
+            <div style="overflow-x:auto">
+                <table id="studentTable">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Course</th>
+                        <th>Semester</th>
+                        <th>Academic Mapping</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="student, iterStat : ${students}" th:attr="data-student-id=${student.id}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td>
+                            <span style="background:var(--gold-bg2);color:var(--gold);border:1px solid var(--gold-br);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700"
+                                  th:text="${student.id != null ? student.id : 'Pending'}">1</span>
+                        </td>
+                        <td class="student-cell-name" style="font-weight:600" th:text="${student.name}">-</td>
+                        <td class="student-cell-email" th:text="${student.email}">-</td>
+                        <td>
+                            <span class="badge badge-blue student-cell-course" th:text="${student.course}">-</span>
+                        </td>
+                        <td>
+                            <span th:if="${student.semester != null}"
+                                  class="student-cell-semester"
+                                  style="background:#f0f4ff;color:#4a6cf7;border:1px solid #c5d0f5;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700"
+                                  th:text="${student.semester}">-</span>
+                            <span th:if="${student.semester == null}" class="student-cell-semester" style="color:#c0b8a8">-</span>
+                        </td>
+                        <td class="student-cell-mapping" th:text="${student.classRoom != null and student.classRoom.name != null and !#strings.isEmpty(student.classRoom.name)
+                                ? student.classRoom.name
+                                : (student.course != null and student.semester != null
+                                    ? student.course + ' - ' + student.semester + (student.sectionName != null and !#strings.isEmpty(student.sectionName) ? ' - ' + student.sectionName : '')
+                                    : '-')}">-</td>
+                        <td>
+                            <span th:switch="${student.admissionStatus}">
+                                <span th:case="'APPLIED'"
+                                      style="background:#fff4db;color:#b57b00;border:1px solid #f0d28a;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">
+                                    Pending
+                                </span>
+                                <span th:case="'REJECTED'"
+                                      style="background:#ffe9e9;color:#c22;border:1px solid #efb4b4;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">
+                                    Rejected
+                                </span>
+                                <span th:case="*"
+                                      class="badge badge-green"
+                                      th:text="${student.admissionStatus != null ? student.admissionStatus : 'ADMITTED'}">Active</span>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button type="button"
+                                        class="btn-view"
+                                        onclick="openStudentModal(this, 'view')"
+                                        th:attr="data-id=${student.id},data-name=${student.name},data-email=${student.email},data-course=${student.course},data-semester=${student.semester},data-classroomid=${student.classRoom != null ? student.classRoom.id : ''},data-classroom=${student.classRoom != null and student.classRoom.name != null and !#strings.isEmpty(student.classRoom.name) ? student.classRoom.name : ((student.course != null and student.semester != null) ? student.course + ' - ' + student.semester + (student.sectionName != null and !#strings.isEmpty(student.sectionName) ? ' - ' + student.sectionName : '') : 'Not assigned')},data-academicyear=${student.academicYear},data-rollno=${student.rollNo},data-enrollment=${student.enrollmentNo},data-registration=${student.registrationNo},data-prn=${student.prnNumber},data-degree=${student.degree},data-section=${student.sectionName},data-gender=${student.gender},data-category=${student.category},data-photo=${student.photo},data-status=${student.admissionStatus != null ? student.admissionStatus : 'ADMITTED'}">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
+                                <button type="button"
+                                        class="btn-view"
+                                        onclick="openStudentModal(this, 'edit')"
+                                        th:attr="data-id=${student.id},data-name=${student.name},data-email=${student.email},data-course=${student.course},data-semester=${student.semester},data-classroomid=${student.classRoom != null ? student.classRoom.id : ''},data-classroom=${student.classRoom != null and student.classRoom.name != null and !#strings.isEmpty(student.classRoom.name) ? student.classRoom.name : ((student.course != null and student.semester != null) ? student.course + ' - ' + student.semester + (student.sectionName != null and !#strings.isEmpty(student.sectionName) ? ' - ' + student.sectionName : '') : 'Not assigned')},data-academicyear=${student.academicYear},data-rollno=${student.rollNo},data-enrollment=${student.enrollmentNo},data-registration=${student.registrationNo},data-prn=${student.prnNumber},data-degree=${student.degree},data-section=${student.sectionName},data-gender=${student.gender},data-category=${student.category},data-photo=${student.photo},data-status=${student.admissionStatus != null ? student.admissionStatus : 'ADMITTED'}">
+                                    <i class="fa fa-pen-to-square"></i> Edit
+                                </button>
+                                <a class="btn-view" th:href="@{/admin-students/{id}/documents(id=${student.id})}">
+                                    <i class="fa fa-folder-open"></i> Docs
+                                </a>
+                                <form th:if="${student.admissionStatus == 'APPLIED'}"
+                                      th:action="@{/admin-students/{id}/approve(id=${student.id})}"
+                                      method="post" style="display:inline">
+                                    <button type="submit" class="btn-gold" onclick="return confirm('Approve this admission?')">
+                                        <i class="fa fa-check"></i> Approve
+                                    </button>
+                                </form>
+                                <form th:if="${student.admissionStatus == 'APPLIED'}"
+                                      th:action="@{/admin-students/{id}/reject(id=${student.id})}"
+                                      method="post" style="display:inline">
+                                    <button type="submit" class="btn-red" onclick="return confirm('Reject this admission?')">
+                                        <i class="fa fa-ban"></i> Reject
+                                    </button>
+                                </form>
+                                <a th:href="@{/delete-student/{id}(id=${student.id})}"
+                                   class="btn-red"
+                                   onclick="return confirm('Are you sure you want to delete this student?')">
+                                    <i class="fa fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${students == null or #lists.isEmpty(students)}">
+                        <td colspan="9" style="text-align:center;color:#b0a898;padding:30px;font-size:15px">
+                            - No students found
+                            <span th:if="${selectedCourse != null}">
+                                for <strong th:text="${selectedCourse}"></strong>
+                                <span th:if="${selectedBatch != null}"> - <strong th:text="${selectedBatch.displayName}"></strong></span>
+                            </span>
+                            -
+                            <a href="/add-student" style="color:var(--gold);font-weight:600">Add first student -></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+</div>
+</div>
+
+<div class="import-modal" id="studentImportModal" aria-hidden="true">
+    <div class="import-modal-card" role="dialog" aria-modal="true" aria-labelledby="studentImportModalTitle">
+        <div class="import-modal-head">
+            <div>
+                <h3 id="studentImportModalTitle">Import Students</h3>
+                <p>Download the template, upload a CSV, review errors, then import only valid rows.</p>
+            </div>
+            <button type="button" class="student-modal-close" onclick="closeStudentImportModal()" aria-label="Close import modal">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="import-modal-body">
+            <div class="import-grid">
+                <div class="import-panel">
+                    <div class="import-step">Step 1</div>
+                    <button type="button" class="btn-gold" onclick="downloadStudentTemplate()">
+                        <i class="fa fa-download"></i> Download CSV Template
+                    </button>
+
+                    <div class="import-step" style="margin-top:18px">Step 2</div>
+                    <input type="file" id="studentImportFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden>
+                    <div class="import-dropzone" id="studentImportDropzone">
+                        <i class="fa fa-cloud-arrow-up"></i>
+                        <strong>Upload Student File</strong>
+                        <p>Drag and drop your file here, or click to browse.<br>CSV, TSV, TXT, XLSX, XLS accepted.</p>
+                    </div>
+                    <div class="import-note" id="studentImportFileName">No file selected yet.</div>
+                    <div class="import-status info" id="studentImportStatus"></div>
+                </div>
+
+                <div>
+                    <div class="import-summary">
+                        <div class="import-summary-card">
+                            <div class="label">Ready To Import</div>
+                            <div class="value" id="studentImportReadyCount">0</div>
+                        </div>
+                        <div class="import-summary-card">
+                            <div class="label">Rows With Errors</div>
+                            <div class="value" id="studentImportErrorCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="import-preview-wrap">
+                        <div class="import-preview-head">
+                            <h4>Preview</h4>
+                            <span id="studentImportSummaryText" style="font-size:12.5px;color:#8a7a6a">Upload a file to preview rows.</span>
+                        </div>
+                        <div class="import-preview" id="studentImportPreview">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Row</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Course Code</th>
+                                    <th>Batch</th>
+                                    <th>Semester</th>
+                                    <th>Section</th>
+                                    <th>Status</th>
+                                    <th>Error Reason</th>
+                                </tr>
+                                </thead>
+                                <tbody id="studentImportPreviewBody">
+                                <tr>
+                                    <td colspan="9" style="text-align:center;color:#b0a898;padding:28px">No data available yet.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="import-actions">
+                        <div style="font-size:12.5px;color:#8a7a6a" id="studentImportConfirmText">
+                            0 students ready to import. 0 rows have errors (will be skipped).
+                        </div>
+                        <div class="import-actions-right">
+                            <button type="button" class="btn-outline" onclick="closeStudentImportModal()">Cancel</button>
+                            <button type="button" class="btn-dark" id="studentImportFailedBtn" style="display:none" onclick="downloadStudentFailedRows()">
+                                <i class="fa fa-download"></i> Download Failed Rows
+                            </button>
+                            <button type="button" class="btn-gold" id="studentImportSubmitBtn" onclick="submitStudentImport()" disabled>
+                                <i class="fa fa-file-import"></i> Import Valid Rows
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="student-modal" id="studentModal" aria-hidden="true">
+    <div class="student-modal-card" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle">
+        <div class="student-modal-head">
+            <div>
+                <h3 id="studentModalTitle">Student Details</h3>
+                <p>Basic information from the database record</p>
+            </div>
+            <button type="button" class="student-modal-close" onclick="closeStudentModal()" aria-label="Close modal">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="student-modal-body">
+            <div class="student-modal-actions">
+                <button type="button" class="btn-view student-modal-pill active" id="studentModalViewBtn" onclick="switchStudentModalMode('view')">
+                    View Details
+                </button>
+                <button type="button" class="btn-view student-modal-pill" id="studentModalEditBtn" onclick="switchStudentModalMode('edit')">
+                    Edit Details
+                </button>
+            </div>
+            <div class="student-modal-profile">
+                <div class="student-modal-avatar">
+                    <img id="studentModalPhoto" alt="Student photo" style="display:none;">
+                    <span id="studentModalInitials">ST</span>
+                </div>
+                <div>
+                    <div class="student-modal-name" id="studentModalName">Student</div>
+                    <div class="student-modal-sub" id="studentModalEmail">student@example.com</div>
+                </div>
+            </div>
+            <div class="student-modal-view" id="studentModalView">
+                <div class="student-modal-grid">
+                    <div class="student-modal-item"><div class="student-modal-label">Course</div><div class="student-modal-value" id="studentModalCourse">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Semester</div><div class="student-modal-value" id="studentModalSemester">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Academic Mapping</div><div class="student-modal-value" id="studentModalClassRoom">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Academic Year</div><div class="student-modal-value" id="studentModalAcademicYear">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Roll No</div><div class="student-modal-value" id="studentModalRollNo">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Enrollment No</div><div class="student-modal-value" id="studentModalEnrollment">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Application No</div><div class="student-modal-value" id="studentModalRegistration">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">PRN</div><div class="student-modal-value" id="studentModalPrn">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Degree</div><div class="student-modal-value" id="studentModalDegree">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Section</div><div class="student-modal-value" id="studentModalSection">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Gender</div><div class="student-modal-value" id="studentModalGender">-</div></div>
+                    <div class="student-modal-item"><div class="student-modal-label">Category</div><div class="student-modal-value" id="studentModalCategory">-</div></div>
+                    <div class="student-modal-item" style="grid-column:1/-1;"><div class="student-modal-label">Status</div><div class="student-modal-value" id="studentModalStatus">Active</div></div>
+                </div>
+            </div>
+            <form class="student-modal-edit" id="studentModalEdit" method="post">
+                <input type="hidden" id="studentEditId" name="id">
+                <div class="student-modal-edit-grid">
+                    <div class="student-modal-field full"><label>Name</label><input type="text" id="studentEditName" name="name" required></div>
+                    <div class="student-modal-field"><label>Email</label><input type="email" id="studentEditEmail" name="email" required></div>
+                    <div class="student-modal-field"><label>Course</label><input type="text" id="studentEditCourse" name="course"></div>
+                    <div class="student-modal-field"><label>Semester</label><input type="text" id="studentEditSemester" name="semester"></div>
+                    <div class="student-modal-field"><label>Academic Year</label><input type="text" id="studentEditAcademicYear" name="academicYear"></div>
+                    <div class="student-modal-field"><label>Roll No</label><input type="text" id="studentEditRollNo" name="rollNo"></div>
+                    <div class="student-modal-field"><label>Enrollment No</label><input type="text" id="studentEditEnrollmentNo" name="enrollmentNo"></div>
+                    <div class="student-modal-field"><label>Application No</label><input type="text" id="studentEditRegistrationNo" name="registrationNo"></div>
+                    <div class="student-modal-field"><label>PRN</label><input type="text" id="studentEditPrn" name="prnNumber"></div>
+                    <div class="student-modal-field"><label>Degree</label><input type="text" id="studentEditDegree" name="degree"></div>
+                    <div class="student-modal-field"><label>Section</label><input type="text" id="studentEditSection" name="sectionName"></div>
+                    <div class="student-modal-field"><label>Gender</label><input type="text" id="studentEditGender" name="gender"></div>
+                    <div class="student-modal-field"><label>Category</label><input type="text" id="studentEditCategory" name="category"></div>
+                    <div class="student-modal-field full">
+                        <label>Academic Mapping</label>
+                        <select id="studentEditClassRoom" name="classRoomId">
+                            <option value="">Not assigned</option>
+                            <option th:each="cls : ${classes}" th:value="${cls.id}" th:text="${cls.name}">Academic Mapping</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="student-modal-save-row">
+                    <button type="button" class="btn-red" onclick="switchStudentModalMode('view')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-view">
+                        <i class="fa fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    let studentSearchTimer;
+    let studentImportFile = null;
+    let studentImportFailedRowsCsv = '';
+
+    function normalizeStudentFilter(value) {
+        return String(value || '').trim().toUpperCase();
+    }
+
+    function filterStudentBatchOptions() {
+        const course = normalizeStudentFilter(document.getElementById('studentCourseSelect').value);
+        const batchSelect = document.getElementById('studentBatchSelect');
+        Array.from(batchSelect.options).forEach((option, index) => {
+            if (index === 0) return;
+            const optionCourse = normalizeStudentFilter(option.dataset.course);
+            const visible = !course || !optionCourse || optionCourse === course;
+            option.hidden = !visible;
+            option.disabled = !visible;
+        });
+        if (batchSelect.selectedOptions[0]?.disabled) {
+            batchSelect.value = '';
+        }
+    }
+
+    function applyStudentFilters() {
+        const params = new URLSearchParams(window.location.search);
+        const search = document.getElementById('searchInput').value.trim();
+        const course = document.getElementById('studentCourseSelect').value;
+        const batchId = document.getElementById('studentBatchSelect').value;
+        if (search) params.set('search', search); else params.delete('search');
+        if (course) params.set('course', course); else params.delete('course');
+        if (batchId) params.set('batchId', batchId); else params.delete('batchId');
+        window.location.href = '/admin-students' + (params.toString() ? '?' + params.toString() : '');
+    }
+
+    function openStudentModal(button, mode) {
+        const modal = document.getElementById('studentModal');
+        const initials = document.getElementById('studentModalInitials');
+        const photo = document.getElementById('studentModalPhoto');
+        const name = button.dataset.name || 'Student';
+        const email = button.dataset.email || 'Not available';
+        const studentId = button.dataset.id || '';
+
+        document.getElementById('studentModalTitle').textContent = name + ' Details';
+        document.getElementById('studentModalName').textContent = name;
+        document.getElementById('studentModalEmail').textContent = email;
+        document.getElementById('studentModalCourse').textContent = button.dataset.course || 'Not assigned';
+        document.getElementById('studentModalSemester').textContent = button.dataset.semester || 'Not assigned';
+        document.getElementById('studentModalClassRoom').textContent = button.dataset.classroom || 'Not assigned';
+        document.getElementById('studentModalAcademicYear').textContent = button.dataset.academicyear || 'Not assigned';
+        document.getElementById('studentModalRollNo').textContent = button.dataset.rollno || 'Not assigned';
+        document.getElementById('studentModalEnrollment').textContent = button.dataset.enrollment || 'Not assigned';
+        document.getElementById('studentModalRegistration').textContent = button.dataset.registration || 'Not assigned';
+        document.getElementById('studentModalPrn').textContent = button.dataset.prn || 'Not assigned';
+        document.getElementById('studentModalDegree').textContent = button.dataset.degree || 'Not assigned';
+        document.getElementById('studentModalSection').textContent = button.dataset.section || 'Not assigned';
+        document.getElementById('studentModalGender').textContent = button.dataset.gender || 'Not provided';
+        document.getElementById('studentModalCategory').textContent = button.dataset.category || 'Not provided';
+        document.getElementById('studentModalStatus').textContent = button.dataset.status || 'ADMITTED';
+        document.getElementById('studentEditId').value = studentId;
+        document.getElementById('studentModalEdit').action = '/update-student/' + encodeURIComponent(studentId);
+        document.getElementById('studentEditName').value = name;
+        document.getElementById('studentEditEmail').value = email;
+        document.getElementById('studentEditCourse').value = button.dataset.course || '';
+        document.getElementById('studentEditSemester').value = button.dataset.semester || '';
+        document.getElementById('studentEditAcademicYear').value = button.dataset.academicyear || '';
+        document.getElementById('studentEditRollNo').value = button.dataset.rollno || '';
+        document.getElementById('studentEditEnrollmentNo').value = button.dataset.enrollment || '';
+        document.getElementById('studentEditRegistrationNo').value = button.dataset.registration || '';
+        document.getElementById('studentEditPrn').value = button.dataset.prn || '';
+        document.getElementById('studentEditDegree').value = button.dataset.degree || '';
+        document.getElementById('studentEditSection').value = button.dataset.section || '';
+        document.getElementById('studentEditGender').value = button.dataset.gender || '';
+        document.getElementById('studentEditCategory').value = button.dataset.category || '';
+        document.getElementById('studentEditClassRoom').value = button.dataset.classroomid || '';
+
+        const photoPath = button.dataset.photo || '';
+        if (photoPath) {
+            photo.src = photoPath;
+            photo.style.display = 'block';
+            initials.style.display = 'none';
+        } else {
+            photo.removeAttribute('src');
+            photo.style.display = 'none';
+            initials.textContent = initialsFromName(name);
+            initials.style.display = 'block';
+        }
+
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        switchStudentModalMode(mode || 'view');
+    }
+
+    function closeStudentModal() {
+        const modal = document.getElementById('studentModal');
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function switchStudentModalMode(mode) {
+        const view = document.getElementById('studentModalView');
+        const edit = document.getElementById('studentModalEdit');
+        const viewBtn = document.getElementById('studentModalViewBtn');
+        const editBtn = document.getElementById('studentModalEditBtn');
+
+        if (mode === 'edit') {
+            view.style.display = 'none';
+            edit.style.display = 'block';
+            viewBtn.classList.remove('active');
+            editBtn.classList.add('active');
+        } else {
+            view.style.display = 'block';
+            edit.style.display = 'none';
+            viewBtn.classList.add('active');
+            editBtn.classList.remove('active');
+        }
+    }
+
+    function initialsFromName(name) {
+        const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return 'ST';
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    document.getElementById('studentModal').addEventListener('click', function (event) {
+        if (event.target === this) {
+            closeStudentModal();
+        }
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function () {
+        window.clearTimeout(studentSearchTimer);
+        studentSearchTimer = window.setTimeout(applyStudentFilters, 300);
+    });
+    document.getElementById('studentCourseSelect').addEventListener('change', function () {
+        filterStudentBatchOptions();
+        applyStudentFilters();
+    });
+    document.getElementById('studentBatchSelect').addEventListener('change', applyStudentFilters);
+    filterStudentBatchOptions();
+
+    ['studentEditCourse', 'studentEditSemester', 'studentEditAcademicYear', 'studentEditSection'].forEach(function (id) {
+        const field = document.getElementById(id);
+        if (!field) return;
+        field.addEventListener('input', function () {
+            const classField = document.getElementById('studentEditClassRoom');
+            if (classField) {
+                classField.value = '';
+            }
+        });
+        field.addEventListener('change', function () {
+            const classField = document.getElementById('studentEditClassRoom');
+            if (classField) {
+                classField.value = '';
+            }
+        });
+    });
+
+    document.getElementById('studentModalEdit').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalLabel = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData,
+                cache: 'no-store'
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Could not update the student right now.');
+            }
+            applyStudentUpdateToPage(result.student);
+            showStudentSuccessBanner(result.message || 'Student record updated successfully.');
+            switchStudentModalMode('view');
+        } catch (error) {
+            window.alert(error.message || 'Could not update the student right now.');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalLabel;
+        }
+    });
+
+    function applyStudentUpdateToPage(student) {
+        if (!student || !student.id) return;
+        const row = document.querySelector('tr[data-student-id="' + student.id + '"]');
+        if (row) {
+            const nameCell = row.querySelector('.student-cell-name');
+            const emailCell = row.querySelector('.student-cell-email');
+            const courseCell = row.querySelector('.student-cell-course');
+            const semesterCell = row.querySelector('.student-cell-semester');
+            const mappingCell = row.querySelector('.student-cell-mapping');
+            if (nameCell) nameCell.textContent = student.name || '-';
+            if (emailCell) emailCell.textContent = student.email || '-';
+            if (courseCell) courseCell.textContent = student.course || '-';
+            if (semesterCell) semesterCell.textContent = student.semester || '-';
+            if (mappingCell) mappingCell.textContent = student.academicMapping || 'Not assigned';
+
+            row.querySelectorAll('[data-id]').forEach(function (button) {
+                if (String(button.dataset.id) !== String(student.id)) return;
+                button.dataset.name = student.name || '';
+                button.dataset.email = student.email || '';
+                button.dataset.course = student.course || '';
+                button.dataset.semester = student.semester || '';
+                button.dataset.classroomid = student.classRoomId || '';
+                button.dataset.classroom = student.academicMapping || 'Not assigned';
+                button.dataset.academicyear = student.academicYear || '';
+                button.dataset.rollno = student.rollNo || '';
+                button.dataset.enrollment = student.enrollmentNo || '';
+                button.dataset.registration = student.registrationNo || '';
+                button.dataset.prn = student.prnNumber || '';
+                button.dataset.degree = student.degree || '';
+                button.dataset.section = student.section || '';
+                button.dataset.gender = student.gender || '';
+                button.dataset.category = student.category || '';
+                button.dataset.photo = student.photo || '';
+                button.dataset.status = student.status || 'ADMITTED';
+            });
+        }
+
+        document.getElementById('studentModalName').textContent = student.name || 'Student';
+        document.getElementById('studentModalEmail').textContent = student.email || 'Not available';
+        document.getElementById('studentModalCourse').textContent = student.course || 'Not assigned';
+        document.getElementById('studentModalSemester').textContent = student.semester || 'Not assigned';
+        document.getElementById('studentModalClassRoom').textContent = student.academicMapping || 'Not assigned';
+        document.getElementById('studentModalAcademicYear').textContent = student.academicYear || 'Not assigned';
+        document.getElementById('studentModalRollNo').textContent = student.rollNo || 'Not assigned';
+        document.getElementById('studentModalEnrollment').textContent = student.enrollmentNo || 'Not assigned';
+        document.getElementById('studentModalRegistration').textContent = student.registrationNo || 'Not assigned';
+        document.getElementById('studentModalPrn').textContent = student.prnNumber || 'Not assigned';
+        document.getElementById('studentModalDegree').textContent = student.degree || 'Not assigned';
+        document.getElementById('studentModalSection').textContent = student.section || 'Not assigned';
+        document.getElementById('studentModalGender').textContent = student.gender || 'Not provided';
+        document.getElementById('studentModalCategory').textContent = student.category || 'Not provided';
+        document.getElementById('studentModalStatus').textContent = student.status || 'ADMITTED';
+
+        document.getElementById('studentEditName').value = student.name || '';
+        document.getElementById('studentEditEmail').value = student.email || '';
+        document.getElementById('studentEditCourse').value = student.course || '';
+        document.getElementById('studentEditSemester').value = student.semester || '';
+        document.getElementById('studentEditAcademicYear').value = student.academicYear || '';
+        document.getElementById('studentEditRollNo').value = student.rollNo || '';
+        document.getElementById('studentEditEnrollmentNo').value = student.enrollmentNo || '';
+        document.getElementById('studentEditRegistrationNo').value = student.registrationNo || '';
+        document.getElementById('studentEditPrn').value = student.prnNumber || '';
+        document.getElementById('studentEditDegree').value = student.degree || '';
+        document.getElementById('studentEditSection').value = student.section || '';
+        document.getElementById('studentEditGender').value = student.gender || '';
+        document.getElementById('studentEditCategory').value = student.category || '';
+        document.getElementById('studentEditClassRoom').value = student.classRoomId || '';
+    }
+
+    function showStudentSuccessBanner(message) {
+        let banner = document.querySelector('.alert.alert-success');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.className = 'alert alert-success';
+            const container = document.querySelector('.content');
+            if (container) {
+                container.insertBefore(banner, container.firstChild);
+            }
+        }
+        banner.innerHTML = '<i class="fa fa-circle-check"></i><span>' + (message || 'Student record updated successfully.') + '</span>';
+    }
+
+    function openStudentImportModal() {
+        document.getElementById('studentImportModal').classList.add('open');
+        document.getElementById('studentImportModal').setAttribute('aria-hidden', 'false');
+    }
+
+    function closeStudentImportModal() {
+        document.getElementById('studentImportModal').classList.remove('open');
+        document.getElementById('studentImportModal').setAttribute('aria-hidden', 'true');
+    }
+
+    function downloadStudentTemplate() {
+        window.location.href = '/admin/students/import/template';
+    }
+
+    function setStudentImportStatus(message, type) {
+        const box = document.getElementById('studentImportStatus');
+        box.textContent = message || '';
+        box.className = 'import-status show ' + (type || 'info');
+    }
+
+    async function previewStudentImport(file) {
+        if (!file) return;
+        studentImportFile = file;
+        document.getElementById('studentImportFileName').textContent = 'Selected file: ' + file.name;
+        setStudentImportStatus('Parsing CSV and validating rows...', 'info');
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('mode', 'preview');
+
+        try {
+            const response = await fetch('/admin/students/import', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.error) {
+                studentImportFailedRowsCsv = '';
+                renderStudentImportPreview([]);
+                setStudentImportStatus(result.error, 'error');
+                return;
+            }
+            studentImportFailedRowsCsv = result.failedRowsCsv || '';
+            renderStudentImportPreview(result.rows || []);
+            const ready = Number(result.readyCount || 0);
+            const errors = Number(result.errorCount || 0);
+            setStudentImportStatus(ready + ' students ready to import. ' + errors + ' row(s) have errors.', ready > 0 ? 'success' : 'info');
+        } catch (error) {
+            studentImportFailedRowsCsv = '';
+            renderStudentImportPreview([]);
+            setStudentImportStatus('Could not read the CSV right now. Please try again.', 'error');
+        }
+    }
+
+    function renderStudentImportPreview(rows) {
+        const body = document.getElementById('studentImportPreviewBody');
+        const ready = rows.filter(row => row.valid).length;
+        const errors = rows.filter(row => !row.valid).length;
+        document.getElementById('studentImportReadyCount').textContent = String(ready);
+        document.getElementById('studentImportErrorCount').textContent = String(errors);
+        document.getElementById('studentImportSummaryText').textContent = rows.length
+            ? (ready + ' students ready, ' + errors + ' row(s) with errors')
+            : 'Upload a file to preview rows.';
+        document.getElementById('studentImportConfirmText').textContent =
+            ready + ' students ready to import. ' + errors + ' rows have errors (will be skipped).';
+        document.getElementById('studentImportSubmitBtn').disabled = ready === 0 || !studentImportFile;
+        document.getElementById('studentImportFailedBtn').style.display = errors > 0 && studentImportFailedRowsCsv ? 'inline-flex' : 'none';
+
+        if (!rows.length) {
+            body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#b0a898;padding:28px">No data available yet.</td></tr>';
+            return;
+        }
+
+        body.innerHTML = rows.map(row => {
+            const values = row.values || {};
+            return `
+                <tr class="${row.valid ? 'row-valid' : 'row-error'}">
+                    <td>${row.rowNumber ?? ''}</td>
+                    <td>${escapeHtml(values['Full Name'])}</td>
+                    <td>${escapeHtml(values['Email'])}</td>
+                    <td>${escapeHtml(values['Course Code'])}</td>
+                    <td>${escapeHtml(values['Batch'])}</td>
+                    <td>${escapeHtml(values['Semester'])}</td>
+                    <td>${escapeHtml(values['Section'])}</td>
+                    <td class="${row.valid ? 'success-text' : 'error-text'}">${row.valid ? 'Valid' : 'Error'}</td>
+                    <td class="${row.valid ? '' : 'error-text'}">${escapeHtml(row.errorReason || '')}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function submitStudentImport() {
+        if (!studentImportFile) {
+            setStudentImportStatus('Please choose a CSV file first.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', studentImportFile);
+        formData.append('mode', 'import');
+        setStudentImportStatus('Importing valid student rows...', 'info');
+
+        try {
+            const response = await fetch('/admin/students/import', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.error) {
+                setStudentImportStatus(result.error, 'error');
+                return;
+            }
+            studentImportFailedRowsCsv = result.failedRowsCsv || '';
+            renderStudentImportPreview(result.rows || []);
+            setStudentImportStatus((result.successCount || 0) + ' students imported successfully.', 'success');
+            if (!studentImportFailedRowsCsv) {
+                window.setTimeout(() => window.location.reload(), 1200);
+            } else {
+                document.getElementById('studentImportFailedBtn').style.display = 'inline-flex';
+            }
+        } catch (error) {
+            setStudentImportStatus('Import failed. Please try again.', 'error');
+        }
+    }
+
+    function downloadStudentFailedRows() {
+        if (!studentImportFailedRowsCsv) return;
+        const blob = new Blob([studentImportFailedRowsCsv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'student-import-failed-rows.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    document.getElementById('studentImportModal').addEventListener('click', function (event) {
+        if (event.target === this) {
+            closeStudentImportModal();
+        }
+    });
+    document.getElementById('studentImportDropzone').addEventListener('click', function () {
+        document.getElementById('studentImportFile').click();
+    });
+    document.getElementById('studentImportFile').addEventListener('change', function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (file) previewStudentImport(file);
+    });
+    document.getElementById('studentImportDropzone').addEventListener('dragover', function (event) {
+        event.preventDefault();
+        this.classList.add('dragover');
+    });
+    document.getElementById('studentImportDropzone').addEventListener('dragleave', function () {
+        this.classList.remove('dragover');
+    });
+    document.getElementById('studentImportDropzone').addEventListener('drop', function (event) {
+        event.preventDefault();
+        this.classList.remove('dragover');
+        const file = event.dataTransfer.files && event.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('studentImportFile').files = event.dataTransfer.files;
+            previewStudentImport(file);
+        }
+    });
+    if (new URLSearchParams(window.location.search).get('openImport') === '1') {
+        openStudentImportModal();
+    }
+</script>
+</body>
+</html>
+

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .profile{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center}
+        .avatar{width:120px;height:120px;border-radius:28px;background:linear-gradient(135deg,#c8922a,#e8aa35);display:grid;place-items:center;font-size:42px;font-weight:800;color:#18160f}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .field{display:grid;gap:6px;margin-bottom:12px}
+        .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .field input{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        @media (max-width:768px){.profile{grid-template-columns:1fr}.avatar{width:88px;height:88px}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='settings')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Settings', subtitle='Update placement TPO profile details and portal preferences.')}"></div>
+        <main class="portal-page-body">
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Placement TPO Profile</h2><p>Manage the active TPO account details.</p></div>
+                    <span class="portal-badge portal-badge--neutral" th:text="${placementTpoCollege}">College</span>
+                </div>
+                <div class="panel-body">
+                    <div class="profile">
+                        <div class="avatar" th:text="${placementTpoInitials}">TP</div>
+                        <div>
+                            <h3 style="margin:0 0 6px;" th:text="${placementTpoName}">Placement TPO</h3>
+                            <div class="pill-row">
+                                <span class="pill" th:text="${placementTpoEmail}">tpo@example.com</span>
+                                <span class="pill" th:text="${placementTpoCollege}">College</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:18px;" class="field">
+                        <label>College Name</label>
+                        <input type="text" th:value="${placementTpoCollege}">
+                    </div>
+                    <div class="field">
+                        <label>Designation</label>
+                        <input type="text" th:value="${placementTpoName}">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

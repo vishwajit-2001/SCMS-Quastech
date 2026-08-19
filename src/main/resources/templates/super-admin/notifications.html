@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - ERP Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <link rel="stylesheet" href="/css/super-admin/super-admin.css">
+    <style>
+        .sa-notification-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr); gap:18px; }
+        .sa-notification-list { display:flex; flex-direction:column; }
+        .sa-notification-item {
+            display:flex;
+            gap:14px;
+            padding:16px 20px;
+            border-bottom:1px solid #ede5d8;
+            text-decoration:none;
+            color:inherit;
+            transition:background .2s ease;
+        }
+        .sa-notification-item:hover { background:#fcf8f0; }
+        .sa-notification-item.active { background:#f7f1e4; }
+        .sa-notification-dot { width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+        .sa-notification-copy { flex:1; min-width:0; }
+        .sa-notification-title { font-size:15px; font-weight:800; color:var(--sa-text); }
+        .sa-notification-meta { font-size:12px; color:var(--sa-muted); margin-top:4px; }
+        .sa-notification-text { font-size:13px; color:#6e6357; margin-top:8px; line-height:1.5; }
+        .sa-detail-box { padding:22px; }
+        .sa-detail-empty {
+            min-height:320px;
+            display:grid;
+            place-items:center;
+            text-align:center;
+            border:1px dashed #e6d8c1;
+            border-radius:14px;
+            background:#fffdf8;
+            color:#8c7f6d;
+        }
+        .sa-detail-title { font-size:22px; font-weight:900; color:var(--sa-text); margin-bottom:8px; }
+        .sa-detail-meta { color:var(--sa-muted); font-size:13px; margin-bottom:18px; }
+        .sa-detail-message { white-space:pre-wrap; line-height:1.7; color:#5f5445; }
+        .sa-detail-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+        .sa-pill-row { display:flex; gap:10px; flex-wrap:wrap; }
+        .sa-pill { padding:8px 12px; border-radius:999px; background:#f5eee3; color:#6c573d; font-size:12px; font-weight:700; }
+        @media (max-width: 980px) {
+            .sa-notification-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="sa-shell">
+    <div th:replace="~{super-admin/fragments/sidebar :: sidebar(${activeModule}, ${superAdminName}, ${superAdminEmail})}"></div>
+    <div class="sa-main">
+        <div class="sa-topbar">
+            <div class="sa-topbar-title">
+                <div class="sa-kicker">Notification center</div>
+                <div class="sa-title">Notifications</div>
+            </div>
+            <div class="sa-topbar-actions">
+                <a class="sa-btn soft" href="/super-admin-dashboard"><i class="fa fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </div>
+
+        <div class="sa-content">
+            <div class="sa-grid-4" style="margin-bottom:18px">
+                <div class="sa-card">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label">Sent Messages</div>
+                            <div class="sa-stat-value" th:text="${notificationCount}">0</div>
+                            <div class="sa-stat-sub">Messages sent to college admins</div>
+                        </div>
+                        <div class="sa-stat-icon primary"><i class="fa fa-paper-plane"></i></div>
+                    </div>
+                </div>
+                <div class="sa-card">
+                    <div class="sa-stat">
+                        <div class="sa-stat-copy">
+                            <div class="sa-stat-label">Unread</div>
+                            <div class="sa-stat-value" th:text="${unreadCount}">0</div>
+                            <div class="sa-stat-sub">Pending read status</div>
+                        </div>
+                        <div class="sa-stat-icon warning"><i class="fa fa-envelope-open"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-notification-grid">
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Super admin messages</h2>
+                            <p>Messages sent from the super admin console to college admins.</p>
+                        </div>
+                        <span class="sa-badge primary"><i class="fa fa-inbox"></i> Live feed</span>
+                    </div>
+                    <div class="sa-notification-list">
+                        <div th:if="${#lists.isEmpty(sentMessages)}" class="sa-notification-item" style="cursor:default">
+                            <div class="sa-notification-dot" style="background:#d6c6b0"></div>
+                            <div class="sa-notification-copy">
+                                <div class="sa-notification-title">No messages yet</div>
+                                <div class="sa-notification-meta">Send a message from Contact Requests to see it here.</div>
+                            </div>
+                        </div>
+
+                        <a class="sa-notification-item"
+                           th:each="notification : ${sentMessages}"
+                           th:href="@{/super-admin/notifications(notificationId=${notification.id})}"
+                           th:classappend="${selectedNotification != null and selectedNotification.id == notification.id} ? ' active' : ''">
+                            <div class="sa-notification-dot" th:style="${notification.unread} ? 'background:var(--sa-warning)' : 'background:#95b07a'"></div>
+                            <div class="sa-notification-copy">
+                                <div class="sa-notification-title" th:text="${notification.title}">Title</div>
+                                <div class="sa-notification-meta">
+                                    To <span th:text="${notification.recipientEmail}">admin@example.com</span> ·
+                                    <span th:text="${notification.createdAtLabel}">Now</span>
+                                </div>
+                                <div class="sa-notification-text" th:text="${#strings.abbreviate(notification.message, 120)}">Message</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sa-panel">
+                    <div class="sa-panel-head">
+                        <div class="sa-panel-title">
+                            <h2>Message detail</h2>
+                            <p>Open any message to see the full content.</p>
+                        </div>
+                    </div>
+                    <div class="sa-detail-box" th:if="${selectedNotification != null}">
+                        <div class="sa-detail-title" th:text="${selectedNotification.title}">Title</div>
+                        <div class="sa-detail-meta">
+                            To <strong th:text="${selectedNotification.recipientEmail}">admin@example.com</strong> ·
+                            <span th:text="${selectedNotification.createdAtLabel}">Date</span>
+                        </div>
+                        <div class="sa-detail-message" th:text="${selectedNotification.message}">Message body</div>
+                        <div class="sa-detail-actions">
+                            <a class="sa-btn soft" th:if="${selectedNotification.linkUrl != null and !#strings.isEmpty(selectedNotification.linkUrl)}" th:href="${selectedNotification.linkUrl}">
+                                <i class="fa fa-arrow-up-right-from-square"></i> Open Link
+                            </a>
+                            <a class="sa-btn ghost" href="/super-admin/communications"><i class="fa fa-comments"></i> Communications</a>
+                        </div>
+                    </div>
+                    <div class="sa-detail-empty" th:if="${selectedNotification == null}">
+                        <div>
+                            <i class="fa fa-envelope-open-text" style="font-size:34px;color:#d0c0a7;margin-bottom:12px"></i>
+                            <div style="font-size:18px;font-weight:800;color:var(--sa-text);margin-bottom:8px">Select a message</div>
+                            <div>Choose a message from the inbox to read the full detail here.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sa-panel" style="margin-top:18px">
+                <div class="sa-panel-head">
+                    <div class="sa-panel-title">
+                        <h2>Recent activity</h2>
+                        <p>College registry activity and status updates.</p>
+                    </div>
+                </div>
+                <div class="sa-panel-body">
+                    <div class="sa-activity-list">
+                        <div class="sa-activity-item" th:if="${#lists.isEmpty(recentActivities)}">
+                            <div class="sa-activity-dot"></div>
+                            <div class="sa-activity-copy">
+                                <div class="sa-activity-title">No activity</div>
+                                <div class="sa-activity-sub">Create colleges or admin accounts to populate this feed.</div>
+                            </div>
+                        </div>
+                        <div class="sa-activity-item" th:each="activity : ${recentActivities}">
+                            <div class="sa-activity-dot" th:classappend="' ' + ${activity.tone}"></div>
+                            <div class="sa-activity-copy">
+                                <div class="sa-activity-title" th:text="${activity.title}">Title</div>
+                                <div class="sa-activity-sub" th:text="${activity.subtitle}">Subtitle</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

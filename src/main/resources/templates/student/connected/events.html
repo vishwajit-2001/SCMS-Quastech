@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${'Events & Activities - ' + (collegeName ?: 'AI Campus Institute')}">Events &amp; Activities - AI Campus Institute</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .event-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+        .event-card{border:1px solid rgba(200,146,42,.16);border-radius:24px;background:linear-gradient(135deg,#fff,#faf5ea);padding:18px;box-shadow:0 12px 32px rgba(24,22,15,.05)}
+        .event-top{display:flex;gap:14px;align-items:flex-start}
+        .date-chip{width:58px;min-width:58px;border-radius:16px;background:#18160f;color:#fff;text-align:center;padding:10px 8px;line-height:1}
+        .date-chip strong{display:block;font-size:24px;font-weight:800}
+        .date-chip span{display:block;margin-top:5px;font-size:11px;letter-spacing:.12em;color:#d8c69b}
+        .event-title{margin:0;font-size:20px}
+        .event-meta{margin-top:6px;color:#6b6457;font-size:13px;line-height:1.5}
+        .pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.72);border:1px solid rgba(24,22,15,.08);font-size:12px;color:#3f372c}
+        .event-actions{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+        .register-btn{border:1px solid rgba(200,146,42,.35);background:#fff;border-radius:999px;padding:10px 16px;font-weight:700;color:#c07b12;cursor:pointer}
+        .register-btn:disabled{opacity:.5;cursor:not-allowed}
+        .form-panel{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(24,22,15,.08)}
+        .form-panel.open{display:block}
+        .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .field{display:grid;gap:6px}
+        .field.full{grid-column:1/-1}
+        .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f7566;font-weight:700}
+        .field input,.field textarea{width:100%;border-radius:14px;border:1px solid rgba(24,22,15,.12);background:#fff;color:#18160f;padding:12px 14px;font:inherit}
+        .field textarea{min-height:92px;resize:vertical}
+        .submit-btn{min-height:46px;padding:0 16px;border:none;border-radius:999px;background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f;font-weight:700;cursor:pointer}
+        .empty{border:1px dashed rgba(200,146,42,.28);border-radius:22px;padding:26px;text-align:center;color:#6b6457;background:rgba(255,255,255,.8)}
+        .msg{border-radius:14px;padding:12px 14px;font-size:13px;font-weight:600}
+        .msg.success{background:rgba(26,158,104,.10);color:#1a7a50;border:1px solid rgba(26,158,104,.18)}
+        .msg.error{background:rgba(208,63,63,.10);color:#9f3939;border:1px solid rgba(208,63,63,.18)}
+        @media (max-width:900px){.event-grid,.form-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{student/components/sidebar :: sidebar(activePage='events')}"></div>
+    <div class="main-content">
+        <div th:replace="~{student/layouts/student-dashboard-layout :: topbar(title='Events &amp; Activities')}"></div>
+        <main class="portal-page-body">
+            <section class="portal-hero-banner">
+                <div class="portal-hero-copy">
+                    <span class="portal-hero-kicker"><i class="fa-solid fa-calendar-check"></i> Campus Events</span>
+                    <h2 class="portal-hero-title">Register for workshops, hackathons, seminars, and college activities</h2>
+                    <p class="portal-hero-subtitle">
+                        <span th:text="${studentName}">Student</span>
+                        <span> | </span>
+                        <span th:text="${studentCourse}">Course</span>
+                        <span> | </span>
+                        <span th:text="${studentSemesterLabel}">Semester</span>
+                    </p>
+                    <div class="portal-chip-row">
+                        <span class="portal-chip"><i class="fa-solid fa-calendar-days"></i><strong th:text="${eventCount}">0</strong><span>events</span></span>
+                        <span class="portal-chip"><i class="fa-solid fa-envelope"></i><span th:text="${studentEmail}">student@example.com</span></span>
+                        <span class="portal-chip"><i class="fa-solid fa-user-graduate"></i><span th:text="${studentCourse}">Course</span></span>
+                    </div>
+                </div>
+                <div class="portal-hero-side">
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Registered</p>
+                        <p class="portal-side-value" th:text="${#lists.size(eventAppliedIds)}">0</p>
+                        <div class="portal-side-meta">Submitted from your account</div>
+                    </div>
+                    <div class="portal-side-panel">
+                        <p class="portal-side-label">Organizer</p>
+                        <p class="portal-side-value">Teacher / Organiser</p>
+                        <div class="portal-side-meta">Registration goes directly to publisher</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="portal-surface" style="margin-top:18px;">
+                <div class="portal-surface-head">
+                    <h2 class="portal-surface-title">Upcoming Events & Activities</h2>
+                    <a class="portal-link" th:href="@{/events}">Refresh</a>
+                </div>
+                <div th:if="${eventSuccess != null}" class="msg success" style="margin-bottom:14px;" th:text="${eventSuccess}">Success</div>
+                <div th:if="${eventError != null}" class="msg error" style="margin-bottom:14px;" th:text="${eventError}">Error</div>
+
+                <div class="event-grid" th:if="${!#lists.isEmpty(events)}">
+                    <article class="event-card" th:each="event, iterStat : ${events}">
+                        <div class="event-top">
+                            <div class="date-chip">
+                                <strong th:text="${event.eventDateTime != null ? #temporals.format(event.eventDateTime, 'dd') : '--'}">18</strong>
+                                <span th:text="${event.eventDateTime != null ? #temporals.format(event.eventDateTime, 'MMM') : 'DATE'}">MAR</span>
+                            </div>
+                            <div style="flex:1;">
+                                <h3 class="event-title" th:text="${event.title}">Event title</h3>
+                                <div class="event-meta">
+                                    <span th:text="${event.category != null ? event.category : 'Activity'}">Activity</span>
+                                    <span> | </span>
+                                    <span th:text="${event.organizationName != null ? event.organizationName : event.organizerName}">Organizer</span>
+                                    <span> | </span>
+                                    <span th:text="${event.venue != null ? event.venue : 'Campus'}">Venue</span>
+                                </div>
+                            </div>
+                            <span class="portal-badge" th:classappend="${event.registrationOpen} ? ' portal-badge--success' : ' portal-badge--warning'"
+                                  th:text="${event.registrationOpen ? 'Open' : 'Closed'}">Open</span>
+                        </div>
+
+                        <div class="event-meta" th:text="${event.description != null ? event.description : 'No details provided.'}">Description</div>
+                        <div class="pill-row">
+                            <span class="pill" th:text="${event.eventDateTime != null ? 'Event: ' + #temporals.format(event.eventDateTime, 'dd MMM yyyy, hh:mm a') : 'Date not set'}">Date</span>
+                            <span class="pill" th:text="${event.registrationDeadline != null ? 'Deadline: ' + #temporals.format(event.registrationDeadline, 'dd MMM yyyy, hh:mm a') : 'No deadline set'}">Deadline</span>
+                            <span class="pill" th:text="${event.targetAudience != null ? event.targetAudience : 'All students'}">Audience</span>
+                        </div>
+
+                        <div class="event-actions">
+                            <span class="portal-link" th:text="${event.organizerName != null ? 'Posted by ' + event.organizerName : 'Posted by Organiser'}">Posted by</span>
+                            <button class="register-btn"
+                                    type="button"
+                                    th:if="${!#lists.contains(eventAppliedIds, event.id)}"
+                                    th:disabled="${!event.registrationOpen}"
+                                    th:attr="data-target='event-form-' + ${event.id}"
+                                    onclick="toggleEventForm(this)">
+                                <span th:text="${event.registrationOpen ? 'Register' : 'Deadline closed'}">Register</span>
+                            </button>
+                        </div>
+
+                        <div th:if="${#lists.contains(eventAppliedIds, event.id)}" class="empty" style="margin-top:14px;padding:18px;">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <h3 style="margin:10px 0 6px;">Already registered</h3>
+                            <p>Your registration for this event has already been submitted.</p>
+                        </div>
+
+                        <div class="form-panel" th:id="'event-form-' + ${event.id}" th:if="${!#lists.contains(eventAppliedIds, event.id)}">
+                            <form method="post" th:action="@{'/events/apply/' + ${event.id}}">
+                                <div class="form-grid">
+                                    <div class="field full"><label>Full Name</label><input type="text" name="fullName" th:value="${studentName}" required></div>
+                                    <div class="field"><label>Mobile Number</label><input type="text" name="phone" placeholder="10 digit mobile" required></div>
+                                    <div class="field"><label>Email</label><input type="email" name="email" th:value="${studentEmail}" required></div>
+                                    <div class="field"><label>Course</label><input type="text" name="course" th:value="${studentCourse}" required></div>
+                                    <div class="field"><label>Semester</label><input type="text" name="semester" th:value="${studentSemesterLabel}" required></div>
+                                    <div class="field"><label>Specialization</label><input type="text" name="specialization" placeholder="CSE, AI, ECE"></div>
+                                    <div class="field"><label>Section</label><input type="text" name="sectionName" placeholder="A / B / C"></div>
+                                    <div class="field full"><label>Short Notes</label><textarea name="notes" placeholder="Add a short note if needed."></textarea></div>
+                                </div>
+                                <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+                                    <button class="submit-btn" type="submit" th:disabled="${!event.registrationOpen}">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                        <span th:text="${event.registrationOpen ? 'Submit Registration' : 'Deadline closed'}">Submit Registration</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="empty" th:if="${#lists.isEmpty(events)}">
+                    <i class="fa-regular fa-calendar"></i>
+                    <h3 style="margin:10px 0 6px;">No events yet</h3>
+                    <p th:text="${eventEmptyMessage}">No events or activities are live for your profile yet.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/student/student-dashboard-layout.js"></script>
+<script>
+    function toggleEventForm(button) {
+        const target = button.getAttribute('data-target');
+        const panel = document.getElementById(target);
+        if (!panel) return;
+        panel.classList.toggle('open');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="panel" id="panel-payment" data-step-panel="payment" th:fragment="paymentPanel">
+    <div class="panel-head">
+        <div>
+            <p class="panel-kicker">Step 8 of 9</p>
+            <h2 class="panel-title">Payment</h2>
+        </div>
+        <div class="panel-badge">Fee summary and payment only</div>
+    </div>
+
+    <div class="course-note">Please let the page load completely before proceeding with Payment.</div>
+    <div class="payment-panel" style="background:#fff;padding:10px 12px 16px;min-height:260px;">
+        <div class="center-panel" style="max-width:760px;">
+            <div style="text-align:left;font-size:12px;color:#1f1f1f;font-weight:700;margin-bottom:28px;">
+                PAYMENT =&gt; <span style="color:#1436f3;">Application No:- <span th:text="${student.registrationNo != null ? student.registrationNo : 'N/A'}">N/A</span></span>
+            </div>
+            <div style="text-align:center;margin-top:4px;">
+                <div style="font-size:23px;color:#2f3b4a;font-weight:400;line-height:1.2;">Registration / Application Amount To Pay</div>
+                <div class="pay-amount" style="margin:18px 0 24px;">₹ 200</div>
+                <button type="button" class="btn btn-submit" data-step-next style="min-width:540px;max-width:100%;background:#2fa84f;height:28px;font-size:11px;letter-spacing:.03em;">PAY NOW</button>
+                <p class="upload-note" style="text-align:center;margin-top:10px;font-size:11px;font-weight:800;color:#121212;">Note : WAIT FOR 24 HOURS IN CASE OF PAYMENT DEDUCTED AND NOT REFLECTED ON REGISTRATION PORTAL.!</p>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

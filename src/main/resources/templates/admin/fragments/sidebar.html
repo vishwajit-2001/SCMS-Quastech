@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="sidebar(active)">
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fa fa-building-columns"></i></div>
+            <div class="brand-sub">Admin Panel</div>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-lbl">Main</div>
+            <a href="/admin-dashboard" th:classappend="${active == 'dashboard'} ? ' active' : ''"><i class="fa fa-th-large"></i> Dashboard</a>
+
+            <div class="nav-lbl">Academic Setup</div>
+            <a href="/admin-courses" th:classappend="${active == 'courses'} ? ' active' : ''"><i class="fa fa-book"></i> Courses</a>
+            <a href="/admin-batches" th:classappend="${active == 'batches'} ? ' active' : ''"><i class="fa fa-layer-group"></i> Batches</a>
+            <a href="/admin-academic-structure" th:classappend="${active == 'academic-structure'} ? ' active' : ''"><i class="fa fa-sitemap"></i> Academic Structure</a>
+            <a href="/admin-subject-registry" th:classappend="${active == 'subject-master'} ? ' active' : ''"><i class="fa fa-book-open"></i> Subject Registry</a>
+
+            <div class="nav-lbl">Students</div>
+            <a href="/add-student" th:classappend="${active == 'add-student'} ? ' active' : ''"><i class="fa fa-user-plus"></i> Add Student</a>
+            <a href="/admin-students" th:classappend="${active == 'students'} ? ' active' : ''"><i class="fa fa-users"></i> View Students</a>
+
+            <div class="nav-lbl">Teachers</div>
+            <a href="/add-teacher" th:classappend="${active == 'add-teacher'} ? ' active' : ''"><i class="fa fa-chalkboard-teacher"></i> Add Teacher</a>
+            <a href="/admin-teachers" th:classappend="${active == 'teachers'} ? ' active' : ''"><i class="fa fa-user-tie"></i> View Teachers</a>
+            <a href="/admin-teacher-assignment" th:classappend="${active == 'teacher-assignment'} ? ' active' : ''"><i class="fa fa-diagram-project"></i> Teacher Assignment</a>
+
+            <div class="nav-lbl">TPO Management</div>
+            <a href="/admin/tpos/add" th:classappend="${active == 'add-tpo'} ? ' active' : ''"><i class="fa fa-user-plus"></i> Add TPO</a>
+            <a href="/admin/tpos" th:classappend="${active == 'tpos'} ? ' active' : ''"><i class="fa fa-briefcase"></i> View TPO</a>
+
+            <div class="nav-lbl">Timetable</div>
+            <a href="/add-timetable" th:classappend="${active == 'add-timetable'} ? ' active' : ''"><i class="fa fa-calendar"></i> Add Timetable</a>
+            <a href="/view-timetable" th:classappend="${active == 'view-timetable'} ? ' active' : ''"><i class="fa fa-table"></i> View Timetable</a>
+
+            <div class="nav-lbl">Management</div>
+            <a href="/admin-fees" th:classappend="${active == 'fees'} ? ' active' : ''"><i class="fa fa-credit-card"></i> Fees</a>
+            <a href="/admin-reports" th:classappend="${active == 'reports'} ? ' active' : ''"><i class="fa fa-chart-bar"></i> Reports</a>
+            <a href="/admin-notifications" th:classappend="${active == 'notifications'} ? ' active' : ''"><i class="fa fa-bell"></i> Notifications</a>
+            <a href="/admin-profile" th:classappend="${active == 'profile'} ? ' active' : ''"><i class="fa fa-user-shield"></i> Profile</a>
+        </div>
+        <a href="/login-admin" class="logout-link"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
+</th:block>
+</body>
+</html>

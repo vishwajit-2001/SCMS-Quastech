@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/student/student-common.css">
+    <link rel="stylesheet" href="/css/student/student-dashboard-layout.css">
+    <link rel="stylesheet" href="/css/student/student-portal-data.css">
+    <style>
+        .panel{border-radius:26px;background:#fff;border:1px solid rgba(200,146,42,.16);box-shadow:0 14px 36px rgba(24,22,15,.05);overflow:hidden}
+        .panel-head{padding:18px 18px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(200,146,42,.12)}
+        .panel-head h2{margin:0;font-size:20px}
+        .panel-head p{margin:4px 0 0;color:#7a7165;font-size:13px}
+        .panel-body{padding:18px}
+        .report-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+        .report{border-radius:18px;border:1px solid rgba(24,22,15,.08);background:linear-gradient(135deg,rgba(242,237,226,.84),rgba(255,255,255,.98));padding:16px}
+        .report h3{margin:0 0 8px}
+        .report p{margin:0;color:#6b6457;font-size:13px;line-height:1.5}
+        .btn{min-height:42px;padding:0 14px;border-radius:999px;border:none;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none}
+        .btn.primary{background:linear-gradient(135deg,#c8922a,#e8aa35);color:#18160f}
+        @media (max-width:1100px){.report-grid{grid-template-columns:1fr 1fr}}
+        @media (max-width:768px){.report-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="student-layout-page">
+<div class="student-shell">
+    <div th:replace="~{placement/components/sidebar :: sidebar(activePage='reports')}"></div>
+    <div class="main-content">
+        <div th:replace="~{placement/components/topbar :: topbar(title='Reports', subtitle='Generate company wise, student wise, and yearly placement reports in one place.')}"></div>
+        <main class="portal-page-body">
+            <section class="panel">
+                <div class="panel-head">
+                    <div><h2>Placement Reports</h2><p>Export the data in Excel, CSV, or PDF later.</p></div>
+                    <span class="portal-badge portal-badge--neutral">Export</span>
+                </div>
+                <div class="panel-body">
+                    <div class="report-grid">
+                        <article class="report"><h3>Company Wise</h3><p>Filter placements by company and export recruiter-wise details.</p></article>
+                        <article class="report"><h3>Student Placement</h3><p>Generate a report of each student and their application or selection status.</p></article>
+                        <article class="report"><h3>Yearly Stats</h3><p>View year wise placement activity and hiring summary.</p></article>
+                    </div>
+                    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <a class="btn primary" href="#"><i class="fa-solid fa-file-export"></i> Export Excel</a>
+                        <a class="btn" style="background:rgba(24,22,15,.05);border:1px solid rgba(24,22,15,.08);color:#18160f;" href="#"><i class="fa-solid fa-file-pdf"></i> Export PDF</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

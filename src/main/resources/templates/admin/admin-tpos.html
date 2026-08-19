@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>View TPO - AI Campus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin/admin-common.css">
+    <style>
+        body{display:flex;min-height:100vh;background:var(--offwhite);font-family:'Inter',sans-serif;overflow-x:hidden}
+        .main{margin-left:var(--sw);width:calc(100% - var(--sw));min-height:100vh}
+        .search-bar{display:flex;align-items:center;gap:10px;background:var(--offwhite);border:1px solid var(--light);border-radius:50px;padding:9px 18px;width:280px}
+        .search-bar:focus-within{border-color:var(--gold-br);background:var(--cream);box-shadow:0 0 0 3px rgba(75,73,172,.08)}
+        .search-bar input{border:none;background:transparent;outline:none;font:inherit;width:100%}
+        .tpo-code{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;background:rgba(75,73,172,.10);border:1px solid rgba(75,73,172,.24);color:var(--gold);font-size:11px;font-weight:700}
+        .row-meta{display:grid;gap:3px}
+        .row-meta strong{font-size:13px}
+        .row-meta span{font-size:12px;color:#7a849f}
+        @media(max-width:900px){.main{margin-left:0;width:100%}.sidebar{transform:translateX(-100%)}.header-right{flex-wrap:wrap}.search-bar{width:100%}}
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('tpos')}"></div>
+
+<div class="main">
+    <div class="header">
+        <div class="header-title">View TPO</div>
+        <div class="header-right">
+            <div class="search-bar"><i class="fa fa-search"></i><input type="text" id="searchInput" placeholder="Search TPO..." oninput="searchTpos()"></div>
+            <a href="/admin/tpos/add" class="btn-gold"><i class="fa fa-user-plus"></i> Add TPO</a>
+            <div th:replace="~{admin/fragments/admin-badge :: adminBadge(${adminName}, ${collegeName})}"></div>
+        </div>
+    </div>
+
+    <div class="alert alert-success" th:if="${tpoSuccess != null}" style="margin: 18px 36px 0"><i class="fa fa-check-circle"></i><span th:text="${tpoSuccess}"></span></div>
+
+    <div class="cards">
+        <div class="card"><div class="card-icon"><i class="fa fa-briefcase"></i></div><h3>Total TPO</h3><p th:text="${totalTpos}">0</p><div class="card-trend">Institute placement team</div></div>
+        <div class="card"><div class="card-icon"><i class="fa fa-circle-check"></i></div><h3>Active</h3><p th:text="${activeTpos}">0</p><div class="card-trend">Can login now</div></div>
+        <div class="card"><div class="card-icon"><i class="fa fa-building-user"></i></div><h3>Departments</h3><p th:text="${departments}">0</p><div class="card-trend">Assigned groups</div></div>
+    </div>
+
+    <div class="content">
+        <div class="box">
+            <div class="box-title"><i class="fa fa-briefcase" style="color:var(--gold)"></i> TPO List</div>
+            <div style="overflow-x:auto">
+                <table id="tpoTable">
+                    <thead>
+                    <tr><th>#</th><th>Employee ID</th><th>Name</th><th>Contact</th><th>Department</th><th>Institute</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="tpo, iterStat : ${tpos}">
+                        <td th:text="${iterStat.count}">1</td>
+                        <td><span class="tpo-code" th:text="${tpo.employeeId != null ? tpo.employeeId : 'Not assigned'}">TPO001</span></td>
+                        <td>
+                            <div class="row-meta">
+                                <strong th:text="${tpo.name}">TPO Name</strong>
+                                <span th:text="${tpo.designation != null ? tpo.designation : 'Training and Placement Officer'}">Training and Placement Officer</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-meta">
+                                <strong th:text="${tpo.email}">tpo@college.edu</strong>
+                                <span th:text="${tpo.phone != null ? tpo.phone : '-'}">Phone</span>
+                            </div>
+                        </td>
+                        <td th:text="${tpo.department != null ? tpo.department : '-'}">Training and Placement</td>
+                        <td th:text="${tpo.collegeName != null ? tpo.collegeName : collegeName}">Institute</td>
+                        <td><span class="badge badge-green" th:text="${tpo.status != null ? tpo.status : 'Active'}">Active</span></td>
+                    </tr>
+                    <tr th:if="${tpos == null or #lists.isEmpty(tpos)}">
+                        <td colspan="7" style="text-align:center;color:#8a94b8;padding:30px;font-size:15px">No TPO accounts yet. <a href="/admin/tpos/add" style="color:var(--gold);font-weight:700">Add first TPO</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function searchTpos(){
+    const value=document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#tpoTable tbody tr').forEach(row=>{
+        row.style.display=row.innerText.toLowerCase().includes(value)?'':'none';
+    });
+}
+</script>
+</body>
+</html>
