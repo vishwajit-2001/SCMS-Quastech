@@ -1,2 +1,12 @@
 # Project exclude paths
+
 /target/
+/.idea/
+/.vscode/
+/report_render/
+/run.log
+/run.err
+/uploads/
+/src/main/resources/static/uploads/
+/.env
+/application-local.properties
