@@ -686,6 +686,26 @@ If you have configured another port, use that port instead.
 
 ![Login Page](screenshots/login.png)
 
+### Student Dashboard
+
+![Student Dashboard](screenshots/student-dashboard.png)
+
+### Teacher Dashboard
+
+![Teacher Dashboard](screenshots/teacher-dashboard.png)
+
+### Attendance
+
+![Attendance](screenshots/attendance.png)
+
+### Timetable
+
+![Timetable](screenshots/timetable.png)
+
+### Placement Dashboard
+
+![Placement Dashboard](screenshots/placement-dashboard.png)
+
 ---
 
 # 🧪 Testing
