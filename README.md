@@ -25,7 +25,7 @@
 * [Project Structure](#-project-structure)
 * [Database](#-database)
 * [Security](#-security)
-* [AI and Smart Features](#-ai-and-smart-features)
+* [Campus Chatbot and Smart Features](#-campus-chatbot-and-smart-features)
 * [Prerequisites](#-prerequisites)
 * [Installation and Setup](#-installation-and-setup)
 * [Configuration](#-configuration)
@@ -234,11 +234,11 @@ The system includes a digital identity concept for students, allowing student in
 
 ---
 
-# 🤖 AI and Smart Features
+# 💬 Campus Chatbot and Smart Features
 
-The project includes AI-oriented and automation-focused features intended to make campus operations smarter.
+The project includes a contextual campus chatbot and timetable-management features that help streamline campus operations.
 
-## 💬 AI Campus Chatbot
+## 💬 Campus Chatbot
 
 The chatbot provides an interactive interface for campus-related assistance.
 
@@ -249,42 +249,6 @@ Possible use cases include:
 * Student assistance
 * Frequently asked questions
 * Navigation to campus services
-
----
-
-## 👤 AI-Based Facial Recognition Attendance
-
-The project includes an AI-based attendance concept involving facial recognition.
-
-The intended workflow can include:
-
-```text
-Student
-   ↓
-Face Detection
-   ↓
-Face Recognition
-   ↓
-Liveness Verification
-   ↓
-Location / Geofence Validation
-   ↓
-Attendance Verification
-   ↓
-Attendance Record
-```
-
----
-
-## 🛡️ Liveness Verification
-
-Liveness verification is intended to reduce attendance fraud by determining whether the detected face belongs to a live person rather than a static photograph.
-
----
-
-## 📍 Geofence-Based Attendance
-
-Geofencing can be used as an additional validation layer to ensure attendance is performed from an authorized campus/location area.
 
 ---
 
@@ -367,7 +331,6 @@ AI-Powered SCMS
 * **CSS3**
 * **JavaScript**
 * **Thymeleaf**
-* **Tailwind CSS**
 
 ## Database
 
@@ -377,7 +340,6 @@ AI-Powered SCMS
 
 * Apache POI
 * Apache PDFBox
-* JWT
 * Git
 * GitHub
 
@@ -432,7 +394,7 @@ The application follows a layered architecture based on Spring Boot.
 The project follows a standard Spring Boot/Maven structure.
 
 ```text
-AI-Powered-SCMS/
+SCMS-Quastech/
 │
 ├── src/
 │   ├── main/
@@ -550,13 +512,13 @@ Before running the project, make sure the following software is installed:
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/vishwajit-2001/AI-Powered-SCMS.git
+git clone https://github.com/vishwajit-2001/SCMS-Quastech.git
 ```
 
 Navigate to the project:
 
 ```bash
-cd AI-Powered-SCMS
+cd SCMS-Quastech
 ```
 
 ---
@@ -900,8 +862,8 @@ https://github.com/vishwajit-2001
 
 ### Project Repository
 
-**AI-Powered SCMS:**
-https://github.com/vishwajit-2001/AI-Powered-SCMS
+**Smart Campus Management System (SCMS):**
+https://github.com/vishwajit-2001/SCMS-Quastech
 
 ---
 
